@@ -3,13 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cashbook;
+use App\Models\Customer;
 use App\Models\Expense;
 use App\Models\Loan;
 use App\Models\Partner;
+use App\Models\Payment;
 use App\Models\Product;
 use App\Models\Purchase;
 use App\Models\Sale;
 use App\Models\SaleItem;
+use App\Models\Supplier;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
@@ -22,17 +25,36 @@ class DashboardController extends Controller
     {
         $filters = $this->filters($request);
 
-        return view('dashboard', [
-            'filters' => $filters,
-            'cards' => $this->cards($filters),
-            'charts' => $this->charts($filters),
-            'tables' => $this->tables($filters),
-        ]);
+        return view('dashboard', $this->dashboardData($filters));
     }
 
     public function chartData(Request $request)
     {
         return response()->json($this->charts($this->filters($request)));
+    }
+
+    public function data(Request $request)
+    {
+        $payload = $this->dashboardData($this->filters($request));
+
+        return response()->json([
+            'filters' => $payload['filters'],
+            'cards' => $payload['cards'],
+            'charts' => $payload['charts'],
+            'cards_html' => view('dashboard.partials.cards', $payload)->render(),
+            'widgets_html' => view('dashboard.partials.widgets', $payload)->render(),
+            'tables_html' => view('dashboard.partials.tables', $payload)->render(),
+        ]);
+    }
+
+    private function dashboardData(array $filters): array
+    {
+        return [
+            'filters' => $filters,
+            'cards' => $this->cards($filters),
+            'charts' => $this->charts($filters),
+            'tables' => $this->tables($filters),
+        ];
     }
 
     private function filters(Request $request): array
@@ -90,6 +112,19 @@ class DashboardController extends Controller
             ->selectRaw('COALESCE(SUM(CASE WHEN balance_amount > 0 THEN balance_amount ELSE 0 END), 0) as supplier_payable')
             ->first();
 
+        $periodSales = (float) $this->periodSales($filters)->sum('total_amount');
+        $periodPurchases = (float) $this->periodPurchases($filters)->sum('total_amount');
+        $periodCollection = (float) Cashbook::query()
+            ->whereDate('entry_date', '>=', $filters['from_date'])
+            ->whereDate('entry_date', '<=', $filters['to_date'])
+            ->whereIn('transaction_type', ['cash_in', 'bank_in'])
+            ->sum('amount');
+        $todayCollection = (float) Cashbook::query()
+            ->whereDate('entry_date', $today)
+            ->whereIn('transaction_type', ['cash_in', 'bank_in'])
+            ->sum('amount');
+        $lowStockCount = (int) Product::where('status', 'active')->where('current_stock', '<=', 10)->count();
+        $stockUnits = (float) Product::where('status', 'active')->sum('current_stock');
         $grossProfit = (float) SaleItem::query()
             ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
             ->whereDate('sales.sale_date', '>=', $filters['from_date'])
@@ -104,17 +139,27 @@ class DashboardController extends Controller
         return [
             'today_sales' => (float) $salesSummary->today_sales,
             'month_sales' => (float) $salesSummary->month_sales,
+            'period_sales' => $periodSales,
             'today_purchase' => (float) $purchaseSummary->today_purchase,
             'month_purchase' => (float) $purchaseSummary->month_purchase,
+            'period_purchases' => $periodPurchases,
+            'today_collection' => $todayCollection,
+            'period_collection' => $periodCollection,
             'cash_balance' => (float) ($cashbookTotals['cash_in'] ?? 0) - (float) ($cashbookTotals['cash_out'] ?? 0),
             'bank_balance' => (float) ($cashbookTotals['bank_in'] ?? 0) - (float) ($cashbookTotals['bank_out'] ?? 0),
             'pending_customer_collection' => (float) $salesSummary->pending_customer_collection,
             'supplier_payable' => (float) $purchaseSummary->supplier_payable,
             'stock_value' => (float) Product::selectRaw('COALESCE(SUM(current_stock * purchase_price), 0) as value')->value('value'),
+            'stock_units' => $stockUnits,
+            'low_stock_count' => $lowStockCount,
             'total_expense' => $expenses,
             'active_loans' => Schema::hasTable('loans') ? (float) Loan::where('status', 'active')->sum('balance_amount') : 0,
             'partner_investment' => Schema::hasTable('partners') ? (float) Partner::where('status', 'active')->sum('current_investment') : 0,
             'net_profit' => (float) $grossProfit - $expenses,
+            'customer_count' => (int) Customer::where('status', 'active')->count(),
+            'supplier_count' => (int) Supplier::where('status', 'active')->count(),
+            'product_count' => (int) Product::where('status', 'active')->count(),
+            'profit_margin' => $periodSales > 0 ? round((((float) $grossProfit - $expenses) / $periodSales) * 100, 2) : 0,
         ];
     }
 
@@ -169,6 +214,8 @@ class DashboardController extends Controller
                 ->oldest('purchase_date')
                 ->limit(8)
                 ->get(),
+            'top_customers' => $this->topCustomers($filters),
+            'recent_payments' => $this->recentPayments($filters),
             'active_loans' => Schema::hasTable('loans')
                 ? Loan::where('status', 'active')->latest('loan_date')->limit(8)->get()
                 : collect(),
@@ -315,6 +362,51 @@ class DashboardController extends Controller
             'labels' => ['Customer Collection', 'Supplier Payable', 'Active Loans'],
             'data' => [$customerPending, $supplierPending, $activeLoans],
         ];
+    }
+
+    private function topCustomers(array $filters)
+    {
+        return Sale::query()
+            ->join('customers', 'sales.customer_id', '=', 'customers.id')
+            ->whereDate('sales.sale_date', '>=', $filters['from_date'])
+            ->whereDate('sales.sale_date', '<=', $filters['to_date'])
+            ->select('customers.name')
+            ->selectRaw('COALESCE(SUM(sales.total_amount), 0) as total_amount')
+            ->selectRaw('COUNT(sales.id) as invoices_count')
+            ->groupBy('customers.id', 'customers.name')
+            ->orderByDesc('total_amount')
+            ->limit(8)
+            ->get();
+    }
+
+    private function recentPayments(array $filters)
+    {
+        if (! Schema::hasTable('payments')) {
+            return collect();
+        }
+
+        $payments = Payment::query()
+            ->whereDate('payment_date', '>=', $filters['from_date'])
+            ->whereDate('payment_date', '<=', $filters['to_date'])
+            ->latest('payment_date')
+            ->latest('id')
+            ->limit(8)
+            ->get();
+
+        $customerNames = Customer::whereIn('id', $payments->where('party_type', 'customer')->pluck('party_id')->filter()->unique())
+            ->pluck('name', 'id');
+        $supplierNames = Supplier::whereIn('id', $payments->where('party_type', 'supplier')->pluck('party_id')->filter()->unique())
+            ->pluck('name', 'id');
+
+        return $payments->map(function (Payment $payment) use ($customerNames, $supplierNames) {
+            $payment->party_name = match ($payment->party_type) {
+                'customer' => $customerNames[$payment->party_id] ?? 'Customer #'.$payment->party_id,
+                'supplier' => $supplierNames[$payment->party_id] ?? 'Supplier #'.$payment->party_id,
+                default => ucfirst((string) $payment->party_type),
+            };
+
+            return $payment;
+        });
     }
 
     private function periodSales(array $filters)

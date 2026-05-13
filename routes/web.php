@@ -40,6 +40,7 @@ Route::middleware(['auth', 'throttle:erp'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->middleware('permission:view_dashboard');
     Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('permission:view_dashboard')->name('dashboard');
     Route::get('/dashboard/charts', [DashboardController::class, 'chartData'])->middleware('permission:view_dashboard')->name('dashboard.charts');
+    Route::get('/dashboard/data', [DashboardController::class, 'data'])->middleware('permission:view_dashboard')->name('dashboard.data');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
