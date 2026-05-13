@@ -4,6 +4,8 @@ use App\Http\Controllers\CashbookController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CustomerReceiptController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ExpenseCategoryController;
+use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\GSTReportController;
 use App\Http\Controllers\LedgerController;
 use App\Http\Controllers\LoanController;
@@ -50,6 +52,11 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/cashbook', [CashbookController::class, 'cashbook'])->name('cashbook.index');
     Route::get('/bankbook', [CashbookController::class, 'bankbook'])->name('bankbook.index');
+
+    Route::resource('expense-categories', ExpenseCategoryController::class)->only(['index', 'create', 'store']);
+    Route::get('/expenses/report', [ExpenseController::class, 'report'])->name('expenses.report');
+    Route::get('/expenses/category-report', [ExpenseController::class, 'categoryReport'])->name('expenses.category-report');
+    Route::resource('expenses', ExpenseController::class)->only(['index', 'create', 'store']);
 
     Route::get('/loans/reports/active', [LoanController::class, 'activeReport'])->name('loans.reports.active');
     Route::get('/loans/reports/closed', [LoanController::class, 'closedReport'])->name('loans.reports.closed');

@@ -27,6 +27,7 @@
             <a href="{{ route('payments.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('payments.*', 'supplier-payments.*') ? 'bg-slate-700' : '' }}">Payments</a>
             <a href="{{ route('ledgers.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('ledgers.*') ? 'bg-slate-700' : '' }}">Ledgers</a>
             <a href="{{ route('cashbook.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('cashbook.*', 'bankbook.*') ? 'bg-slate-700' : '' }}">Cashbook</a>
+            <a href="{{ route('expenses.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('expenses.*', 'expense-categories.*') ? 'bg-slate-700' : '' }}">Expenses</a>
             <a href="#" class="block px-4 py-2 rounded hover:bg-slate-700">Stock</a>
             <a href="{{ route('loans.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('loans.*') ? 'bg-slate-700' : '' }}">Loans</a>
             <a href="{{ route('partners.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('partners.*') ? 'bg-slate-700' : '' }}">Partners</a>
