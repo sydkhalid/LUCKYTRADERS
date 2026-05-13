@@ -72,6 +72,13 @@ class PurchaseController extends Controller
         return view('purchases.show', compact('purchase'));
     }
 
+    public function print(Purchase $purchase)
+    {
+        $purchase->load(['supplier', 'items.product']);
+
+        return view('purchases.print', compact('purchase'));
+    }
+
     public function edit(Request $request, Purchase $purchase)
     {
         $this->authorizePermission($request, 'edit_old_records');
@@ -193,19 +200,23 @@ class PurchaseController extends Controller
         $items = [];
         $subtotal = 0;
         $gstAmount = 0;
+        $products = Product::whereIn('id', collect($data['items'])->pluck('product_id')->unique())
+            ->get()
+            ->keyBy('id');
 
         foreach ($data['items'] as $item) {
+            $product = $products->get((int) $item['product_id']);
             $quantity = round((float) $item['quantity'], 3);
             $rate = round((float) $item['rate'], 2);
             $itemSubtotal = round($quantity * $rate, 2);
-            $gstPercentage = $data['bill_type'] === 'gst' ? round((float) $item['gst_percentage'], 2) : 0;
+            $gstPercentage = $data['bill_type'] === 'gst' ? round((float) $product->gst_percentage, 2) : 0;
             $itemGst = round($itemSubtotal * $gstPercentage / 100, 2);
             $itemTotal = round($itemSubtotal + $itemGst, 2);
 
             $items[] = [
                 'product_id' => (int) $item['product_id'],
                 'quantity' => $quantity,
-                'unit' => $item['unit'],
+                'unit' => $product->unit,
                 'rate' => $rate,
                 'subtotal' => $itemSubtotal,
                 'gst_percentage' => $gstPercentage,

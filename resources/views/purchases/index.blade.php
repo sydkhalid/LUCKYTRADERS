@@ -44,6 +44,7 @@
                         <td class="px-4 py-3">
                             <div class="flex justify-end gap-3">
                                 <a href="{{ route('purchases.show', $purchase) }}" class="font-semibold text-slate-700 hover:text-slate-900">View</a>
+                                <a href="{{ route('purchases.print', $purchase) }}" target="_blank" class="font-semibold text-slate-700 hover:text-slate-900">Print</a>
                                 <a href="{{ route('purchases.pdf', $purchase) }}" target="_blank" class="font-semibold text-slate-700 hover:text-slate-900">PDF</a>
                                 @can('edit_old_records')
                                     <a href="{{ route('purchases.edit', $purchase) }}" class="font-semibold text-slate-700 hover:text-slate-900">Edit</a>

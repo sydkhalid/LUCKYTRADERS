@@ -51,6 +51,7 @@
                             <div class="flex justify-end gap-3">
                                 <a href="{{ route('products.show', $product) }}" class="font-semibold text-slate-700 hover:text-slate-900">View</a>
                                 <a href="{{ route('products.edit', $product) }}" class="font-semibold text-slate-700 hover:text-slate-900">Edit</a>
+                                <a href="{{ route('stock-adjustments.products.history', $product) }}" class="font-semibold text-slate-700 hover:text-slate-900">History</a>
                                 @can('delete_records')
                                     <form method="POST" action="{{ route('products.destroy', $product) }}" onsubmit="return confirm('Delete this product?')">
                                         @csrf
