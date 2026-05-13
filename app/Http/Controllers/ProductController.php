@@ -9,13 +9,25 @@ use Illuminate\Validation\Rule;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $search = trim((string) $request->query('search'));
         $products = Product::with('category')
+            ->when($search !== '', function ($query) use ($search): void {
+                $query->where(function ($query) use ($search): void {
+                    $query->where('name', 'like', '%'.$search.'%')
+                        ->orWhere('code', 'like', '%'.$search.'%')
+                        ->orWhere('size', 'like', '%'.$search.'%')
+                        ->orWhere('thickness', 'like', '%'.$search.'%')
+                        ->orWhere('hsn_code', 'like', '%'.$search.'%')
+                        ->orWhereHas('category', fn ($query) => $query->where('name', 'like', '%'.$search.'%'));
+                });
+            })
             ->latest()
-            ->paginate(15);
+            ->paginate(15)
+            ->withQueryString();
 
-        return view('products.index', compact('products'));
+        return view('products.index', compact('products', 'search'));
     }
 
     public function create()
@@ -27,7 +39,10 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
-        Product::create($this->validatedData($request));
+        $data = $this->validatedData($request);
+        $data['current_stock'] = $data['opening_stock'];
+
+        Product::create($data);
 
         return redirect()
             ->route('products.index')
@@ -39,6 +54,13 @@ class ProductController extends Controller
         $categories = ProductCategory::orderBy('name')->get();
 
         return view('products.edit', compact('product', 'categories'));
+    }
+
+    public function show(Product $product)
+    {
+        $product->load('category');
+
+        return view('products.show', compact('product'));
     }
 
     public function update(Request $request, Product $product)
@@ -66,7 +88,7 @@ class ProductController extends Controller
         return $request->validate([
             'product_category_id' => ['required', 'exists:product_categories,id'],
             'name' => ['required', 'string', 'max:255'],
-            'code' => ['required', 'string', 'max:100', Rule::unique('products', 'code')->ignore($product)],
+            'code' => ['required', 'string', 'max:100', Rule::unique('products', 'code')->ignore($product)->withoutTrashed()],
             'size' => ['nullable', 'string', 'max:100'],
             'thickness' => ['nullable', 'string', 'max:100'],
             'unit' => ['required', 'string', 'max:50'],
@@ -76,7 +98,7 @@ class ProductController extends Controller
             'purchase_price' => ['required', 'numeric', 'min:0'],
             'selling_price' => ['required', 'numeric', 'min:0'],
             'opening_stock' => ['required', 'numeric', 'min:0'],
-            'current_stock' => ['required', 'numeric', 'min:0'],
+            'current_stock' => [$product ? 'required' : 'nullable', 'numeric', 'min:0'],
             'status' => ['required', Rule::in(['active', 'inactive'])],
         ]);
     }

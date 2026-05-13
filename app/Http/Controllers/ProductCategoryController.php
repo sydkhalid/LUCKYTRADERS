@@ -8,13 +8,22 @@ use Illuminate\Validation\Rule;
 
 class ProductCategoryController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $search = trim((string) $request->query('search'));
         $categories = ProductCategory::withCount('products')
+            ->when($search !== '', function ($query) use ($search): void {
+                $query->where(function ($query) use ($search): void {
+                    $query->where('name', 'like', '%'.$search.'%')
+                        ->orWhere('description', 'like', '%'.$search.'%')
+                        ->orWhere('status', 'like', '%'.$search.'%');
+                });
+            })
             ->latest()
-            ->paginate(15);
+            ->paginate(15)
+            ->withQueryString();
 
-        return view('product-categories.index', compact('categories'));
+        return view('product-categories.index', compact('categories', 'search'));
     }
 
     public function create()
@@ -34,6 +43,17 @@ class ProductCategoryController extends Controller
     public function edit(ProductCategory $productCategory)
     {
         return view('product-categories.edit', compact('productCategory'));
+    }
+
+    public function show(ProductCategory $productCategory)
+    {
+        $productCategory->loadCount('products');
+        $products = $productCategory->products()
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('product-categories.show', compact('productCategory', 'products'));
     }
 
     public function update(Request $request, ProductCategory $productCategory)

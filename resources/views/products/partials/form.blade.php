@@ -80,10 +80,16 @@
             <input type="number" name="opening_stock" value="{{ old('opening_stock', $product->opening_stock ?? '0') }}" step="0.001" min="0" class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
         </div>
 
-        <div>
-            <label class="mb-1 block text-sm font-medium text-gray-700">Current Stock</label>
-            <input type="number" name="current_stock" value="{{ old('current_stock', $product->current_stock ?? '0') }}" step="0.001" min="0" class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
-        </div>
+        @isset($product)
+            <div>
+                <label class="mb-1 block text-sm font-medium text-gray-700">Current Stock</label>
+                <input type="number" name="current_stock" value="{{ old('current_stock', $product->current_stock) }}" step="0.001" min="0" class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
+            </div>
+        @else
+            <div class="rounded border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+                Current stock will start from opening stock when the product is saved.
+            </div>
+        @endisset
 
         <div>
             <label class="mb-1 block text-sm font-medium text-gray-700">Status</label>

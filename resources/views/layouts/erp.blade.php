@@ -23,8 +23,8 @@
                 <a href="{{ route('dashboard') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('dashboard') ? 'bg-slate-700' : '' }}">Dashboard</a>
             @endcan
             @can('manage_products')
+                <a href="{{ route('product-categories.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('product-categories.*') ? 'bg-slate-700' : '' }}">Product Categories</a>
                 <a href="{{ route('products.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('products.*') ? 'bg-slate-700' : '' }}">Products</a>
-                <a href="{{ route('product-categories.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('product-categories.*') ? 'bg-slate-700' : '' }}">Categories</a>
             @endcan
             @can('manage_customers')
                 <a href="{{ route('customers.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('customers.*') ? 'bg-slate-700' : '' }}">Customers</a>

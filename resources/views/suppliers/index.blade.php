@@ -11,6 +11,14 @@
         <a href="{{ route('suppliers.create') }}" class="rounded bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">Add Supplier</a>
     </div>
 
+    <form method="GET" action="{{ route('suppliers.index') }}" class="mb-5 flex flex-wrap gap-3 rounded bg-white p-4 shadow">
+        <input type="search" name="search" value="{{ $search }}" placeholder="Search supplier, phone, email, GST number, or status" class="min-w-0 flex-1 rounded border-gray-300 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500">
+        <button class="rounded bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">Search</button>
+        @if ($search !== '')
+            <a href="{{ route('suppliers.index') }}" class="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Clear</a>
+        @endif
+    </form>
+
     <div class="overflow-hidden rounded bg-white shadow">
         <table class="min-w-full divide-y divide-gray-200 text-sm">
             <thead class="bg-slate-100 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">
@@ -42,6 +50,7 @@
                         </td>
                         <td class="px-4 py-3">
                             <div class="flex justify-end gap-3">
+                                <a href="{{ route('suppliers.show', $supplier) }}" class="font-semibold text-slate-700 hover:text-slate-900">View</a>
                                 <a href="{{ route('suppliers.edit', $supplier) }}" class="font-semibold text-slate-700 hover:text-slate-900">Edit</a>
                                 @can('delete_records')
                                     <form method="POST" action="{{ route('suppliers.destroy', $supplier) }}" onsubmit="return confirm('Delete this supplier?')">
@@ -63,6 +72,6 @@
     </div>
 
     <div class="mt-5">
-        {{ $suppliers->links() }}
+        {{ $suppliers->withQueryString()->links() }}
     </div>
 @endsection

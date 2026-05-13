@@ -11,6 +11,14 @@
         <a href="{{ route('products.create') }}" class="rounded bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">Add Product</a>
     </div>
 
+    <form method="GET" action="{{ route('products.index') }}" class="mb-5 flex flex-wrap gap-3 rounded bg-white p-4 shadow">
+        <input type="search" name="search" value="{{ $search }}" placeholder="Search product, code, category, HSN, size, or thickness" class="min-w-0 flex-1 rounded border-gray-300 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500">
+        <button class="rounded bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">Search</button>
+        @if ($search !== '')
+            <a href="{{ route('products.index') }}" class="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Clear</a>
+        @endif
+    </form>
+
     <div class="overflow-x-auto rounded bg-white shadow">
         <table class="min-w-full divide-y divide-gray-200 text-sm">
             <thead class="bg-slate-100 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">
@@ -41,8 +49,8 @@
                         </td>
                         <td class="px-4 py-3">
                             <div class="flex justify-end gap-3">
+                                <a href="{{ route('products.show', $product) }}" class="font-semibold text-slate-700 hover:text-slate-900">View</a>
                                 <a href="{{ route('products.edit', $product) }}" class="font-semibold text-slate-700 hover:text-slate-900">Edit</a>
-                                <a href="{{ route('stock-adjustments.products.history', $product) }}" class="font-semibold text-slate-700 hover:text-slate-900">History</a>
                                 @can('delete_records')
                                     <form method="POST" action="{{ route('products.destroy', $product) }}" onsubmit="return confirm('Delete this product?')">
                                         @csrf
@@ -63,6 +71,6 @@
     </div>
 
     <div class="mt-5">
-        {{ $products->links() }}
+        {{ $products->withQueryString()->links() }}
     </div>
 @endsection

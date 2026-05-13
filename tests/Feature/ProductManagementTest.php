@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\Product;
 use App\Models\ProductCategory;
+use App\Models\Customer;
+use App\Models\Supplier;
 use App\Models\User;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -32,7 +34,7 @@ class ProductManagementTest extends TestCase
         $this->actingAs($admin)
             ->post(route('products.store'), $this->productPayload($category, [
                 'code' => 'MS-TEST',
-                'current_stock' => 10,
+                'current_stock' => 99,
             ]))
             ->assertRedirect(route('products.index'));
 
@@ -53,9 +55,175 @@ class ProductManagementTest extends TestCase
         $this->assertSame(130.0, (float) $product->fresh()->selling_price);
 
         $this->actingAs($admin)
-            ->get(route('products.index'))
+            ->get(route('products.index', ['search' => 'Updated']))
             ->assertOk()
             ->assertSee('MS Rod Updated');
+
+        $this->actingAs($admin)
+            ->get(route('products.show', $product))
+            ->assertOk()
+            ->assertSee('MS-TEST')
+            ->assertSee('Current Stock');
+    }
+
+    public function test_product_category_search_show_and_soft_delete_flow(): void
+    {
+        $admin = $this->userWithRole('Admin');
+
+        $this->actingAs($admin)
+            ->post(route('product-categories.store'), [
+                'name' => 'Angles',
+                'description' => 'MS angle stock',
+                'status' => 'active',
+            ])
+            ->assertRedirect(route('product-categories.index'));
+
+        $category = ProductCategory::where('name', 'Angles')->firstOrFail();
+
+        $this->actingAs($admin)
+            ->get(route('product-categories.index', ['search' => 'angle']))
+            ->assertOk()
+            ->assertSee('Angles');
+
+        $this->actingAs($admin)
+            ->get(route('product-categories.show', $category))
+            ->assertOk()
+            ->assertSee('Linked Products');
+
+        $this->actingAs($admin)
+            ->delete(route('product-categories.destroy', $category))
+            ->assertRedirect(route('product-categories.index'));
+
+        $this->assertSoftDeleted('product_categories', ['id' => $category->id]);
+    }
+
+    public function test_master_create_and_edit_pages_render(): void
+    {
+        $admin = $this->userWithRole('Admin');
+        $category = ProductCategory::create([
+            'name' => 'Sheets',
+            'status' => 'active',
+        ]);
+        $product = Product::create($this->productPayload($category, [
+            'code' => 'SHEET-001',
+        ]));
+        $customer = Customer::create($this->partyPayload([
+            'name' => 'Render Customer',
+            'phone' => '9000000011',
+        ]));
+        $supplier = Supplier::create($this->partyPayload([
+            'name' => 'Render Supplier',
+            'phone' => '9000000012',
+            'balance_type' => 'credit',
+        ]));
+
+        $this->actingAs($admin)
+            ->get(route('product-categories.create'))
+            ->assertOk()
+            ->assertSee('Save Category');
+
+        $this->actingAs($admin)
+            ->get(route('product-categories.edit', $category))
+            ->assertOk()
+            ->assertSee('Sheets');
+
+        $this->actingAs($admin)
+            ->get(route('products.create'))
+            ->assertOk()
+            ->assertSee('Current stock will start from opening stock');
+
+        $this->actingAs($admin)
+            ->get(route('products.edit', $product))
+            ->assertOk()
+            ->assertSee('Current Stock');
+
+        $this->actingAs($admin)
+            ->get(route('customers.create'))
+            ->assertOk()
+            ->assertSee('Save Customer');
+
+        $this->actingAs($admin)
+            ->get(route('customers.edit', $customer))
+            ->assertOk()
+            ->assertSee('Render Customer');
+
+        $this->actingAs($admin)
+            ->get(route('suppliers.create'))
+            ->assertOk()
+            ->assertSee('Save Supplier');
+
+        $this->actingAs($admin)
+            ->get(route('suppliers.edit', $supplier))
+            ->assertOk()
+            ->assertSee('Render Supplier');
+    }
+
+    public function test_customer_crud_search_show_and_duplicate_phone_validation(): void
+    {
+        $admin = $this->userWithRole('Admin');
+
+        $this->actingAs($admin)
+            ->post(route('customers.store'), $this->partyPayload([
+                'name' => 'Arun Steel',
+                'phone' => '9000000001',
+            ]))
+            ->assertRedirect(route('customers.index'));
+
+        $customer = Customer::where('phone', '9000000001')->firstOrFail();
+
+        $this->actingAs($admin)
+            ->from(route('customers.create'))
+            ->post(route('customers.store'), $this->partyPayload([
+                'name' => 'Duplicate Customer',
+                'phone' => '9000000001',
+            ]))
+            ->assertRedirect(route('customers.create'))
+            ->assertSessionHasErrors('phone');
+
+        $this->actingAs($admin)
+            ->get(route('customers.index', ['search' => 'Arun']))
+            ->assertOk()
+            ->assertSee('Arun Steel');
+
+        $this->actingAs($admin)
+            ->get(route('customers.show', $customer))
+            ->assertOk()
+            ->assertSee('Customer Details')
+            ->assertSee('9000000001');
+    }
+
+    public function test_supplier_crud_search_show_and_duplicate_phone_validation(): void
+    {
+        $admin = $this->userWithRole('Admin');
+
+        $this->actingAs($admin)
+            ->post(route('suppliers.store'), $this->partyPayload([
+                'name' => 'Lucky Supplier',
+                'phone' => '9000000002',
+            ]))
+            ->assertRedirect(route('suppliers.index'));
+
+        $supplier = Supplier::where('phone', '9000000002')->firstOrFail();
+
+        $this->actingAs($admin)
+            ->from(route('suppliers.create'))
+            ->post(route('suppliers.store'), $this->partyPayload([
+                'name' => 'Duplicate Supplier',
+                'phone' => '9000000002',
+            ]))
+            ->assertRedirect(route('suppliers.create'))
+            ->assertSessionHasErrors('phone');
+
+        $this->actingAs($admin)
+            ->get(route('suppliers.index', ['search' => 'Lucky']))
+            ->assertOk()
+            ->assertSee('Lucky Supplier');
+
+        $this->actingAs($admin)
+            ->get(route('suppliers.show', $supplier))
+            ->assertOk()
+            ->assertSee('Supplier Details')
+            ->assertSee('9000000002');
     }
 
     public function test_product_validation_blocks_negative_stock_and_prices(): void
@@ -150,6 +318,20 @@ class ProductManagementTest extends TestCase
             'selling_price' => 120,
             'opening_stock' => 10,
             'current_stock' => 10,
+            'status' => 'active',
+        ], $overrides);
+    }
+
+    private function partyPayload(array $overrides = []): array
+    {
+        return array_merge([
+            'name' => 'Party Name',
+            'phone' => null,
+            'email' => null,
+            'gst_number' => null,
+            'address' => 'Krishnagiri',
+            'opening_balance' => 0,
+            'balance_type' => 'debit',
             'status' => 'active',
         ], $overrides);
     }

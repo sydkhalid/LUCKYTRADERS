@@ -57,12 +57,12 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::middleware('permission:manage_products')->group(function () {
-        Route::resource('product-categories', ProductCategoryController::class)->except(['show']);
-        Route::resource('products', ProductController::class)->except(['show']);
+        Route::resource('product-categories', ProductCategoryController::class);
+        Route::resource('products', ProductController::class);
     });
 
-    Route::resource('customers', CustomerController::class)->except(['show'])->middleware('permission:manage_customers');
-    Route::resource('suppliers', SupplierController::class)->except(['show'])->middleware('permission:manage_suppliers');
+    Route::resource('customers', CustomerController::class)->middleware('permission:manage_customers');
+    Route::resource('suppliers', SupplierController::class)->middleware('permission:manage_suppliers');
     Route::middleware('permission:manage_purchases')->group(function () {
         Route::get('/purchases/{purchase}/pdf', [DocumentPdfController::class, 'purchase'])->name('purchases.pdf');
         Route::resource('purchases', PurchaseController::class);
