@@ -11,6 +11,7 @@ use App\Models\Sale;
 use App\Models\StockAdjustment;
 use App\Models\StockMovement;
 use App\Models\User;
+use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -104,8 +105,47 @@ class StockAdjustmentTest extends TestCase
         $this->actingAs($user)->get(route('stock-adjustments.show', $adjustment))->assertOk()->assertSee('Old Stock');
         $this->actingAs($user)->get(route('stock-adjustments.create'))->assertOk()->assertSee('Create Stock Adjustment');
         $this->actingAs($user)->get(route('stock-adjustments.products.history', $product))->assertOk()->assertSee($adjustment->adjustment_no);
+        $this->actingAs($user)->get(route('stock-adjustments.product-report'))->assertOk()->assertSee('Product-wise Adjustment Report');
         $this->actingAs($user)->get(route('stock-adjustments.movements'))->assertOk()->assertSee('Stock Movement Report');
         $this->actingAs($user)->get(route('products.index'))->assertOk()->assertSee('History');
+    }
+
+    public function test_product_wise_adjustment_report_groups_filtered_adjustments(): void
+    {
+        $firstProduct = $this->product('MS Flat', 'MS-FLAT', 10);
+        $secondProduct = $this->product('MS Pipe', 'MS-PIPE', 10);
+
+        $this->createAdjustment($firstProduct, '2026-05-13', 5);
+        $this->actingAs(User::factory()->create())->post(route('stock-adjustments.store'), [
+            'adjustment_date' => '2026-05-14',
+            'product_id' => $firstProduct->id,
+            'adjustment_type' => 'decrease',
+            'reason' => 'damage',
+            'quantity' => 2,
+            'remarks' => 'Damaged material',
+        ]);
+        $this->createAdjustment($secondProduct, '2026-05-14', 4);
+        $this->flushSession();
+
+        $response = $this->actingAs(User::factory()->create())->get(route('stock-adjustments.product-report', [
+            'from_date' => '2026-05-13',
+            'to_date' => '2026-05-14',
+            'product_id' => $firstProduct->id,
+        ]));
+
+        $response->assertOk();
+        $response->assertSee('Product-wise Adjustment Report');
+        $response->assertViewHas('summaries', function ($summaries) use ($firstProduct): bool {
+            $summary = $summaries->first();
+
+            return $summaries->count() === 1
+                && $summary->product_id === $firstProduct->id
+                && (float) $summary->increase_quantity === 5.0
+                && (float) $summary->decrease_quantity === 2.0
+                && (int) $summary->adjustments_count === 2;
+        });
+        $response->assertViewHas('increaseTotal', fn ($value): bool => (float) $value === 5.0);
+        $response->assertViewHas('decreaseTotal', fn ($value): bool => (float) $value === 2.0);
     }
 
     public function test_stock_movement_report_filters_adjustments_by_product_and_date(): void
@@ -143,6 +183,22 @@ class StockAdjustmentTest extends TestCase
         $response->assertDontSee('Physical count excess');
     }
 
+    public function test_stock_adjustments_are_restricted_to_admin_and_stock_staff(): void
+    {
+        $this->seed(RolePermissionSeeder::class);
+
+        $stockStaff = $this->userWithRole('Stock Staff');
+        $viewer = $this->userWithRole('Viewer');
+
+        $this->actingAs($stockStaff)
+            ->get(route('stock-adjustments.index'))
+            ->assertOk();
+
+        $this->actingAs($viewer)
+            ->get(route('stock-adjustments.index'))
+            ->assertForbidden();
+    }
+
     private function product(string $name = 'MS Angle', string $code = 'MS-ANG', float $currentStock = 10): Product
     {
         $category = ProductCategory::create([
@@ -176,5 +232,17 @@ class StockAdjustmentTest extends TestCase
         ]);
 
         return StockAdjustment::latest('id')->firstOrFail();
+    }
+
+    private function userWithRole(string $role): User
+    {
+        $user = User::factory()->create([
+            'is_admin' => in_array($role, ['Super Admin', 'Admin'], true),
+            'role' => $role,
+        ]);
+
+        $user->syncRoles([$role]);
+
+        return $user->refresh();
     }
 }

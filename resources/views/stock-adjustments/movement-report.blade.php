@@ -8,7 +8,10 @@
             <h2 class="text-lg font-semibold text-gray-900">Stock Movement Report</h2>
             <p class="text-sm text-gray-500">Purchase, sale, and adjustment stock movements in one report.</p>
         </div>
-        <a href="{{ route('stock-adjustments.index') }}" class="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Adjustments</a>
+        <div class="flex gap-2">
+            <a href="{{ route('stock-adjustments.product-report') }}" class="rounded border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Product Report</a>
+            <a href="{{ route('stock-adjustments.index') }}" class="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Adjustments</a>
+        </div>
     </div>
 
     <form method="GET" action="{{ route('stock-adjustments.movements') }}" class="mb-5 rounded bg-white p-5 shadow">

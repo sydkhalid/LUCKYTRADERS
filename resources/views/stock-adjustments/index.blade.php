@@ -9,6 +9,7 @@
             <p class="text-sm text-gray-500">Record damage, shortage, excess, return, wastage, and manual correction entries.</p>
         </div>
         <div class="flex gap-2">
+            <a href="{{ route('stock-adjustments.product-report') }}" class="rounded border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Product Report</a>
             <a href="{{ route('stock-adjustments.movements') }}" class="rounded border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Movement Report</a>
             <a href="{{ route('stock-adjustments.create') }}" class="rounded bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">Create Adjustment</a>
         </div>

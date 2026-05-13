@@ -61,6 +61,45 @@ class StockAdjustmentController extends Controller
         return view('stock-adjustments.product-history', compact('product', 'movements', 'adjustmentsById'));
     }
 
+    public function productReport(Request $request)
+    {
+        $filters = $request->validate([
+            'from_date' => ['nullable', 'date'],
+            'to_date' => ['nullable', 'date', 'after_or_equal:from_date'],
+            'product_id' => ['nullable', 'exists:products,id'],
+            'adjustment_type' => ['nullable', 'in:increase,decrease'],
+            'reason' => ['nullable', 'in:damage,shortage,excess,return,wastage,correction,other'],
+        ]);
+
+        $query = StockAdjustment::query()
+            ->when($filters['from_date'] ?? null, fn ($query, $date) => $query->whereDate('adjustment_date', '>=', $date))
+            ->when($filters['to_date'] ?? null, fn ($query, $date) => $query->whereDate('adjustment_date', '<=', $date))
+            ->when($filters['product_id'] ?? null, fn ($query, $productId) => $query->where('product_id', $productId))
+            ->when($filters['adjustment_type'] ?? null, fn ($query, $type) => $query->where('adjustment_type', $type))
+            ->when($filters['reason'] ?? null, fn ($query, $reason) => $query->where('reason', $reason));
+
+        $increaseTotal = (clone $query)->where('adjustment_type', 'increase')->sum('quantity');
+        $decreaseTotal = (clone $query)->where('adjustment_type', 'decrease')->sum('quantity');
+
+        $summaries = $query
+            ->select('product_id')
+            ->selectRaw('COUNT(*) as adjustments_count')
+            ->selectRaw("SUM(CASE WHEN adjustment_type = 'increase' THEN quantity ELSE 0 END) as increase_quantity")
+            ->selectRaw("SUM(CASE WHEN adjustment_type = 'decrease' THEN quantity ELSE 0 END) as decrease_quantity")
+            ->selectRaw('MAX(adjustment_date) as last_adjustment_date')
+            ->with('product')
+            ->groupBy('product_id')
+            ->orderByDesc('last_adjustment_date')
+            ->paginate(25)
+            ->withQueryString();
+
+        $products = Product::orderBy('name')->get();
+        $types = StockAdjustment::TYPES;
+        $reasons = StockAdjustment::REASONS;
+
+        return view('stock-adjustments.product-report', compact('summaries', 'products', 'types', 'reasons', 'filters', 'increaseTotal', 'decreaseTotal'));
+    }
+
     public function movementReport(Request $request)
     {
         $filters = $request->validate([

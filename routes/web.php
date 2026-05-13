@@ -74,6 +74,7 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::middleware('permission:manage_stock_adjustments')->group(function () {
+        Route::get('/stock-adjustments/product-report', [StockAdjustmentController::class, 'productReport'])->name('stock-adjustments.product-report');
         Route::get('/stock-adjustments/movements', [StockAdjustmentController::class, 'movementReport'])->name('stock-adjustments.movements');
         Route::get('/stock-adjustments/products/{product}/history', [StockAdjustmentController::class, 'productHistory'])->name('stock-adjustments.products.history');
         Route::resource('stock-adjustments', StockAdjustmentController::class)->only(['index', 'create', 'store', 'show']);
