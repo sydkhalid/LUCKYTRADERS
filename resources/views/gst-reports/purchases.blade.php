@@ -8,14 +8,24 @@
             <h2 class="text-lg font-semibold text-gray-900">GST Purchase Report</h2>
             <p class="text-sm text-gray-500">Only GST purchases are included for input GST.</p>
         </div>
-        <div class="flex gap-2">
+        <div class="flex flex-wrap gap-2">
             <a href="{{ route('gst-reports.index', $filters) }}" class="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Summary</a>
+            <a href="{{ route('gst-reports.purchase-returns', $filters) }}" class="rounded border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Debit Notes</a>
             <a href="{{ route('gst-reports.pdf', $filters) }}" target="_blank" class="rounded border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">PDF</a>
             <a href="{{ route('gst-reports.export', array_merge($filters, ['type' => 'purchases'])) }}" class="rounded bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">Export CSV</a>
         </div>
     </div>
 
-    @include('gst-reports.partials.filters', ['action' => route('gst-reports.purchases'), 'filters' => $filters])
+    @include('gst-reports.partials.filters', [
+        'action' => route('gst-reports.purchases'),
+        'filters' => $filters,
+        'suppliers' => $suppliers,
+        'billTypes' => $billTypes,
+        'paymentStatuses' => $paymentStatuses,
+        'showSupplier' => true,
+        'showBillType' => true,
+        'showPaymentStatus' => true,
+    ])
 
     <div class="mb-5 grid grid-cols-1 gap-4 md:grid-cols-5">
         <div class="rounded bg-white p-4 shadow">

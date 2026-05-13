@@ -4,7 +4,9 @@ namespace Tests\Feature;
 
 use App\Models\Customer;
 use App\Models\Purchase;
+use App\Models\PurchaseReturn;
 use App\Models\Sale;
+use App\Models\SalesReturn;
 use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -63,10 +65,115 @@ class GSTReportTest extends TestCase
         $response->assertSee('Rs. 800.00');
     }
 
+    public function test_gst_return_reports_show_only_gst_credit_and_debit_notes(): void
+    {
+        [$gstSale, $normalSale] = $this->createSales();
+        [$gstPurchase, $normalPurchase] = $this->createPurchases();
+
+        $gstSalesReturn = $this->createSalesReturn($gstSale, 'GST-SRET-001', 100, 18, 118);
+        $normalSalesReturn = $this->createSalesReturn($normalSale, 'NORMAL-SRET-001', 100, 0, 100);
+        $gstPurchaseReturn = $this->createPurchaseReturn($gstPurchase, 'GST-PRET-001', 100, 18, 118);
+        $normalPurchaseReturn = $this->createPurchaseReturn($normalPurchase, 'NORMAL-PRET-001', 100, 0, 100);
+
+        $salesResponse = $this->actingAs(User::factory()->create())->get(route('gst-reports.sales-returns'));
+        $salesResponse->assertOk();
+        $salesResponse->assertSee($gstSalesReturn->return_no);
+        $salesResponse->assertDontSee($normalSalesReturn->return_no);
+
+        $purchaseResponse = $this->actingAs(User::factory()->create())->get(route('gst-reports.purchase-returns'));
+        $purchaseResponse->assertOk();
+        $purchaseResponse->assertSee($gstPurchaseReturn->return_no);
+        $purchaseResponse->assertDontSee($normalPurchaseReturn->return_no);
+    }
+
+    public function test_gst_summary_subtracts_gst_return_adjustments(): void
+    {
+        [$gstSale] = $this->createSales();
+        [$gstPurchase] = $this->createPurchases();
+        $this->createSalesReturn($gstSale, 'GST-SRET-001', 100, 18, 118);
+        $this->createPurchaseReturn($gstPurchase, 'GST-PRET-001', 50, 9, 59);
+
+        $response = $this->actingAs(User::factory()->create())->get(route('gst-reports.index'));
+
+        $response->assertOk();
+        $response->assertSee('Rs. 162.00');
+        $response->assertSee('Rs. 81.00');
+        $response->assertSee('Rs. 81.00');
+    }
+
+    public function test_customer_supplier_and_payment_status_filters_apply_to_gst_reports(): void
+    {
+        [$gstSale] = $this->createSales();
+        [$gstPurchase] = $this->createPurchases();
+
+        $otherCustomer = Customer::create(['name' => 'Other GST Customer', 'gst_number' => '33OTHERGST']);
+        $otherSale = Sale::create([
+            'sale_no' => 'GST-SALE-OTHER',
+            'customer_id' => $otherCustomer->id,
+            'sale_date' => '2026-05-13',
+            'bill_type' => 'gst',
+            'subtotal' => 100,
+            'gst_amount' => 18,
+            'total_amount' => 118,
+            'paid_amount' => 118,
+            'balance_amount' => 0,
+            'payment_status' => 'paid',
+            'payment_mode' => 'cash',
+        ]);
+
+        $otherSupplier = Supplier::create(['name' => 'Other GST Supplier', 'gst_number' => '33OTHERGSTSUP']);
+        $otherPurchase = Purchase::create([
+            'purchase_no' => 'GST-PUR-OTHER',
+            'supplier_id' => $otherSupplier->id,
+            'purchase_date' => '2026-05-13',
+            'bill_type' => 'gst',
+            'supplier_invoice_no' => 'SUP-OTHER',
+            'subtotal' => 100,
+            'gst_amount' => 18,
+            'total_amount' => 118,
+            'paid_amount' => 118,
+            'balance_amount' => 0,
+            'payment_status' => 'paid',
+            'payment_mode' => 'cash',
+        ]);
+
+        $salesResponse = $this->actingAs(User::factory()->create())->get(route('gst-reports.sales', [
+            'customer_id' => $gstSale->customer_id,
+            'payment_status' => 'partial',
+        ]));
+        $salesResponse->assertOk();
+        $salesResponse->assertSee($gstSale->sale_no);
+        $salesResponse->assertDontSee($otherSale->sale_no);
+
+        $purchaseResponse = $this->actingAs(User::factory()->create())->get(route('gst-reports.purchases', [
+            'supplier_id' => $gstPurchase->supplier_id,
+            'payment_status' => 'partial',
+        ]));
+        $purchaseResponse->assertOk();
+        $purchaseResponse->assertSee($gstPurchase->purchase_no);
+        $purchaseResponse->assertDontSee($otherPurchase->purchase_no);
+    }
+
+    public function test_conflicting_bill_type_filter_does_not_leak_normal_bills_into_gst_reports(): void
+    {
+        [$gstSale, $normalSale] = $this->createSales();
+
+        $response = $this->actingAs(User::factory()->create())->get(route('gst-reports.sales', [
+            'bill_type' => 'non_gst',
+        ]));
+
+        $response->assertOk();
+        $response->assertDontSee($gstSale->sale_no);
+        $response->assertDontSee($normalSale->sale_no);
+        $response->assertSee('No GST sales found.');
+    }
+
     public function test_auditor_export_includes_only_gst_sales_and_purchases(): void
     {
         [$gstSale, $normalSale] = $this->createSales();
         [$gstPurchase, $normalPurchase] = $this->createPurchases();
+        $gstSalesReturn = $this->createSalesReturn($gstSale, 'GST-SRET-001', 100, 18, 118);
+        $normalSalesReturn = $this->createSalesReturn($normalSale, 'NORMAL-SRET-001', 100, 0, 100);
 
         $response = $this->actingAs(User::factory()->create())->get(route('gst-reports.export', [
             'type' => 'all',
@@ -77,8 +184,32 @@ class GSTReportTest extends TestCase
 
         $this->assertStringContainsString($gstSale->sale_no, $content);
         $this->assertStringContainsString($gstPurchase->purchase_no, $content);
+        $this->assertStringContainsString('GST Summary', $content);
+        $this->assertStringContainsString($gstSalesReturn->return_no, $content);
         $this->assertStringNotContainsString($normalSale->sale_no, $content);
         $this->assertStringNotContainsString($normalPurchase->purchase_no, $content);
+        $this->assertStringNotContainsString($normalSalesReturn->return_no, $content);
+    }
+
+    public function test_summary_export_contains_auditor_gst_formula_rows(): void
+    {
+        [$gstSale] = $this->createSales();
+        [$gstPurchase] = $this->createPurchases();
+        $this->createSalesReturn($gstSale, 'GST-SRET-001', 100, 18, 118);
+        $this->createPurchaseReturn($gstPurchase, 'GST-PRET-001', 50, 9, 59);
+
+        $response = $this->actingAs(User::factory()->create())->get(route('gst-reports.export', [
+            'type' => 'summary',
+        ]));
+
+        $response->assertOk();
+        $content = $response->streamedContent();
+
+        $this->assertStringContainsString('Output GST', $content);
+        $this->assertStringContainsString('Input GST', $content);
+        $this->assertStringContainsString('Net GST Payable', $content);
+        $this->assertStringContainsString('162.00', $content);
+        $this->assertStringContainsString('81.00', $content);
     }
 
     public function test_date_filter_limits_gst_sales_report(): void
@@ -188,5 +319,35 @@ class GSTReportTest extends TestCase
         ]);
 
         return [$gstPurchase, $normalPurchase];
+    }
+
+    private function createSalesReturn(Sale $sale, string $returnNo, float $subtotal, float $gst, float $total): SalesReturn
+    {
+        return SalesReturn::create([
+            'return_no' => $returnNo,
+            'sale_id' => $sale->id,
+            'customer_id' => $sale->customer_id,
+            'return_date' => '2026-05-14',
+            'subtotal' => $subtotal,
+            'gst_amount' => $gst,
+            'total_amount' => $total,
+            'refund_amount' => 0,
+            'adjustment_amount' => $total,
+        ]);
+    }
+
+    private function createPurchaseReturn(Purchase $purchase, string $returnNo, float $subtotal, float $gst, float $total): PurchaseReturn
+    {
+        return PurchaseReturn::create([
+            'return_no' => $returnNo,
+            'purchase_id' => $purchase->id,
+            'supplier_id' => $purchase->supplier_id,
+            'return_date' => '2026-05-14',
+            'subtotal' => $subtotal,
+            'gst_amount' => $gst,
+            'total_amount' => $total,
+            'refund_amount' => 0,
+            'adjustment_amount' => $total,
+        ]);
     }
 }

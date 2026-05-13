@@ -160,6 +160,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/gst-reports', [GSTReportController::class, 'index'])->name('gst-reports.index');
         Route::get('/gst-reports/sales', [GSTReportController::class, 'sales'])->name('gst-reports.sales');
         Route::get('/gst-reports/purchases', [GSTReportController::class, 'purchases'])->name('gst-reports.purchases');
+        Route::get('/gst-reports/sales-returns', [GSTReportController::class, 'salesReturns'])->name('gst-reports.sales-returns');
+        Route::get('/gst-reports/purchase-returns', [GSTReportController::class, 'purchaseReturns'])->name('gst-reports.purchase-returns');
         Route::get('/gst-reports/non-gst-sales', [GSTReportController::class, 'nonGstSales'])->name('gst-reports.non-gst-sales');
     });
 

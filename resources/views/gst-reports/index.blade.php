@@ -8,16 +8,30 @@
             <h2 class="text-lg font-semibold text-gray-900">GST Summary</h2>
             <p class="text-sm text-gray-500">GST bills are separated from normal bills for auditor reporting.</p>
         </div>
-        <div class="flex gap-2">
+        <div class="flex flex-wrap gap-2">
             <a href="{{ route('gst-reports.sales', $filters) }}" class="rounded border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">GST Sales</a>
             <a href="{{ route('gst-reports.purchases', $filters) }}" class="rounded border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">GST Purchases</a>
+            <a href="{{ route('gst-reports.sales-returns', $filters) }}" class="rounded border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Credit Notes</a>
+            <a href="{{ route('gst-reports.purchase-returns', $filters) }}" class="rounded border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Debit Notes</a>
             <a href="{{ route('gst-reports.pdf', $filters) }}" target="_blank" class="rounded border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">PDF</a>
             <a href="{{ route('gst-reports.pdf', array_merge($filters, ['download' => 1])) }}" class="rounded border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Download PDF</a>
+            <a href="{{ route('gst-reports.export', array_merge($filters, ['type' => 'summary'])) }}" class="rounded border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Summary CSV</a>
             <a href="{{ route('gst-reports.export', array_merge($filters, ['type' => 'all'])) }}" class="rounded bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">Auditor CSV</a>
         </div>
     </div>
 
-    @include('gst-reports.partials.filters', ['action' => route('gst-reports.index'), 'filters' => $filters])
+    @include('gst-reports.partials.filters', [
+        'action' => route('gst-reports.index'),
+        'filters' => $filters,
+        'customers' => $customers,
+        'suppliers' => $suppliers,
+        'billTypes' => $billTypes,
+        'paymentStatuses' => $paymentStatuses,
+        'showCustomer' => true,
+        'showSupplier' => true,
+        'showBillType' => true,
+        'showPaymentStatus' => true,
+    ])
 
     <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
         <div class="rounded bg-white p-5 shadow">
@@ -63,6 +77,14 @@
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">GST Purchase Returns</p>
             <h3 class="mt-1 text-2xl font-bold text-emerald-700">Rs. {{ number_format((float) $summary['purchase_returns'], 2) }}</h3>
+        </div>
+        <div class="rounded bg-white p-5 shadow">
+            <p class="text-sm text-gray-500">Sales Return GST Adjustment</p>
+            <h3 class="mt-1 text-2xl font-bold text-red-700">Rs. {{ number_format((float) $summary['sales_returns_gst'], 2) }}</h3>
+        </div>
+        <div class="rounded bg-white p-5 shadow">
+            <p class="text-sm text-gray-500">Purchase Return GST Adjustment</p>
+            <h3 class="mt-1 text-2xl font-bold text-emerald-700">Rs. {{ number_format((float) $summary['purchase_returns_gst'], 2) }}</h3>
         </div>
     </div>
 @endsection

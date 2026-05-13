@@ -11,7 +11,16 @@
         <a href="{{ route('gst-reports.index', $filters) }}" class="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Summary</a>
     </div>
 
-    @include('gst-reports.partials.filters', ['action' => route('gst-reports.non-gst-sales'), 'filters' => $filters])
+    @include('gst-reports.partials.filters', [
+        'action' => route('gst-reports.non-gst-sales'),
+        'filters' => $filters,
+        'customers' => $customers,
+        'billTypes' => $billTypes,
+        'paymentStatuses' => $paymentStatuses,
+        'showCustomer' => true,
+        'showBillType' => true,
+        'showPaymentStatus' => true,
+    ])
 
     <div class="mb-5 grid grid-cols-1 gap-4 md:grid-cols-4">
         <div class="rounded bg-white p-4 shadow">
