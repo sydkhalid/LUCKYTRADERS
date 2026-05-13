@@ -5,7 +5,7 @@
 @section('content')
     <div class="mb-5 flex items-center justify-between">
         <div>
-            <h2 class="text-lg font-semibold text-gray-900">{{ $loan->loan_no }} Repayment History</h2>
+            <h2 class="text-lg font-semibold text-gray-900">{{ $loan->loan_no }} Transaction History</h2>
             <p class="text-sm text-gray-500">{{ $loan->party_name }} - Balance Rs. {{ number_format((float) $loan->balance_amount, 2) }}</p>
         </div>
         <a href="{{ route('loans.show', $loan) }}" class="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Back</a>

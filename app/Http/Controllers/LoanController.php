@@ -3,15 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Loans\StoreLoanRequest;
-use App\Http\Requests\Loans\StoreLoanTransactionRequest;
 use App\Models\Loan;
+use App\Models\Partner;
 use App\Services\LoanPostingService;
 
 class LoanController extends Controller
 {
     public function index()
     {
-        $loans = Loan::latest('loan_date')
+        $loans = Loan::with('partner')
+            ->latest('loan_date')
             ->latest('id')
             ->paginate(20);
 
@@ -25,8 +26,11 @@ class LoanController extends Controller
     public function create()
     {
         $loanTypes = Loan::TYPES;
+        $partners = Partner::active()
+            ->orderBy('name')
+            ->get(['id', 'name', 'phone']);
 
-        return view('loans.create', compact('loanTypes'));
+        return view('loans.create', compact('loanTypes', 'partners'));
     }
 
     public function store(StoreLoanRequest $request, LoanPostingService $postingService)
@@ -40,6 +44,8 @@ class LoanController extends Controller
 
     public function show(Loan $loan, LoanPostingService $postingService)
     {
+        $loan->load('partner');
+
         $transactions = $loan->transactions()
             ->latest('transaction_date')
             ->latest('id')
@@ -47,38 +53,6 @@ class LoanController extends Controller
         $transactionTypes = $postingService->allowedTransactionTypes($loan);
 
         return view('loans.show', compact('loan', 'transactions', 'transactionTypes'));
-    }
-
-    public function createTransaction(Loan $loan, LoanPostingService $postingService)
-    {
-        if ($loan->status === 'closed') {
-            return redirect()
-                ->route('loans.show', $loan)
-                ->with('error', 'This loan is already closed.');
-        }
-
-        $transactionTypes = $postingService->allowedTransactionTypes($loan);
-
-        return view('loans.transaction-create', compact('loan', 'transactionTypes'));
-    }
-
-    public function storeTransaction(StoreLoanTransactionRequest $request, Loan $loan, LoanPostingService $postingService)
-    {
-        $postingService->recordTransaction($loan, $request->validated());
-
-        return redirect()
-            ->route('loans.show', $loan)
-            ->with('success', 'Loan transaction saved successfully.');
-    }
-
-    public function transactions(Loan $loan)
-    {
-        $transactions = $loan->transactions()
-            ->latest('transaction_date')
-            ->latest('id')
-            ->paginate(30);
-
-        return view('loans.transactions', compact('loan', 'transactions'));
     }
 
     public function activeReport()
@@ -93,7 +67,8 @@ class LoanController extends Controller
 
     private function report(string $status)
     {
-        $loans = Loan::where('status', $status)
+        $loans = Loan::with('partner')
+            ->where('status', $status)
             ->latest('loan_date')
             ->latest('id')
             ->paginate(30);

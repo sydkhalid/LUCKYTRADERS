@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Concerns\LogsErpActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -50,6 +51,11 @@ class Loan extends Model
     public function transactions(): HasMany
     {
         return $this->hasMany(LoanTransaction::class);
+    }
+
+    public function partner(): BelongsTo
+    {
+        return $this->belongsTo(Partner::class);
     }
 
     public function scopeActive($query)

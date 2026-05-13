@@ -11,6 +11,7 @@ use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\GSTReportController;
 use App\Http\Controllers\LedgerController;
 use App\Http\Controllers\LoanController;
+use App\Http\Controllers\LoanTransactionController;
 use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductCategoryController;
@@ -96,14 +97,19 @@ Route::middleware('auth')->group(function () {
         ->name('sales.pdf');
 
     Route::middleware('permission:manage_sales|manage_payments')->group(function () {
+        Route::get('/receipts', [CustomerReceiptController::class, 'index'])->name('receipts.index');
         Route::get('/receipts/create', [CustomerReceiptController::class, 'create'])->name('receipts.create');
         Route::post('/receipts', [CustomerReceiptController::class, 'store'])->name('receipts.store');
+        Route::get('/receipts/{payment}', [CustomerReceiptController::class, 'show'])->name('receipts.show');
     });
 
     Route::middleware('permission:manage_payments')->group(function () {
         Route::get('/payments/{payment}/pdf', [DocumentPdfController::class, 'payment'])->name('payments.pdf');
+        Route::get('/payments/{payment}', [PaymentController::class, 'show'])->name('payments.show');
+        Route::get('/supplier-payments', [SupplierPaymentController::class, 'index'])->name('supplier-payments.index');
         Route::get('/supplier-payments/create', [SupplierPaymentController::class, 'create'])->name('supplier-payments.create');
         Route::post('/supplier-payments', [SupplierPaymentController::class, 'store'])->name('supplier-payments.store');
+        Route::get('/supplier-payments/{payment}', [SupplierPaymentController::class, 'show'])->name('supplier-payments.show');
         Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
         Route::get('/ledgers', [LedgerController::class, 'index'])->name('ledgers.index');
         Route::get('/ledgers/customers', [LedgerController::class, 'customers'])->name('ledgers.customers.index');
@@ -127,9 +133,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/loans/{loan}/transactions/{transaction}/pdf', [DocumentPdfController::class, 'loanTransaction'])->name('loans.transactions.pdf');
         Route::get('/loans/reports/active', [LoanController::class, 'activeReport'])->name('loans.reports.active');
         Route::get('/loans/reports/closed', [LoanController::class, 'closedReport'])->name('loans.reports.closed');
-        Route::get('/loans/{loan}/transactions', [LoanController::class, 'transactions'])->name('loans.transactions.index');
-        Route::get('/loans/{loan}/transactions/create', [LoanController::class, 'createTransaction'])->name('loans.transactions.create');
-        Route::post('/loans/{loan}/transactions', [LoanController::class, 'storeTransaction'])->name('loans.transactions.store');
+        Route::get('/loans/{loan}/transactions', [LoanTransactionController::class, 'index'])->name('loans.transactions.index');
+        Route::get('/loans/{loan}/transactions/create', [LoanTransactionController::class, 'create'])->name('loans.transactions.create');
+        Route::post('/loans/{loan}/transactions', [LoanTransactionController::class, 'store'])->name('loans.transactions.store');
         Route::resource('loans', LoanController::class)->only(['index', 'create', 'store', 'show']);
     });
 

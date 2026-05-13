@@ -53,8 +53,8 @@
                 <p class="mt-1 font-semibold text-gray-900">{{ $loan->party_phone ?: '-' }}</p>
             </div>
             <div>
-                <p class="text-gray-500">Partner ID</p>
-                <p class="mt-1 font-semibold text-gray-900">{{ $loan->partner_id ?: '-' }}</p>
+                <p class="text-gray-500">Partner</p>
+                <p class="mt-1 font-semibold text-gray-900">{{ $loan->partner?->name ?? ($loan->partner_id ? 'Partner #'.$loan->partner_id : '-') }}</p>
             </div>
         </div>
         @if ($loan->notes)

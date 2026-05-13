@@ -42,7 +42,7 @@
                 <a href="{{ route('sales-returns.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('sales-returns.*') ? 'bg-slate-700' : '' }}">Sales Returns</a>
             @endcan
             @canany(['manage_sales', 'manage_payments'])
-                <a href="{{ route('receipts.create') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('receipts.*') ? 'bg-slate-700' : '' }}">Receipts</a>
+                <a href="{{ route('receipts.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('receipts.*') ? 'bg-slate-700' : '' }}">Receipts</a>
             @endcanany
             @can('manage_payments')
                 <a href="{{ route('payments.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('payments.*', 'supplier-payments.*') ? 'bg-slate-700' : '' }}">Payments</a>

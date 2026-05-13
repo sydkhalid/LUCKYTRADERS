@@ -28,7 +28,7 @@
             <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
                 <div>
                     <label class="mb-1 block text-sm font-medium text-gray-700">Loan Type</label>
-                    <select name="loan_type" class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
+                    <select name="loan_type" id="loanType" class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
                         @foreach ($loanTypes as $value => $label)
                             <option value="{{ $value }}" @selected(old('loan_type') === $value)>{{ $label }}</option>
                         @endforeach
@@ -42,17 +42,25 @@
 
                 <div>
                     <label class="mb-1 block text-sm font-medium text-gray-700">Party / Partner Name</label>
-                    <input type="text" name="party_name" value="{{ old('party_name') }}" class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
+                    <input type="text" name="party_name" id="partyName" value="{{ old('party_name') }}" class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
                 </div>
 
                 <div>
                     <label class="mb-1 block text-sm font-medium text-gray-700">Phone</label>
-                    <input type="text" name="party_phone" value="{{ old('party_phone') }}" class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500">
+                    <input type="text" name="party_phone" id="partyPhone" value="{{ old('party_phone') }}" class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500">
                 </div>
 
                 <div>
-                    <label class="mb-1 block text-sm font-medium text-gray-700">Partner ID</label>
-                    <input type="number" name="partner_id" value="{{ old('partner_id') }}" min="1" class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500">
+                    <label class="mb-1 block text-sm font-medium text-gray-700">Linked Partner</label>
+                    <select name="partner_id" id="partnerId" class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500">
+                        <option value="">No linked partner</option>
+                        @foreach ($partners as $partner)
+                            <option value="{{ $partner->id }}" data-name="{{ $partner->name }}" data-phone="{{ $partner->phone }}" @selected(old('partner_id') == $partner->id)>
+                                {{ $partner->name }} @if ($partner->phone)- {{ $partner->phone }}@endif
+                            </option>
+                        @endforeach
+                    </select>
+                    <p class="mt-1 text-xs text-gray-500">Use this for partner withdrawals and deposits.</p>
                 </div>
 
                 <div>
@@ -113,6 +121,10 @@
         const principalAmount = document.getElementById('principalAmount');
         const interestType = document.getElementById('interestType');
         const interestPercentage = document.getElementById('interestPercentage');
+        const loanType = document.getElementById('loanType');
+        const partnerId = document.getElementById('partnerId');
+        const partyName = document.getElementById('partyName');
+        const partyPhone = document.getElementById('partyPhone');
 
         function money(value) {
             return 'Rs. ' + Number(value || 0).toFixed(2);
@@ -126,11 +138,27 @@
             document.getElementById('totalText').textContent = money(principal + interest);
         }
 
+        function syncPartnerDetails() {
+            const selected = partnerId.selectedOptions[0];
+            const isPartnerLoan = ['partner_withdrawal', 'partner_deposit'].includes(loanType.value);
+
+            if (!isPartnerLoan || !selected || !selected.value) {
+                return;
+            }
+
+            partyName.value = selected.dataset.name || partyName.value;
+            partyPhone.value = selected.dataset.phone || partyPhone.value;
+        }
+
         [principalAmount, interestType, interestPercentage].forEach(function (input) {
             input.addEventListener('input', refreshLoanTotal);
             input.addEventListener('change', refreshLoanTotal);
         });
+        [loanType, partnerId].forEach(function (input) {
+            input.addEventListener('change', syncPartnerDetails);
+        });
 
         refreshLoanTotal();
+        syncPartnerDetails();
     </script>
 @endsection

@@ -1,3 +1,15 @@
+@php
+    $pendingPurchaseRows = $pendingPurchases->map(fn ($purchase) => [
+        'id' => $purchase->id,
+        'supplier_id' => $purchase->supplier_id,
+        'purchase_no' => $purchase->purchase_no,
+        'purchase_date' => $purchase->purchase_date?->format('d M Y'),
+        'supplier_invoice_no' => $purchase->supplier_invoice_no,
+        'balance_amount' => (float) $purchase->balance_amount,
+        'label' => $purchase->purchase_no.' - Supplier Inv '.($purchase->supplier_invoice_no ?: '-').' - Balance Rs. '.number_format((float) $purchase->balance_amount, 2),
+    ])->values();
+@endphp
+
 @extends('layouts.erp')
 
 @section('title', 'Supplier Payment')
@@ -7,9 +19,12 @@
         <div class="mb-5 flex items-center justify-between">
             <div>
                 <h2 class="text-lg font-semibold text-gray-900">Pay Supplier</h2>
-                <p class="text-sm text-gray-500">Record supplier payment against purchase, opening balance, or advance.</p>
+                <p class="text-sm text-gray-500">Record supplier payment against pending purchase invoices.</p>
             </div>
-            <a href="{{ route('payments.index') }}" class="rounded bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">Payment List</a>
+            <div class="flex gap-2">
+                <a href="{{ route('supplier-payments.index') }}" class="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Payment List</a>
+                <a href="{{ route('payments.index') }}" class="rounded bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">All Payments</a>
+            </div>
         </div>
 
         @if ($errors->any())
@@ -24,11 +39,12 @@
 
         <form method="POST" action="{{ route('supplier-payments.store') }}" class="rounded bg-white p-6 shadow">
             @csrf
+            <input type="hidden" name="reference_type" value="purchase">
 
             <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
                 <div>
                     <label class="mb-1 block text-sm font-medium text-gray-700">Supplier</label>
-                    <select name="supplier_id" class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
+                    <select name="supplier_id" id="supplierId" class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
                         <option value="">Select supplier</option>
                         @foreach ($suppliers as $supplier)
                             <option value="{{ $supplier->id }}" @selected(old('supplier_id') == $supplier->id)>
@@ -43,24 +59,17 @@
                     <input type="date" name="payment_date" value="{{ old('payment_date', now()->toDateString()) }}" class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
                 </div>
 
-                <div>
-                    <label class="mb-1 block text-sm font-medium text-gray-700">Reference Type</label>
-                    <select name="reference_type" class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500">
-                        <option value="">No reference</option>
-                        <option value="purchase" @selected(old('reference_type') === 'purchase')>Purchase</option>
-                        <option value="opening_balance" @selected(old('reference_type') === 'opening_balance')>Opening Balance</option>
-                        <option value="other" @selected(old('reference_type') === 'other')>Other</option>
+                <div class="md:col-span-2">
+                    <label class="mb-1 block text-sm font-medium text-gray-700">Pending Purchase Invoice</label>
+                    <select name="reference_id" id="referenceId" class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
+                        <option value="">Select supplier first</option>
                     </select>
+                    <p id="invoiceHelp" class="mt-1 text-xs text-gray-500">Only purchases with balance amount are shown.</p>
                 </div>
 
                 <div>
-                    <label class="mb-1 block text-sm font-medium text-gray-700">Reference ID</label>
-                    <input type="number" name="reference_id" value="{{ old('reference_id') }}" min="1" class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500">
-                </div>
-
-                <div>
-                    <label class="mb-1 block text-sm font-medium text-gray-700">Amount</label>
-                    <input type="number" name="amount" value="{{ old('amount') }}" step="0.01" min="0.01" class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
+                    <label class="mb-1 block text-sm font-medium text-gray-700">Paid Amount</label>
+                    <input type="number" name="amount" id="amount" value="{{ old('amount') }}" step="0.01" min="0.01" class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
                 </div>
 
                 <div>
@@ -80,9 +89,49 @@
             </div>
 
             <div class="mt-6 flex justify-end gap-3">
-                <a href="{{ route('dashboard') }}" class="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Cancel</a>
+                <a href="{{ route('supplier-payments.index') }}" class="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Cancel</a>
                 <button class="rounded bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700">Save Payment</button>
             </div>
         </form>
     </div>
+
+    <script>
+        const pendingPurchases = @json($pendingPurchaseRows);
+        const oldReferenceId = String(@json(old('reference_id', '')));
+        const supplierSelect = document.getElementById('supplierId');
+        const referenceSelect = document.getElementById('referenceId');
+        const amount = document.getElementById('amount');
+        const invoiceHelp = document.getElementById('invoiceHelp');
+
+        function renderPendingPurchases() {
+            const supplierId = Number(supplierSelect.value || 0);
+            const purchases = pendingPurchases.filter((purchase) => Number(purchase.supplier_id) === supplierId);
+
+            referenceSelect.innerHTML = '<option value="">Select pending purchase</option>';
+
+            purchases.forEach((purchase) => {
+                const option = document.createElement('option');
+                option.value = purchase.id;
+                option.dataset.balance = purchase.balance_amount;
+                option.textContent = purchase.label;
+                option.selected = oldReferenceId && oldReferenceId === String(purchase.id);
+                referenceSelect.appendChild(option);
+            });
+
+            referenceSelect.disabled = purchases.length === 0;
+            invoiceHelp.textContent = purchases.length === 0
+                ? 'No pending purchases found for the selected supplier.'
+                : 'Only purchases with balance amount are shown.';
+            syncInvoiceMeta();
+        }
+
+        function syncInvoiceMeta() {
+            const selected = referenceSelect.selectedOptions[0];
+            amount.max = selected?.dataset.balance || '';
+        }
+
+        supplierSelect.addEventListener('change', renderPendingPurchases);
+        referenceSelect.addEventListener('change', syncInvoiceMeta);
+        renderPendingPurchases();
+    </script>
 @endsection
