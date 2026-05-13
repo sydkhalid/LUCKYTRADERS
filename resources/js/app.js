@@ -1,4 +1,5 @@
 import './bootstrap';
+import './ui';
 import './global-search';
 import './notifications';
 

@@ -94,6 +94,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/media', [SettingController::class, 'media'])->name('media');
         Route::patch('/media', [SettingController::class, 'updateMedia'])->name('media.update');
         Route::get('/testing-checklist', [ProductionReadinessController::class, 'checklist'])->name('testing-checklist');
+        Route::patch('/testing-checklist', [ProductionReadinessController::class, 'updateChecklist'])->name('testing-checklist.update');
+        Route::post('/testing-bugs', [ProductionReadinessController::class, 'storeBug'])->name('testing-bugs.store');
+        Route::patch('/testing-bugs/{bug}', [ProductionReadinessController::class, 'updateBug'])->name('testing-bugs.update');
 
         Route::middleware('role:Super Admin')->prefix('backups')->name('backups.')->group(function () {
             Route::get('/', [BackupController::class, 'index'])->name('index');

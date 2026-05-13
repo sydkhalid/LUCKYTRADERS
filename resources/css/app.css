@@ -1,3 +1,257 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    [x-cloak] {
+        display: none !important;
+    }
+
+    html {
+        text-rendering: optimizeLegibility;
+    }
+
+    body {
+        min-width: 320px;
+    }
+
+    ::selection {
+        background: rgb(14 165 233 / 0.22);
+    }
+}
+
+@layer components {
+    .erp-nav-link {
+        @apply relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-300 transition duration-150 hover:bg-white/10 hover:text-white;
+    }
+
+    .erp-nav-link-active {
+        @apply bg-cyan-400/15 text-white ring-1 ring-cyan-300/20;
+    }
+
+    .erp-nav-link-active::before {
+        content: '';
+        @apply absolute left-0 top-1/2 h-7 w-1 -translate-y-1/2 rounded-r-full bg-cyan-300;
+    }
+
+    .erp-nav-dot {
+        @apply h-2 w-2 shrink-0 rounded-full bg-slate-600 transition;
+    }
+
+    .erp-nav-link:hover .erp-nav-dot,
+    .erp-nav-link-active .erp-nav-dot {
+        @apply bg-cyan-300;
+    }
+
+    .erp-content > * {
+        animation: erpFadeIn 180ms ease-out;
+    }
+
+    .erp-content h2 {
+        @apply tracking-tight;
+    }
+
+    .erp-content :is([class~='rounded'][class~='bg-white'][class~='shadow'], [class~='rounded-lg'][class~='bg-white'][class~='shadow'], [class~='rounded-lg'][class~='border'][class~='bg-white'][class~='shadow-sm'], [class~='overflow-hidden'][class~='rounded'][class~='bg-white'][class~='shadow']) {
+        border: 1px solid rgb(226 232 240 / 0.8);
+        box-shadow: 0 1px 2px 0 rgb(226 232 240 / 0.7);
+    }
+
+    .erp-content form[class~='rounded'][class~='bg-white'],
+    .erp-content form[class~='rounded-lg'][class~='bg-white'] {
+        border: 1px solid rgb(226 232 240 / 0.8);
+        box-shadow: 0 1px 2px 0 rgb(226 232 240 / 0.7);
+    }
+
+    .erp-content input:not([type='checkbox']):not([type='radio']):not([type='file']),
+    .erp-content select,
+    .erp-content textarea {
+        border-radius: 0.75rem;
+        border-color: #cbd5e1;
+        background: #ffffff;
+        color: #0f172a;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+        box-shadow: 0 1px 2px 0 rgb(15 23 42 / 0.05);
+        transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+    }
+
+    .erp-content input::placeholder,
+    .erp-content textarea::placeholder {
+        color: #94a3b8;
+    }
+
+    .erp-content input:not([type='checkbox']):not([type='radio']):not([type='file']):focus,
+    .erp-content select:focus,
+    .erp-content textarea:focus {
+        border-color: #0891b2;
+        box-shadow: 0 0 0 3px rgb(8 145 178 / 0.16);
+    }
+
+    .erp-content label {
+        @apply text-slate-700;
+    }
+
+    .erp-content button,
+    .erp-content a {
+        @apply transition duration-150;
+    }
+
+    .erp-content button:disabled,
+    .erp-content [aria-disabled='true'] {
+        @apply cursor-not-allowed opacity-60;
+    }
+
+    .erp-content .overflow-x-auto {
+        border-radius: 0.75rem;
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        box-shadow: 0 1px 2px 0 rgb(226 232 240 / 0.7);
+    }
+
+    .erp-content .overflow-x-auto > table,
+    .erp-content .overflow-hidden > table {
+        @apply min-w-full;
+    }
+
+    .erp-content table {
+        @apply text-slate-800;
+    }
+
+    .erp-content thead {
+        @apply sticky top-0 z-10 bg-slate-100/95 backdrop-blur;
+    }
+
+    .erp-content thead th {
+        @apply whitespace-nowrap border-b border-slate-200 px-4 py-3 text-left text-[11px] font-black uppercase tracking-[0.16em] text-slate-600;
+    }
+
+    .erp-content tbody td {
+        @apply align-middle;
+    }
+
+    .erp-content tbody tr {
+        @apply transition hover:bg-cyan-50/40;
+    }
+
+    .erp-content tr > td[colspan]:only-child {
+        @apply bg-slate-50/80 py-10 text-center text-sm font-medium text-slate-500;
+    }
+
+    .erp-content nav[role='navigation'] {
+        border-radius: 1rem;
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        padding: 0.75rem 1rem;
+        box-shadow: 0 1px 2px 0 rgb(226 232 240 / 0.7);
+    }
+
+    .erp-empty-state {
+        @apply flex min-h-40 flex-col items-center justify-center px-5 py-10 text-center text-sm font-semibold text-slate-500;
+        border-radius: 1rem;
+        border: 1px dashed #cbd5e1;
+        background: #f8fafc;
+    }
+
+    .erp-panel {
+        @apply p-5;
+        border-radius: 1rem;
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        box-shadow: 0 1px 2px 0 rgb(226 232 240 / 0.7);
+    }
+
+    .erp-panel-header {
+        @apply flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-4;
+    }
+
+    .erp-summary-card {
+        @apply p-5 transition hover:-translate-y-0.5 hover:shadow-md;
+        border-radius: 1rem;
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        box-shadow: 0 1px 2px 0 rgb(226 232 240 / 0.7);
+    }
+}
+
+@layer utilities {
+    @keyframes erpFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(4px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+}
+
+@media (max-width: 640px) {
+    .erp-topbar {
+        position: sticky;
+    }
+
+    .erp-content {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .erp-content .overflow-x-auto {
+        margin-left: -0.25rem;
+        margin-right: -0.25rem;
+    }
+
+    .erp-content table {
+        min-width: 720px;
+    }
+}
+
+@media print {
+    @page {
+        size: A4;
+        margin: 12mm;
+    }
+
+    body {
+        background: white !important;
+        color: #0f172a !important;
+    }
+
+    .erp-sidebar,
+    .erp-topbar,
+    .no-print,
+    [data-global-search],
+    [data-notification-bell] {
+        display: none !important;
+    }
+
+    .erp-shell,
+    .erp-content {
+        display: block !important;
+        min-height: auto !important;
+        padding: 0 !important;
+    }
+
+    .erp-content :is(.rounded, .rounded-lg, .rounded-xl, .rounded-2xl) {
+        border-radius: 0 !important;
+    }
+
+    .erp-content :is(.shadow, .shadow-sm, .shadow-md, .shadow-lg) {
+        box-shadow: none !important;
+    }
+
+    .erp-content table {
+        width: 100% !important;
+        min-width: 0 !important;
+        page-break-inside: auto;
+    }
+
+    .erp-content thead {
+        display: table-header-group;
+        position: static !important;
+    }
+
+    .erp-content tr {
+        page-break-inside: avoid;
+    }
+}
