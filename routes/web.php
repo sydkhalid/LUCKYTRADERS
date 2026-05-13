@@ -88,6 +88,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('quotations', QuotationController::class)->except(['destroy']);
         Route::resource('sales', SaleController::class);
         Route::get('/sales-returns/report', [SalesReturnController::class, 'report'])->name('sales-returns.report');
+        Route::get('/sales-returns/{salesReturn}/print', [SalesReturnController::class, 'print'])->name('sales-returns.print');
         Route::resource('sales-returns', SalesReturnController::class)->only(['index', 'create', 'store', 'show']);
     });
 

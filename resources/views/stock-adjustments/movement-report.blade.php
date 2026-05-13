@@ -39,6 +39,7 @@
                     <option value="">All</option>
                     <option value="purchase_in" @selected(($filters['movement_type'] ?? '') === 'purchase_in')>Purchase In</option>
                     <option value="sale_out" @selected(($filters['movement_type'] ?? '') === 'sale_out')>Sale Out</option>
+                    <option value="sales_return_in" @selected(($filters['movement_type'] ?? '') === 'sales_return_in')>Sales Return In</option>
                     <option value="adjustment" @selected(($filters['movement_type'] ?? '') === 'adjustment')>Adjustment</option>
                 </select>
             </div>

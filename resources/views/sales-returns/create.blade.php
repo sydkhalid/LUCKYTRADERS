@@ -43,6 +43,25 @@
                 </div>
             </div>
 
+            <div class="mt-5 grid grid-cols-1 gap-4 rounded bg-slate-50 p-4 text-sm md:grid-cols-4">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Customer</p>
+                    <p class="mt-1 font-semibold text-gray-900" id="selectedCustomerText">Select sale</p>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Bill Type</p>
+                    <p class="mt-1 font-semibold text-gray-900" id="selectedBillTypeText">-</p>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Sale Balance</p>
+                    <p class="mt-1 font-semibold text-gray-900" id="selectedBalanceText">Rs. 0.00</p>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Returnable Products</p>
+                    <p class="mt-1 font-semibold text-gray-900" id="selectedItemCountText">0</p>
+                </div>
+            </div>
+
             @include('sales-returns.partials.item-rows')
 
             <div class="mt-6 grid grid-cols-1 gap-5 lg:grid-cols-3">

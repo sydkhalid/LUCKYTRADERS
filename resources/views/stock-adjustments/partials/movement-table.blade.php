@@ -21,6 +21,7 @@
                     $movementLabel = match ($movement->movement_type) {
                         'purchase_in' => 'Purchase In',
                         'sale_out' => 'Sale Out',
+                        'sales_return_in' => 'Sales Return In',
                         'adjustment' => match ($movement->reference_type) {
                             'sales_return' => 'Sales Return',
                             'purchase_return' => 'Purchase Return',
@@ -29,6 +30,7 @@
                         default => ucfirst(str_replace('_', ' ', $movement->movement_type)),
                     };
                     $isIn = $movement->movement_type === 'purchase_in'
+                        || $movement->movement_type === 'sales_return_in'
                         || $movement->reference_type === 'sales_return'
                         || ($movement->movement_type === 'adjustment' && $adjustment?->adjustment_type === 'increase');
                     $isOut = $movement->movement_type === 'sale_out'

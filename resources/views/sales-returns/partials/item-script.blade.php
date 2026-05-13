@@ -18,6 +18,23 @@
         return sourceData[sourceId.value]?.items || [];
     }
 
+    function refreshSourceSummary() {
+        const source = sourceData[sourceId.value];
+        const partyText = document.getElementById('selectedCustomerText');
+        const billTypeText = document.getElementById('selectedBillTypeText');
+        const balanceText = document.getElementById('selectedBalanceText');
+        const itemCountText = document.getElementById('selectedItemCountText');
+
+        if (! partyText || ! billTypeText || ! balanceText || ! itemCountText) {
+            return;
+        }
+
+        partyText.textContent = source?.party || 'Select sale';
+        billTypeText.textContent = source?.bill_type === 'gst' ? 'GST Invoice' : (source?.bill_type === 'non_gst' ? 'Normal Bill' : '-');
+        balanceText.textContent = money(source?.balance_amount || 0);
+        itemCountText.textContent = String(source?.items?.length || 0);
+    }
+
     function productOptions(selectedId) {
         return '<option value="">Select product</option>' + currentItems().map(function (item) {
             const selected = Number(selectedId) === Number(item.product_id) ? 'selected' : '';
@@ -79,6 +96,7 @@
     }
 
     function refreshProductOptions() {
+        refreshSourceSummary();
         document.querySelectorAll('.return-row').forEach(function (row) {
             row.querySelector('.product-select').innerHTML = productOptions();
             updateProductMeta(row, true);
@@ -111,5 +129,6 @@
 
     document.getElementById('addRow').addEventListener('click', () => addReturnRow());
     sourceId.addEventListener('change', refreshProductOptions);
+    refreshSourceSummary();
     addReturnRow();
 </script>

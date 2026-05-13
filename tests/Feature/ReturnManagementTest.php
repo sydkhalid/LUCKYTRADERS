@@ -54,7 +54,7 @@ class ReturnManagementTest extends TestCase
         $this->assertSame(168.0, (float) $sale->fresh()->balance_amount);
 
         $movement = StockMovement::firstOrFail();
-        $this->assertSame('adjustment', $movement->movement_type);
+        $this->assertSame('sales_return_in', $movement->movement_type);
         $this->assertSame('sales_return', $movement->reference_type);
         $this->assertSame($return->id, $movement->reference_id);
 
@@ -151,6 +151,21 @@ class ReturnManagementTest extends TestCase
         $this->assertSame(8.0, (float) $product->fresh()->current_stock);
     }
 
+    public function test_sales_return_adjustment_without_refund_does_not_create_cashbook_entry(): void
+    {
+        [$customer, $product, $sale] = $this->seedSale(balance: 236, customerBalance: 236, stock: 8);
+
+        $return = $this->createSalesReturn($sale, $product);
+
+        $this->assertSame(0, Cashbook::count());
+        $this->assertSame(1, Ledger::count());
+        $this->assertSame(118.0, (float) $return->adjustment_amount);
+        $this->assertSame(0.0, (float) $return->refund_amount);
+        $this->assertSame(118.0, (float) $customer->fresh()->current_balance);
+        $this->assertSame(118.0, (float) $sale->fresh()->balance_amount);
+        $this->assertSame('sales_return_in', StockMovement::firstOrFail()->movement_type);
+    }
+
     public function test_purchase_return_cannot_exceed_available_stock(): void
     {
         [, $product, $purchase] = $this->seedPurchase(balance: 590, supplierBalance: 590, stock: 0.5);
@@ -242,6 +257,7 @@ class ReturnManagementTest extends TestCase
         $this->actingAs($user)->get(route('sales-returns.index'))->assertOk()->assertSee($salesReturn->return_no);
         $this->actingAs($user)->get(route('sales-returns.show', $salesReturn))->assertOk()->assertSee('Sales Return Details');
         $this->actingAs($user)->get(route('sales-returns.create'))->assertOk()->assertSee('Create Sales Return');
+        $this->actingAs($user)->get(route('sales-returns.print', $salesReturn))->assertOk()->assertSee('CREDIT NOTE');
         $this->actingAs($user)->get(route('sales-returns.report'))->assertOk()->assertSee($salesReturn->return_no);
 
         $this->actingAs($user)->get(route('purchase-returns.index'))->assertOk()->assertSee($purchaseReturn->return_no);

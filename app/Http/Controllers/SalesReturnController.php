@@ -7,6 +7,8 @@ use App\Models\Sale;
 use App\Models\SalesReturn;
 use App\Models\SalesReturnItem;
 use App\Services\ReturnPostingService;
+use App\Services\SystemSettingService;
+use App\Support\AmountInWords;
 use Illuminate\Http\Request;
 
 class SalesReturnController extends Controller
@@ -51,6 +53,20 @@ class SalesReturnController extends Controller
         $salesReturn->load(['sale', 'customer', 'items.product']);
 
         return view('sales-returns.show', ['return' => $salesReturn]);
+    }
+
+    public function print(SalesReturn $salesReturn)
+    {
+        $salesReturn->load(['sale.customer', 'customer', 'items.product']);
+        $settings = app(SystemSettingService::class);
+
+        return view('sales-returns.print', [
+            'return' => $salesReturn,
+            'company' => $settings->company(),
+            'amountWords' => AmountInWords::rupees($salesReturn->total_amount),
+            'termsAndConditions' => $settings->termsAndConditions(),
+            'signatureImagePath' => $settings->signatureImagePath(),
+        ]);
     }
 
     public function report(Request $request)
@@ -117,6 +133,7 @@ class SalesReturnController extends Controller
             return [
                 $sale->id => [
                     'party' => $sale->customer?->name,
+                    'sale_no' => $sale->sale_no,
                     'bill_type' => $sale->bill_type,
                     'balance_amount' => (float) $sale->balance_amount,
                     'items' => $items,
