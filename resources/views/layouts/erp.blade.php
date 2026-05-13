@@ -72,6 +72,9 @@
             @can('view_gst_reports')
                 <a href="{{ route('gst-reports.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('gst-reports.*') ? 'bg-slate-700' : '' }}">GST Reports</a>
             @endcan
+            @can('view_reports')
+                <a href="{{ route('reports.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('reports.*') ? 'bg-slate-700' : '' }}">Reports</a>
+            @endcan
             @can('manage_users')
                 <a href="{{ route('users.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('users.*') ? 'bg-slate-700' : '' }}">Users & Roles</a>
             @endcan

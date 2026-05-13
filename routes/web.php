@@ -1,7 +1,8 @@
 <?php
 
-use App\Http\Controllers\CashbookController;
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\AdvancedReportController;
+use App\Http\Controllers\CashbookController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CustomerReceiptController;
 use App\Http\Controllers\BackupController;
@@ -50,6 +51,26 @@ Route::middleware('auth')->group(function () {
         Route::get('/modules', [ActivityLogController::class, 'modules'])->name('modules');
         Route::get('/dates', [ActivityLogController::class, 'dates'])->name('dates');
         Route::delete('/{activity}', [ActivityLogController::class, 'destroy'])->middleware('role:Super Admin')->name('destroy');
+    });
+
+    Route::middleware('permission:view_reports')->prefix('reports')->name('reports.')->group(function () {
+        Route::get('/', [AdvancedReportController::class, 'index'])->name('index');
+        Route::get('/profit-loss', [AdvancedReportController::class, 'profitLoss'])->name('profit-loss');
+        Route::get('/product-profit', [AdvancedReportController::class, 'productProfit'])->name('product-profit');
+        Route::get('/customer-outstanding', [AdvancedReportController::class, 'customerOutstanding'])->name('customer-outstanding');
+        Route::get('/supplier-outstanding', [AdvancedReportController::class, 'supplierOutstanding'])->name('supplier-outstanding');
+        Route::get('/stock-valuation', [AdvancedReportController::class, 'stockValuation'])->name('stock-valuation');
+        Route::get('/fast-moving-products', [AdvancedReportController::class, 'fastMovingProducts'])->name('fast-moving-products');
+        Route::get('/slow-moving-products', [AdvancedReportController::class, 'slowMovingProducts'])->name('slow-moving-products');
+        Route::get('/expense-summary', [AdvancedReportController::class, 'expenseSummary'])->name('expense-summary');
+        Route::get('/partner-balance', [AdvancedReportController::class, 'partnerBalance'])->name('partner-balance');
+        Route::get('/loan-summary', [AdvancedReportController::class, 'loanSummary'])->name('loan-summary');
+        Route::get('/gst-summary', [AdvancedReportController::class, 'gstSummary'])->name('gst-summary');
+        Route::get('/daily-business-summary', [AdvancedReportController::class, 'dailyBusinessSummary'])->name('daily-business-summary');
+        Route::get('/{report}/export/{format}', [AdvancedReportController::class, 'export'])
+            ->whereIn('format', ['pdf', 'csv', 'excel'])
+            ->middleware('permission:export_reports')
+            ->name('export');
     });
 
     Route::middleware('permission:manage_settings')->prefix('settings')->name('settings.')->group(function () {

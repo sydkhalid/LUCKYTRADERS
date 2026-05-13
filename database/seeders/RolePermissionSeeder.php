@@ -40,6 +40,8 @@ class RolePermissionSeeder extends Seeder
         'manage_backups',
         'view_activity_logs',
         'delete_activity_logs',
+        'view_reports',
+        'export_reports',
     ];
 
     /**
@@ -54,6 +56,7 @@ class RolePermissionSeeder extends Seeder
                 'view_dashboard',
                 'manage_partners',
                 'view_gst_reports',
+                'view_reports',
             ],
             'Accountant' => [
                 'view_dashboard',
@@ -64,6 +67,8 @@ class RolePermissionSeeder extends Seeder
                 'export_gst_reports',
                 'manage_expenses',
                 'view_activity_logs',
+                'view_reports',
+                'export_reports',
             ],
             'Billing Staff' => [
                 'view_dashboard',
@@ -81,6 +86,7 @@ class RolePermissionSeeder extends Seeder
             'Viewer' => [
                 'view_dashboard',
                 'view_gst_reports',
+                'view_reports',
             ],
         ];
     }
