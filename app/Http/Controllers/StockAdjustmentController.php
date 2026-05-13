@@ -1,0 +1,107 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Requests\StockAdjustments\StoreStockAdjustmentRequest;
+use App\Models\Product;
+use App\Models\StockAdjustment;
+use App\Models\StockMovement;
+use App\Services\StockAdjustmentService;
+use Illuminate\Http\Request;
+
+class StockAdjustmentController extends Controller
+{
+    public function index()
+    {
+        $adjustments = StockAdjustment::with('product')
+            ->latest('adjustment_date')
+            ->latest('id')
+            ->paginate(20);
+
+        $increaseTotal = StockAdjustment::where('adjustment_type', 'increase')->sum('quantity');
+        $decreaseTotal = StockAdjustment::where('adjustment_type', 'decrease')->sum('quantity');
+
+        return view('stock-adjustments.index', compact('adjustments', 'increaseTotal', 'decreaseTotal'));
+    }
+
+    public function create()
+    {
+        $products = Product::where('status', 'active')->orderBy('name')->get();
+        $types = StockAdjustment::TYPES;
+        $reasons = StockAdjustment::REASONS;
+
+        return view('stock-adjustments.create', compact('products', 'types', 'reasons'));
+    }
+
+    public function store(StoreStockAdjustmentRequest $request, StockAdjustmentService $stockAdjustmentService)
+    {
+        $adjustment = $stockAdjustmentService->recordAdjustment($request->validated());
+
+        return redirect()
+            ->route('stock-adjustments.show', $adjustment)
+            ->with('success', 'Stock adjustment '.$adjustment->adjustment_no.' saved successfully.');
+    }
+
+    public function show(StockAdjustment $stockAdjustment)
+    {
+        $stockAdjustment->load('product.category');
+
+        return view('stock-adjustments.show', ['adjustment' => $stockAdjustment]);
+    }
+
+    public function productHistory(Product $product)
+    {
+        $product->load('category');
+        $movements = StockMovement::where('product_id', $product->id)
+            ->latest('movement_date')
+            ->latest('id')
+            ->paginate(30);
+        $adjustmentsById = $this->adjustmentsForMovements($movements->getCollection());
+
+        return view('stock-adjustments.product-history', compact('product', 'movements', 'adjustmentsById'));
+    }
+
+    public function movementReport(Request $request)
+    {
+        $filters = $request->validate([
+            'from_date' => ['nullable', 'date'],
+            'to_date' => ['nullable', 'date', 'after_or_equal:from_date'],
+            'product_id' => ['nullable', 'exists:products,id'],
+            'movement_type' => ['nullable', 'in:purchase_in,sale_out,adjustment'],
+        ]);
+
+        $query = StockMovement::with('product')
+            ->when($filters['from_date'] ?? null, fn ($query, $date) => $query->whereDate('movement_date', '>=', $date))
+            ->when($filters['to_date'] ?? null, fn ($query, $date) => $query->whereDate('movement_date', '<=', $date))
+            ->when($filters['product_id'] ?? null, fn ($query, $productId) => $query->where('product_id', $productId))
+            ->when($filters['movement_type'] ?? null, fn ($query, $movementType) => $query->where('movement_type', $movementType));
+
+        $totalQuantity = (clone $query)->sum('quantity');
+        $totalValue = (clone $query)->sum('total_value');
+        $movements = $query
+            ->latest('movement_date')
+            ->latest('id')
+            ->paginate(30)
+            ->withQueryString();
+        $adjustmentsById = $this->adjustmentsForMovements($movements->getCollection());
+        $products = Product::orderBy('name')->get();
+
+        return view('stock-adjustments.movement-report', compact('movements', 'adjustmentsById', 'products', 'filters', 'totalQuantity', 'totalValue'));
+    }
+
+    private function adjustmentsForMovements($movements)
+    {
+        $adjustmentIds = $movements
+            ->where('reference_type', 'stock_adjustment')
+            ->pluck('reference_id')
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($adjustmentIds->isEmpty()) {
+            return collect();
+        }
+
+        return StockAdjustment::whereIn('id', $adjustmentIds)->get()->keyBy('id');
+    }
+}
