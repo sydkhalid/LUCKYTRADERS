@@ -1,0 +1,65 @@
+@extends('layouts.erp')
+
+@section('title', 'Cashbook')
+
+@section('content')
+    <div class="mb-5 flex items-center justify-between">
+        <div>
+            <h2 class="text-lg font-semibold text-gray-900">Cashbook Report</h2>
+            <p class="text-sm text-gray-500">Cash receipts and cash payments only.</p>
+        </div>
+        <a href="{{ route('bankbook.index') }}" class="rounded bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">Bankbook</a>
+    </div>
+
+    <div class="mb-5 grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div class="rounded bg-white p-5 shadow">
+            <p class="text-sm text-gray-500">Cash In</p>
+            <h3 class="mt-1 text-2xl font-bold text-emerald-700">Rs. {{ number_format((float) $totalIn, 2) }}</h3>
+        </div>
+        <div class="rounded bg-white p-5 shadow">
+            <p class="text-sm text-gray-500">Cash Out</p>
+            <h3 class="mt-1 text-2xl font-bold text-red-700">Rs. {{ number_format((float) $totalOut, 2) }}</h3>
+        </div>
+        <div class="rounded bg-white p-5 shadow">
+            <p class="text-sm text-gray-500">Cash Balance</p>
+            <h3 class="mt-1 text-2xl font-bold text-gray-900">Rs. {{ number_format((float) $balance, 2) }}</h3>
+        </div>
+    </div>
+
+    <div class="overflow-hidden rounded bg-white shadow">
+        <table class="min-w-full divide-y divide-gray-200 text-sm">
+            <thead class="bg-slate-100 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">
+                <tr>
+                    <th class="px-4 py-3">Date</th>
+                    <th class="px-4 py-3">Type</th>
+                    <th class="px-4 py-3">Reference</th>
+                    <th class="px-4 py-3 text-right">Amount</th>
+                    <th class="px-4 py-3">Remarks</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                @forelse ($entries as $entry)
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 text-gray-700">{{ $entry->entry_date?->format('d M Y') }}</td>
+                        <td class="px-4 py-3">
+                            <span class="rounded px-2 py-1 text-xs font-semibold {{ $entry->transaction_type === 'cash_in' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700' }}">
+                                {{ str_replace('_', ' ', strtoupper($entry->transaction_type)) }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 text-gray-700">{{ ucfirst($entry->reference_type ?? '-') }} @if ($entry->reference_id)#{{ $entry->reference_id }}@endif</td>
+                        <td class="px-4 py-3 text-right font-semibold text-gray-900">Rs. {{ number_format((float) $entry->amount, 2) }}</td>
+                        <td class="px-4 py-3 text-gray-600">{{ $entry->remarks ?: '-' }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="5" class="px-4 py-8 text-center text-gray-500">No cash entries found.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-5">
+        {{ $entries->links() }}
+    </div>
+@endsection
