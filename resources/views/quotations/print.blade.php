@@ -26,8 +26,27 @@
         <header class="border-b-2 border-slate-900 pb-5">
             <div class="flex items-start justify-between gap-6">
                 <div>
-                    <h1 class="text-3xl font-bold tracking-wide text-slate-900">LUCKY TRADERS</h1>
-                    <p class="mt-2 text-sm text-gray-700">2/164/14 Line Kollai, Venkatapuram, Krishnagiri, Tamil Nadu, India</p>
+                    @if (! empty($company['logo']))
+                        <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($company['logo']) }}" alt="Company logo" class="mb-3 h-14 max-w-40 object-contain">
+                    @endif
+                    <h1 class="text-3xl font-bold tracking-wide text-slate-900">{{ $company['name'] }}</h1>
+                    <p class="mt-2 text-sm text-gray-700">{{ $company['address'] }}</p>
+                    @if (! empty($company['phone']) || ! empty($company['email']))
+                        <p class="text-sm text-gray-700">
+                            @if (! empty($company['phone']))
+                                Phone: {{ $company['phone'] }}
+                            @endif
+                            @if (! empty($company['phone']) && ! empty($company['email']))
+                                |
+                            @endif
+                            @if (! empty($company['email']))
+                                Email: {{ $company['email'] }}
+                            @endif
+                        </p>
+                    @endif
+                    @if (! empty($company['gst_number']))
+                        <p class="text-sm text-gray-700">GSTIN: {{ $company['gst_number'] }}</p>
+                    @endif
                 </div>
                 <div class="text-right">
                     <h2 class="text-xl font-bold text-slate-900">QUOTATION</h2>
@@ -101,9 +120,21 @@
             </div>
         </section>
 
-        <footer class="mt-12 flex justify-between pt-8 text-sm text-gray-700">
-            <span>Customer Signature</span>
-            <span>Authorized Signature</span>
+        <footer class="mt-12 grid grid-cols-1 gap-6 border-t border-gray-200 pt-6 text-sm text-gray-700 md:grid-cols-2">
+            <div>
+                <p class="font-semibold text-gray-900">Terms and Conditions</p>
+                <div class="mt-2 whitespace-pre-line text-xs">{{ $termsAndConditions }}</div>
+                @if (! empty($bankDetails))
+                    <p class="mt-4 font-semibold text-gray-900">Bank Details</p>
+                    <div class="mt-2 whitespace-pre-line text-xs">{{ $bankDetails }}</div>
+                @endif
+            </div>
+            <div class="flex flex-col items-end justify-end">
+                @if (! empty($signatureImagePath))
+                    <img src="{{ $signatureImagePath }}" alt="Signature" class="mb-2 h-14 max-w-48 object-contain">
+                @endif
+                <span class="border-t border-gray-900 px-10 pt-2">Authorized Signature</span>
+            </div>
         </footer>
     </main>
 </body>

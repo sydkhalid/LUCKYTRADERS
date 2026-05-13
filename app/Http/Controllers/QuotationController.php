@@ -9,6 +9,7 @@ use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Quotation;
 use App\Services\QuotationService;
+use App\Services\SystemSettingService;
 use Illuminate\Http\Request;
 
 class QuotationController extends Controller
@@ -74,7 +75,15 @@ class QuotationController extends Controller
     {
         $quotation->load(['customer', 'items.product']);
 
-        return view('quotations.print', compact('quotation'));
+        $settings = app(SystemSettingService::class);
+
+        return view('quotations.print', [
+            'quotation' => $quotation,
+            'company' => $settings->company(),
+            'termsAndConditions' => $settings->termsAndConditions(),
+            'bankDetails' => $settings->bankDetails(),
+            'signatureImagePath' => $settings->signatureImagePath(),
+        ]);
     }
 
     public function convert(Quotation $quotation, Request $request, QuotationService $quotationService)

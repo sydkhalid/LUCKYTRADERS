@@ -32,6 +32,8 @@ class RolePermissionSeeder extends Seeder
         'delete_records',
         'edit_old_records',
         'manage_users',
+        'manage_settings',
+        'manage_backups',
     ];
 
     /**
@@ -41,7 +43,7 @@ class RolePermissionSeeder extends Seeder
     {
         return [
             'Super Admin' => $this->permissions,
-            'Admin' => $this->permissions,
+            'Admin' => array_values(array_diff($this->permissions, ['manage_backups'])),
             'Partner' => [
                 'view_dashboard',
                 'manage_partners',

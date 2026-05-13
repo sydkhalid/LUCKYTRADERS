@@ -3,6 +3,7 @@
 use App\Http\Controllers\CashbookController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CustomerReceiptController;
+use App\Http\Controllers\BackupController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentPdfController;
 use App\Http\Controllers\ExpenseCategoryController;
@@ -23,6 +24,7 @@ use App\Http\Controllers\SalesReturnController;
 use App\Http\Controllers\StockAdjustmentController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\SupplierPaymentController;
+use App\Http\Controllers\SystemSettingController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -36,6 +38,20 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('permission:manage_users')->group(function () {
         Route::resource('users', UserController::class)->only(['index', 'create', 'store', 'edit', 'update']);
+    });
+
+    Route::middleware('permission:manage_settings')->prefix('settings')->name('settings.')->group(function () {
+        Route::get('/company', [SystemSettingController::class, 'company'])->name('company');
+        Route::patch('/company', [SystemSettingController::class, 'updateCompany'])->name('company.update');
+        Route::get('/invoice', [SystemSettingController::class, 'invoice'])->name('invoice');
+        Route::patch('/invoice', [SystemSettingController::class, 'updateInvoice'])->name('invoice.update');
+
+        Route::middleware('role:Super Admin')->prefix('backups')->name('backups.')->group(function () {
+            Route::get('/', [BackupController::class, 'index'])->name('index');
+            Route::post('/', [BackupController::class, 'store'])->name('store');
+            Route::get('/{file}', [BackupController::class, 'download'])->name('download');
+            Route::delete('/{file}', [BackupController::class, 'destroy'])->name('destroy');
+        });
     });
 
     Route::middleware('permission:manage_products')->group(function () {

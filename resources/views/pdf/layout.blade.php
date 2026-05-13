@@ -10,6 +10,7 @@
         h1, h2, h3, p { margin: 0; }
         .document { width: 100%; }
         .header { border-bottom: 2px solid #111827; padding-bottom: 10px; margin-bottom: 14px; }
+        .logo { max-height: 52px; max-width: 120px; margin-bottom: 6px; object-fit: contain; }
         .company-name { font-size: 24px; font-weight: 700; letter-spacing: .5px; }
         .company-address { margin-top: 3px; color: #4b5563; font-size: 11px; }
         .title-box { text-align: right; }
@@ -34,7 +35,10 @@
         .footer-grid { margin-top: 18px; width: 100%; }
         .footer-grid td { width: 50%; vertical-align: top; }
         .terms { color: #374151; font-size: 10px; }
+        .terms p { margin-bottom: 2px; }
+        .bank-details { margin-top: 8px; color: #374151; font-size: 10px; white-space: pre-line; }
         .signature { padding-top: 45px; text-align: right; }
+        .signature-image { display: block; height: 44px; margin: 0 0 4px auto; max-width: 170px; object-fit: contain; }
         .signature-line { border-top: 1px solid #111827; display: inline-block; min-width: 180px; padding-top: 5px; text-align: center; }
         .badge { border: 1px solid #111827; display: inline-block; font-size: 9px; font-weight: 700; margin-top: 6px; padding: 2px 6px; text-transform: uppercase; }
         .page-break { page-break-before: always; }

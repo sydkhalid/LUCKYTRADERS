@@ -13,6 +13,10 @@ use Illuminate\Validation\ValidationException;
 
 class QuotationService
 {
+    public function __construct(private SystemSettingService $settings)
+    {
+    }
+
     public function createQuotation(array $data): Quotation
     {
         $totals = $this->calculateQuotationTotals($data);
@@ -95,7 +99,7 @@ class QuotationService
             $totalAmount = round($subtotal + $gstAmount, 2);
 
             $sale = Sale::create([
-                'sale_no' => $this->nextSaleNo(),
+                'sale_no' => $this->nextSaleNo($data['bill_type']),
                 'customer_id' => $quotation->customer_id,
                 'sale_date' => $data['sale_date'],
                 'bill_type' => $data['bill_type'],
@@ -269,25 +273,11 @@ class QuotationService
 
     private function nextQuotationNo(): string
     {
-        $date = now()->format('Ymd');
-        $sequence = Quotation::where('quotation_no', 'like', 'QTN-'.$date.'-%')->count() + 1;
-
-        do {
-            $quotationNo = sprintf('QTN-%s-%05d', $date, $sequence++);
-        } while (Quotation::where('quotation_no', $quotationNo)->exists());
-
-        return $quotationNo;
+        return $this->settings->nextQuotationNumber();
     }
 
-    private function nextSaleNo(): string
+    private function nextSaleNo(string $billType): string
     {
-        $date = now()->format('Ymd');
-        $sequence = Sale::where('sale_no', 'like', 'SAL-'.$date.'-%')->count() + 1;
-
-        do {
-            $saleNo = sprintf('SAL-%s-%05d', $date, $sequence++);
-        } while (Sale::where('sale_no', $saleNo)->exists());
-
-        return $saleNo;
+        return $this->settings->nextSaleNumber($billType);
     }
 }

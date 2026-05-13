@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\Purchase;
 use App\Models\StockMovement;
 use App\Models\Supplier;
+use App\Services\SystemSettingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -355,26 +356,12 @@ class PurchaseController extends Controller
 
     private function nextPurchaseNo(): string
     {
-        $date = now()->format('Ymd');
-        $sequence = Purchase::where('purchase_no', 'like', 'PUR-'.$date.'-%')->count() + 1;
-
-        do {
-            $purchaseNo = sprintf('PUR-%s-%05d', $date, $sequence++);
-        } while (Purchase::where('purchase_no', $purchaseNo)->exists());
-
-        return $purchaseNo;
+        return app(SystemSettingService::class)->nextPurchaseNumber();
     }
 
     private function nextPaymentNo(string $prefix): string
     {
-        $date = now()->format('Ymd');
-        $sequence = Payment::where('payment_no', 'like', $prefix.'-'.$date.'-%')->count() + 1;
-
-        do {
-            $paymentNo = sprintf('%s-%s-%05d', $prefix, $date, $sequence++);
-        } while (Payment::where('payment_no', $paymentNo)->exists());
-
-        return $paymentNo;
+        return app(SystemSettingService::class)->nextPaymentNumber($prefix);
     }
 
     private function ensureNoExternalSupplierPayments(Purchase $purchase): void

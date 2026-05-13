@@ -15,6 +15,7 @@ use App\Models\Quotation;
 use App\Models\Sale;
 use App\Models\SalesReturn;
 use App\Models\Supplier;
+use App\Services\SystemSettingService;
 use App\Support\AmountInWords;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -147,6 +148,9 @@ class DocumentPdfController extends Controller
         $pdf = Pdf::loadView($view, array_merge([
             'company' => $this->company(),
             'generatedAt' => now(),
+            'termsAndConditions' => app(SystemSettingService::class)->termsAndConditions(),
+            'bankDetails' => app(SystemSettingService::class)->bankDetails(),
+            'signatureImagePath' => app(SystemSettingService::class)->signatureImagePath(),
         ], $data))->setPaper('a4');
 
         return $request->boolean('download')
@@ -156,7 +160,7 @@ class DocumentPdfController extends Controller
 
     private function company(): array
     {
-        return config('lucky.company');
+        return app(SystemSettingService::class)->company();
     }
 
     private function fileName(string $type, string $number): string

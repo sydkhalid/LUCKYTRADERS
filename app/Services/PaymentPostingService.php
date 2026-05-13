@@ -17,6 +17,10 @@ class PaymentPostingService
 {
     private const CUSTOMER_SALE_REFERENCE_TYPES = ['sale', 'gst_invoice', 'normal_bill'];
 
+    public function __construct(private SystemSettingService $settings)
+    {
+    }
+
     public function recordCustomerReceipt(Customer $customer, array $data): Payment
     {
         return DB::transaction(function () use ($customer, $data) {
@@ -204,14 +208,7 @@ class PaymentPostingService
 
     private function nextPaymentNo(string $prefix): string
     {
-        $date = now()->format('Ymd');
-        $sequence = Payment::where('payment_no', 'like', $prefix.'-'.$date.'-%')->count() + 1;
-
-        do {
-            $paymentNo = sprintf('%s-%s-%05d', $prefix, $date, $sequence++);
-        } while (Payment::where('payment_no', $paymentNo)->exists());
-
-        return $paymentNo;
+        return $this->settings->nextPaymentNumber($prefix);
     }
 
     private function updateReferencePayment(?string $referenceType, ?int $referenceId, float $amount): void

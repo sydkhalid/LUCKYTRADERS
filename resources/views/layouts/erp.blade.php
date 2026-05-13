@@ -6,13 +6,16 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-gray-100">
+@php
+    $erpCompanyName = app(\App\Services\SystemSettingService::class)->company()['name'] ?? 'LUCKY TRADERS';
+@endphp
 
 <div class="flex min-h-screen">
 
     {{-- Sidebar --}}
     <aside class="w-64 bg-slate-900 text-white">
         <div class="p-5 text-2xl font-bold border-b border-slate-700">
-            LUCKY TRADERS
+            {{ $erpCompanyName }}
         </div>
 
         <nav class="p-4 space-y-2">
@@ -63,6 +66,9 @@
             @endcan
             @can('manage_users')
                 <a href="{{ route('users.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('users.*') ? 'bg-slate-700' : '' }}">Users & Roles</a>
+            @endcan
+            @can('manage_settings')
+                <a href="{{ route('settings.company') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('settings.*') ? 'bg-slate-700' : '' }}">Settings</a>
             @endcan
         </nav>
     </aside>

@@ -9,6 +9,7 @@ use App\Models\Payment;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\StockMovement;
+use App\Services\SystemSettingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -40,7 +41,7 @@ class SaleController extends Controller
             $this->assertStockAvailable($totals['items']);
 
             $sale = Sale::create([
-                'sale_no' => $this->nextSaleNo(),
+                'sale_no' => $this->nextSaleNo($data['bill_type']),
                 'customer_id' => $data['customer_id'],
                 'sale_date' => $data['sale_date'],
                 'bill_type' => $data['bill_type'],
@@ -139,7 +140,15 @@ class SaleController extends Controller
     {
         $sale->load(['customer', 'items.product']);
 
-        return view('sales.print', compact('sale'));
+        $settings = app(SystemSettingService::class);
+
+        return view('sales.print', [
+            'sale' => $sale,
+            'company' => $settings->company(),
+            'termsAndConditions' => $settings->termsAndConditions(),
+            'bankDetails' => $settings->bankDetails(),
+            'signatureImagePath' => $settings->signatureImagePath(),
+        ]);
     }
 
     private function formData(): array
@@ -373,28 +382,14 @@ class SaleController extends Controller
         return $paidAmount >= $totalAmount ? 'paid' : 'partial';
     }
 
-    private function nextSaleNo(): string
+    private function nextSaleNo(string $billType): string
     {
-        $date = now()->format('Ymd');
-        $sequence = Sale::where('sale_no', 'like', 'SAL-'.$date.'-%')->count() + 1;
-
-        do {
-            $saleNo = sprintf('SAL-%s-%05d', $date, $sequence++);
-        } while (Sale::where('sale_no', $saleNo)->exists());
-
-        return $saleNo;
+        return app(SystemSettingService::class)->nextSaleNumber($billType);
     }
 
     private function nextPaymentNo(string $prefix): string
     {
-        $date = now()->format('Ymd');
-        $sequence = Payment::where('payment_no', 'like', $prefix.'-'.$date.'-%')->count() + 1;
-
-        do {
-            $paymentNo = sprintf('%s-%s-%05d', $prefix, $date, $sequence++);
-        } while (Payment::where('payment_no', $paymentNo)->exists());
-
-        return $paymentNo;
+        return app(SystemSettingService::class)->nextPaymentNumber($prefix);
     }
 
     private function authorizePermission(Request $request, string $permission): void
