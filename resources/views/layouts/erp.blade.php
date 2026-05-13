@@ -92,8 +92,10 @@
 
     {{-- Main Content --}}
     <main class="flex-1">
-        <header class="bg-white shadow px-6 py-4 flex justify-between">
+        <header class="bg-white shadow px-6 py-4 flex flex-wrap items-center justify-between gap-4">
             <h1 class="text-xl font-semibold">@yield('title')</h1>
+
+            <x-global-search />
 
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
