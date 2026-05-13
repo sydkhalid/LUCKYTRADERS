@@ -58,7 +58,9 @@ Route::middleware('auth')->group(function () {
 
         Route::middleware('role:Super Admin')->prefix('backups')->name('backups.')->group(function () {
             Route::get('/', [BackupController::class, 'index'])->name('index');
+            Route::get('/settings', [BackupController::class, 'settings'])->name('settings');
             Route::post('/', [BackupController::class, 'store'])->name('store');
+            Route::post('/cleanup', [BackupController::class, 'cleanup'])->name('cleanup');
             Route::get('/{file}', [BackupController::class, 'download'])->name('download');
             Route::delete('/{file}', [BackupController::class, 'destroy'])->name('destroy');
         });

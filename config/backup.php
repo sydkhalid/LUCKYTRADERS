@@ -7,16 +7,17 @@ return [
          * The name of this application. You can use this name to monitor
          * the backups.
          */
-        'name' => env('APP_NAME', 'laravel-backup'),
+        'name' => env('BACKUP_NAME', 'lucky-traders-erp'),
 
         'source' => [
             'files' => [
                 /*
                  * The list of directories and files that will be included in the backup.
                  */
-                'include' => [
-                    base_path(),
-                ],
+                'include' => array_values(array_filter([
+                    storage_path('app/public'),
+                    filter_var(env('BACKUP_INCLUDE_ENV', false), FILTER_VALIDATE_BOOLEAN) ? base_path('.env') : null,
+                ])),
 
                 /*
                  * These directories and files will be excluded from the backup.
@@ -26,6 +27,8 @@ return [
                 'exclude' => [
                     base_path('vendor'),
                     base_path('node_modules'),
+                    storage_path('app/private'),
+                    storage_path('app/backup-temp'),
                 ],
 
                 /*
@@ -43,7 +46,7 @@ return [
                  * Set to `null` to include complete absolute path
                  * Example: base_path()
                  */
-                'relative_path' => null,
+                'relative_path' => base_path(),
             ],
 
             /*
@@ -97,7 +100,7 @@ return [
         /*
          * If specified, the database dumped file name will contain a timestamp (e.g.: 'Y-m-d-H-i-s').
          */
-        'database_dump_file_timestamp_format' => null,
+        'database_dump_file_timestamp_format' => 'Y-m-d-His',
 
         /*
          * The base of the dump filename, either 'database' or 'connection'
@@ -145,7 +148,7 @@ return [
             /*
              * The filename prefix used for the backup zip file.
              */
-            'filename_prefix' => '',
+            'filename_prefix' => env('BACKUP_FILENAME_PREFIX', 'lucky-traders-'),
 
             /*
              * The disk names on which the backups will be stored.
@@ -254,7 +257,7 @@ return [
      */
     'monitor_backups' => [
         [
-            'name' => env('APP_NAME', 'laravel-backup'),
+            'name' => env('BACKUP_NAME', 'lucky-traders-erp'),
             'disks' => ['local'],
             'health_checks' => [
                 \Spatie\Backup\Tasks\Monitor\HealthChecks\MaximumAgeInDays::class => 1,
@@ -290,40 +293,40 @@ return [
             /*
              * The number of days for which backups must be kept.
              */
-            'keep_all_backups_for_days' => 7,
+            'keep_all_backups_for_days' => 1,
 
             /*
              * After the "keep_all_backups_for_days" period is over, the most recent backup
              * of that day will be kept. Older backups within the same day will be removed.
              * If you create backups only once a day, no backups will be removed yet.
              */
-            'keep_daily_backups_for_days' => 16,
+            'keep_daily_backups_for_days' => 7,
 
             /*
              * After the "keep_daily_backups_for_days" period is over, the most recent backup
              * of that week will be kept. Older backups within the same week will be removed.
              * If you create backups only once a week, no backups will be removed yet.
              */
-            'keep_weekly_backups_for_weeks' => 8,
+            'keep_weekly_backups_for_weeks' => 4,
 
             /*
              * After the "keep_weekly_backups_for_weeks" period is over, the most recent backup
              * of that month will be kept. Older backups within the same month will be removed.
              */
-            'keep_monthly_backups_for_months' => 4,
+            'keep_monthly_backups_for_months' => 6,
 
             /*
              * After the "keep_monthly_backups_for_months" period is over, the most recent backup
              * of that year will be kept. Older backups within the same year will be removed.
              */
-            'keep_yearly_backups_for_years' => 2,
+            'keep_yearly_backups_for_years' => 1,
 
             /*
              * After cleaning up the backups remove the oldest backup until
              * this amount of megabytes has been reached.
              * Set null for unlimited size.
              */
-            'delete_oldest_backups_when_using_more_megabytes_than' => 5000,
+            'delete_oldest_backups_when_using_more_megabytes_than' => env('BACKUP_MAX_STORAGE_MB', 5000),
         ],
 
         /*

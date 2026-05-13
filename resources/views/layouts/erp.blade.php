@@ -78,6 +78,9 @@
             @can('manage_settings')
                 <a href="{{ route('settings.company') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('settings.*') ? 'bg-slate-700' : '' }}">Settings</a>
             @endcan
+            @role('Super Admin')
+                <a href="{{ route('settings.backups.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('settings.backups.*') ? 'bg-slate-700' : '' }}">Backup System</a>
+            @endrole
         </nav>
     </aside>
 

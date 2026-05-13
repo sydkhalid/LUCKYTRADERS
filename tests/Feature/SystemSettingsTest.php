@@ -148,7 +148,7 @@ class SystemSettingsTest extends TestCase
         $this->actingAs($superAdmin)
             ->get(route('settings.backups.index'))
             ->assertOk()
-            ->assertSee('Database Backups');
+            ->assertSee('Backup System');
 
         $this->actingAs($admin)
             ->get(route('settings.backups.index'))
