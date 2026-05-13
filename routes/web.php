@@ -15,6 +15,7 @@ use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\SupplierPaymentController;
@@ -33,6 +34,10 @@ Route::middleware('auth')->group(function () {
     Route::resource('customers', CustomerController::class)->except(['show']);
     Route::resource('suppliers', SupplierController::class)->except(['show']);
     Route::resource('purchases', PurchaseController::class);
+    Route::get('/quotations/{quotation}/print', [QuotationController::class, 'print'])->name('quotations.print');
+    Route::get('/quotations/{quotation}/convert', [QuotationController::class, 'convert'])->name('quotations.convert');
+    Route::post('/quotations/{quotation}/convert', [QuotationController::class, 'storeConversion'])->name('quotations.convert.store');
+    Route::resource('quotations', QuotationController::class)->except(['destroy']);
     Route::get('/sales/{sale}/print', [SaleController::class, 'printInvoice'])->name('sales.print');
     Route::resource('sales', SaleController::class);
 
