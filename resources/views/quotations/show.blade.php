@@ -10,6 +10,8 @@
         </div>
         <div class="flex gap-2">
             <a href="{{ route('quotations.print', $quotation) }}" class="rounded bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">Print</a>
+            <a href="{{ route('quotations.pdf', $quotation) }}" target="_blank" class="rounded border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">PDF</a>
+            <a href="{{ route('quotations.pdf', ['quotation' => $quotation, 'download' => 1]) }}" class="rounded border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Download</a>
             @if ($quotation->status === 'accepted')
                 <a href="{{ route('quotations.convert', $quotation) }}" class="rounded bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800">Convert to Sale</a>
             @endif

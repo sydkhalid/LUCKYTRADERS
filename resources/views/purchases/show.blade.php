@@ -9,8 +9,10 @@
             <p class="text-sm text-gray-500">{{ $purchase->supplier?->name }} - {{ $purchase->purchase_date?->format('d M Y') }}</p>
         </div>
         <div class="flex gap-2">
+            <a href="{{ route('purchases.pdf', $purchase) }}" target="_blank" class="rounded bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">Print PDF</a>
+            <a href="{{ route('purchases.pdf', ['purchase' => $purchase, 'download' => 1]) }}" class="rounded border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Download</a>
             @can('edit_old_records')
-                <a href="{{ route('purchases.edit', $purchase) }}" class="rounded bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">Edit</a>
+                <a href="{{ route('purchases.edit', $purchase) }}" class="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Edit</a>
             @endcan
             <a href="{{ route('purchases.index') }}" class="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Back</a>
         </div>

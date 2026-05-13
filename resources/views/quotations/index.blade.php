@@ -54,6 +54,7 @@
                             <div class="flex justify-end gap-3">
                                 <a href="{{ route('quotations.show', $quotation) }}" class="font-semibold text-slate-700 hover:text-slate-900">View</a>
                                 <a href="{{ route('quotations.print', $quotation) }}" class="font-semibold text-slate-700 hover:text-slate-900">Print</a>
+                                <a href="{{ route('quotations.pdf', $quotation) }}" target="_blank" class="font-semibold text-slate-700 hover:text-slate-900">PDF</a>
                                 @if ($quotation->status !== 'converted')
                                     <a href="{{ route('quotations.edit', $quotation) }}" class="font-semibold text-slate-700 hover:text-slate-900">Edit</a>
                                 @endif

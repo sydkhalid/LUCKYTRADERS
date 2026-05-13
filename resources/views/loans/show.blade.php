@@ -9,6 +9,8 @@
             <p class="text-sm text-gray-500">{{ $loan->typeLabel() }} recorded on {{ $loan->loan_date?->format('d M Y') }}</p>
         </div>
         <div class="flex gap-2">
+            <a href="{{ route('loans.pdf', $loan) }}" target="_blank" class="rounded border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Loan PDF</a>
+            <a href="{{ route('loans.pdf', ['loan' => $loan, 'download' => 1]) }}" class="rounded border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Download</a>
             <a href="{{ route('loans.transactions.index', $loan) }}" class="rounded border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">History</a>
             @if ($loan->status === 'active' && $transactionTypes !== [])
                 <a href="{{ route('loans.transactions.create', $loan) }}" class="rounded bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">Add Transaction</a>
@@ -69,6 +71,7 @@
                     <th class="px-4 py-3">Mode</th>
                     <th class="px-4 py-3 text-right">Amount</th>
                     <th class="px-4 py-3">Notes</th>
+                    <th class="px-4 py-3 text-right">Action</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -79,10 +82,16 @@
                         <td class="px-4 py-3 text-gray-700">{{ strtoupper($transaction->payment_mode) }}</td>
                         <td class="px-4 py-3 text-right font-semibold text-gray-900">Rs. {{ number_format((float) $transaction->amount, 2) }}</td>
                         <td class="px-4 py-3 text-gray-600">{{ $transaction->notes ?: '-' }}</td>
+                        <td class="px-4 py-3 text-right">
+                            <div class="flex justify-end gap-3">
+                                <a href="{{ route('loans.transactions.pdf', ['loan' => $loan, 'transaction' => $transaction]) }}" target="_blank" class="font-semibold text-slate-700 hover:text-slate-900">Voucher</a>
+                                <a href="{{ route('loans.transactions.pdf', ['loan' => $loan, 'transaction' => $transaction, 'download' => 1]) }}" class="font-semibold text-slate-700 hover:text-slate-900">Download</a>
+                            </div>
+                        </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="px-4 py-8 text-center text-gray-500">No loan transactions found.</td>
+                        <td colspan="6" class="px-4 py-8 text-center text-gray-500">No loan transactions found.</td>
                     </tr>
                 @endforelse
             </tbody>

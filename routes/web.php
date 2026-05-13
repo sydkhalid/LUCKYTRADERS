@@ -4,6 +4,7 @@ use App\Http\Controllers\CashbookController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CustomerReceiptController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DocumentPdfController;
 use App\Http\Controllers\ExpenseCategoryController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\GSTReportController;
@@ -45,6 +46,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('customers', CustomerController::class)->except(['show'])->middleware('permission:manage_customers');
     Route::resource('suppliers', SupplierController::class)->except(['show'])->middleware('permission:manage_suppliers');
     Route::middleware('permission:manage_purchases')->group(function () {
+        Route::get('/purchases/{purchase}/pdf', [DocumentPdfController::class, 'purchase'])->name('purchases.pdf');
         Route::resource('purchases', PurchaseController::class);
         Route::get('/purchase-returns/report', [PurchaseReturnController::class, 'report'])->name('purchase-returns.report');
         Route::resource('purchase-returns', PurchaseReturnController::class)->only(['index', 'create', 'store', 'show']);
@@ -57,6 +59,7 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::middleware('permission:manage_sales')->group(function () {
+        Route::get('/quotations/{quotation}/pdf', [DocumentPdfController::class, 'quotation'])->name('quotations.pdf');
         Route::get('/quotations/{quotation}/print', [QuotationController::class, 'print'])->name('quotations.print');
         Route::get('/quotations/{quotation}/convert', [QuotationController::class, 'convert'])->name('quotations.convert');
         Route::post('/quotations/{quotation}/convert', [QuotationController::class, 'storeConversion'])->name('quotations.convert.store');
@@ -69,6 +72,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/sales/{sale}/print', [SaleController::class, 'printInvoice'])
         ->middleware('permission:print_invoice')
         ->name('sales.print');
+    Route::get('/sales/{sale}/pdf', [DocumentPdfController::class, 'sale'])
+        ->middleware('permission:print_invoice')
+        ->name('sales.pdf');
 
     Route::middleware('permission:manage_sales|manage_payments')->group(function () {
         Route::get('/receipts/create', [CustomerReceiptController::class, 'create'])->name('receipts.create');
@@ -76,6 +82,7 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::middleware('permission:manage_payments')->group(function () {
+        Route::get('/payments/{payment}/pdf', [DocumentPdfController::class, 'payment'])->name('payments.pdf');
         Route::get('/supplier-payments/create', [SupplierPaymentController::class, 'create'])->name('supplier-payments.create');
         Route::post('/supplier-payments', [SupplierPaymentController::class, 'store'])->name('supplier-payments.store');
         Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
@@ -89,6 +96,7 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::middleware('permission:manage_expenses')->group(function () {
+        Route::get('/expenses/{expense}/pdf', [DocumentPdfController::class, 'expense'])->name('expenses.pdf');
         Route::resource('expense-categories', ExpenseCategoryController::class)->only(['index', 'create', 'store']);
         Route::get('/expenses/report', [ExpenseController::class, 'report'])->name('expenses.report');
         Route::get('/expenses/category-report', [ExpenseController::class, 'categoryReport'])->name('expenses.category-report');
@@ -96,6 +104,8 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::middleware('permission:manage_loans')->group(function () {
+        Route::get('/loans/{loan}/pdf', [DocumentPdfController::class, 'loan'])->name('loans.pdf');
+        Route::get('/loans/{loan}/transactions/{transaction}/pdf', [DocumentPdfController::class, 'loanTransaction'])->name('loans.transactions.pdf');
         Route::get('/loans/reports/active', [LoanController::class, 'activeReport'])->name('loans.reports.active');
         Route::get('/loans/reports/closed', [LoanController::class, 'closedReport'])->name('loans.reports.closed');
         Route::get('/loans/{loan}/transactions', [LoanController::class, 'transactions'])->name('loans.transactions.index');
@@ -105,6 +115,7 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::middleware('permission:manage_partners')->group(function () {
+        Route::get('/partners/{partner}/transactions/{transaction}/pdf', [DocumentPdfController::class, 'partnerTransaction'])->name('partners.transactions.pdf');
         Route::get('/partners/profit-share', [PartnerController::class, 'profitShareReport'])->name('partners.profit-share');
         Route::get('/partners/{partner}/investments/create', [PartnerController::class, 'createInvestment'])->name('partners.investments.create');
         Route::get('/partners/{partner}/withdrawals/create', [PartnerController::class, 'createWithdrawal'])->name('partners.withdrawals.create');
@@ -114,6 +125,7 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::middleware('permission:view_gst_reports')->group(function () {
+        Route::get('/gst-reports/pdf', [DocumentPdfController::class, 'gstReport'])->name('gst-reports.pdf');
         Route::get('/gst-reports', [GSTReportController::class, 'index'])->name('gst-reports.index');
         Route::get('/gst-reports/sales', [GSTReportController::class, 'sales'])->name('gst-reports.sales');
         Route::get('/gst-reports/purchases', [GSTReportController::class, 'purchases'])->name('gst-reports.purchases');

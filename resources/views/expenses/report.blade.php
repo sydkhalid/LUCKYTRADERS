@@ -32,6 +32,7 @@
                     <th class="px-4 py-3">Mode</th>
                     <th class="px-4 py-3 text-right">Amount</th>
                     <th class="px-4 py-3">Notes</th>
+                    <th class="px-4 py-3 text-right">Action</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -44,10 +45,16 @@
                         <td class="px-4 py-3 text-gray-700">{{ strtoupper($expense->payment_mode) }}</td>
                         <td class="px-4 py-3 text-right font-semibold text-gray-900">Rs. {{ number_format((float) $expense->amount, 2) }}</td>
                         <td class="px-4 py-3 text-gray-600">{{ $expense->notes ?: '-' }}</td>
+                        <td class="px-4 py-3 text-right">
+                            <div class="flex justify-end gap-3">
+                                <a href="{{ route('expenses.pdf', $expense) }}" target="_blank" class="font-semibold text-slate-700 hover:text-slate-900">Voucher</a>
+                                <a href="{{ route('expenses.pdf', ['expense' => $expense, 'download' => 1]) }}" class="font-semibold text-slate-700 hover:text-slate-900">Download</a>
+                            </div>
+                        </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="px-4 py-8 text-center text-gray-500">No expenses found for the selected dates.</td>
+                        <td colspan="8" class="px-4 py-8 text-center text-gray-500">No expenses found for the selected dates.</td>
                     </tr>
                 @endforelse
             </tbody>

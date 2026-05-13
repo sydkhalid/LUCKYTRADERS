@@ -11,6 +11,8 @@
         <div class="flex gap-2">
             <a href="{{ route('gst-reports.sales', $filters) }}" class="rounded border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">GST Sales</a>
             <a href="{{ route('gst-reports.purchases', $filters) }}" class="rounded border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">GST Purchases</a>
+            <a href="{{ route('gst-reports.pdf', $filters) }}" target="_blank" class="rounded border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">PDF</a>
+            <a href="{{ route('gst-reports.pdf', array_merge($filters, ['download' => 1])) }}" class="rounded border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Download PDF</a>
             <a href="{{ route('gst-reports.export', array_merge($filters, ['type' => 'all'])) }}" class="rounded bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">Auditor CSV</a>
         </div>
     </div>
