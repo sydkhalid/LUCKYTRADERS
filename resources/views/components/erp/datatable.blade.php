@@ -17,12 +17,12 @@
 @endphp
 
 <div class="card custom-card erp-datatable-shell">
-    <div class="card-header erp-datatable-card-header">
+    <div class="card-header erp-datatable-card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
         <div class="min-w-0">
             <h5 class="card-title mb-1">{{ $tableTitle }}</h5>
             <p class="card-subtitle text-muted mb-0">{{ $subtitle }}</p>
         </div>
-        <span class="badge erp-table-badge">Live Table</span>
+        <span class="badge erp-table-badge bg-label-primary">Live Table</span>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive erp-datatable-table" tabindex="0" role="region" aria-label="{{ $tableTitle }} table">

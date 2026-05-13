@@ -47,26 +47,26 @@
         ->values();
 @endphp
 
-<aside class="lt-sidebar" data-lt-sidebar data-sidebar-style="{{ $erpTheme['sidebar_style'] ?? 'dark' }}" aria-label="Primary navigation">
-    <div class="lt-sidebar-inner">
-        <div class="lt-sidebar-brand">
+<aside class="lt-sidebar layout-menu menu-vertical menu bg-menu-theme" data-lt-sidebar data-sidebar-style="light" aria-label="Primary navigation">
+    <div class="lt-sidebar-inner menu-inner-shadow">
+        <div class="lt-sidebar-brand app-brand demo">
             @if (! empty($erpCompany['logo_url']))
-                <img src="{{ $erpCompany['logo_url'] }}" alt="{{ $erpCompanyName }}" class="lt-brand-logo">
+                <img src="{{ $erpCompany['logo_url'] }}" alt="{{ $erpCompanyName }}" class="lt-brand-logo app-brand-logo demo">
             @else
-                <span class="lt-brand-mark">{{ $erpInitials }}</span>
+                <span class="lt-brand-mark app-brand-logo demo">{{ $erpInitials }}</span>
             @endif
 
-            <div class="lt-brand-text min-w-0">
+            <div class="lt-brand-text app-brand-text demo menu-text fw-bold ms-2 min-w-0">
                 <span class="lt-brand-title text-truncate">{{ $erpCompanyName }}</span>
                 <span class="lt-brand-subtitle">{{ $erpBusinessType ?? 'Steel Trading ERP' }}</span>
             </div>
 
-            <button type="button" class="btn btn-sm lt-icon-button ms-auto d-lg-none" data-lt-sidebar-close aria-label="Close sidebar">
+            <button type="button" class="btn btn-sm lt-icon-button layout-menu-toggle menu-link text-large ms-auto d-lg-none" data-lt-sidebar-close aria-label="Close sidebar">
                 <span aria-hidden="true">&times;</span>
             </button>
         </div>
 
-        <nav class="lt-sidebar-menu" data-simplebar>
+        <nav class="lt-sidebar-menu menu-inner py-1" data-simplebar>
             @foreach ($erpNavItems as $item)
                 @php
                     $children = collect($item['children'] ?? []);
@@ -75,28 +75,28 @@
                     $submenuId = 'lt-menu-'.\Illuminate\Support\Str::slug($item['label']);
                 @endphp
 
-                <div class="lt-menu-section">
+                <div class="lt-menu-section menu-item {{ $isParentActive ? 'active open' : '' }}">
                     @if ($hasChildren)
                         <button
                             type="button"
-                            class="lt-menu-toggle {{ $isParentActive ? 'active' : '' }}"
+                            class="lt-menu-toggle menu-link menu-toggle {{ $isParentActive ? 'active' : '' }}"
                             data-lt-menu-toggle="{{ $submenuId }}"
                             aria-expanded="{{ $isParentActive ? 'true' : 'false' }}"
                             title="{{ $item['label'] }}"
                         >
-                            <span class="lt-icon">
+                            <span class="lt-icon menu-icon tf-icons">
                                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="{{ $item['icon'] }}" /></svg>
                             </span>
                             <span class="lt-menu-text text-truncate">{{ $item['label'] }}</span>
                             <span class="lt-menu-arrow">›</span>
                         </button>
 
-                        <div id="{{ $submenuId }}" class="lt-submenu {{ $isParentActive ? 'show' : '' }}">
+                        <div id="{{ $submenuId }}" class="lt-submenu menu-sub {{ $isParentActive ? 'show' : '' }}">
                             @foreach ($children as $child)
                                 @php $isActive = $erpItemActive($child); @endphp
                                 <a
                                     href="{{ route($child['route']) }}"
-                                    class="lt-menu-link {{ $isActive ? 'active' : '' }}"
+                                    class="lt-menu-link menu-link {{ $isActive ? 'active' : '' }}"
                                     @if ($isActive) aria-current="page" @endif
                                 >
                                     <span class="lt-menu-text text-truncate">{{ $child['label'] }}</span>
@@ -107,11 +107,11 @@
                         @php $isActive = $erpItemActive($item); @endphp
                         <a
                             href="{{ route($item['route']) }}"
-                            class="lt-menu-link {{ $isActive ? 'active' : '' }}"
+                            class="lt-menu-link menu-link {{ $isActive ? 'active' : '' }}"
                             title="{{ $item['label'] }}"
                             @if ($isActive) aria-current="page" @endif
                         >
-                            <span class="lt-icon">
+                            <span class="lt-icon menu-icon tf-icons">
                                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="{{ $item['icon'] }}" /></svg>
                             </span>
                             <span class="lt-menu-text text-truncate">{{ $item['label'] }}</span>
@@ -121,8 +121,8 @@
             @endforeach
         </nav>
 
-        <div class="lt-sidebar-user border-top border-white border-opacity-10 p-3">
-            <div class="rounded-3 border border-white border-opacity-10 bg-white bg-opacity-10 p-3">
+        <div class="lt-sidebar-user menu-user border-top p-3">
+            <div class="rounded-3 border bg-white p-3">
                 <div class="fw-bold text-truncate">{{ $erpUser?->name }}</div>
                 <div class="small opacity-75 text-truncate">{{ $erpUser?->role ?: 'ERP User' }}</div>
             </div>

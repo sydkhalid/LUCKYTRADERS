@@ -5,7 +5,7 @@
 @endphp
 
 <div
-    class="relative shrink-0"
+    class="relative shrink-0 nav-item navbar-dropdown dropdown-notifications"
     data-notification-bell
     data-dropdown-url="{{ route('notifications.dropdown') }}"
     data-index-url="{{ route('notifications.index') }}"
@@ -13,7 +13,7 @@
     <button
         type="button"
         data-notification-toggle
-        class="lt-header-control relative"
+        class="lt-header-control nav-link relative"
         aria-label="Notifications"
         aria-expanded="false"
     >
@@ -23,12 +23,12 @@
         </svg>
         <span
             data-notification-count
-            class="{{ $unreadCount > 0 ? '' : 'hidden' }} absolute -right-2 -top-2 min-w-5 rounded-full bg-red-600 px-1.5 py-0.5 text-xs font-black leading-none text-white ring-2 ring-white"
+            class="{{ $unreadCount > 0 ? '' : 'hidden' }} badge bg-danger rounded-pill badge-notifications position-absolute top-0 start-100 translate-middle"
         >{{ $unreadCount }}</span>
     </button>
 
     <div
         data-notification-panel
-        class="lt-notification-panel absolute right-0 top-full z-50 mt-2 hidden w-[min(24rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl shadow-slate-300/30"
+        class="lt-notification-panel dropdown-menu dropdown-menu-end p-0 absolute right-0 top-full z-50 mt-2 hidden w-[min(24rem,calc(100vw-2rem))] overflow-hidden"
     ></div>
 </div>

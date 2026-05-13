@@ -13,7 +13,7 @@ function parseJsonScript(root, selector, fallback = {}) {
 }
 
 function sumValues(values = []) {
-    return values.reduce((total, value) => total + Number(value || 0), 0);
+    return values.reduce((total, value) => total + Math.abs(Number(value || 0)), 0);
 }
 
 function datasetValues(charts, key) {
@@ -32,15 +32,14 @@ function chartIsEmpty(charts, key) {
 
 function chartColors() {
     return {
-        green: '#059669',
-        cyan: '#0891b2',
-        blue: '#2563eb',
-        red: '#e11d48',
-        orange: '#f97316',
-        amber: '#f59e0b',
-        indigo: '#6366f1',
-        violet: '#8b5cf6',
-        slate: '#64748b',
+        primary: '#696cff',
+        success: '#71dd37',
+        info: '#03c3ec',
+        warning: '#ffab00',
+        danger: '#ff3e1d',
+        secondary: '#8592a3',
+        purple: '#8c57ff',
+        teal: '#00b8a9',
     };
 }
 
@@ -52,20 +51,20 @@ function baseChartOptions() {
             legend: {
                 labels: {
                     boxWidth: 12,
-                    color: '#475569',
-                    font: { weight: '700' },
+                    color: '#697a8d',
+                    font: { weight: '600' },
                 },
             },
         },
         scales: {
             x: {
-                grid: { color: 'rgba(148, 163, 184, 0.18)' },
-                ticks: { color: '#64748b' },
+                grid: { color: 'rgba(67, 89, 113, 0.08)' },
+                ticks: { color: '#697a8d' },
             },
             y: {
                 beginAtZero: true,
-                grid: { color: 'rgba(148, 163, 184, 0.18)' },
-                ticks: { color: '#64748b' },
+                grid: { color: 'rgba(67, 89, 113, 0.08)' },
+                ticks: { color: '#697a8d' },
             },
         },
     };
@@ -83,8 +82,8 @@ function chartConfig(key, charts) {
                 datasets: [{
                     label: 'Sales',
                     data: charts.monthly_sales?.data || [],
-                    borderColor: colors.green,
-                    backgroundColor: 'rgba(5, 150, 105, 0.12)',
+                    borderColor: colors.success,
+                    backgroundColor: 'rgba(113, 221, 55, 0.14)',
                     tension: 0.35,
                     fill: true,
                     pointRadius: 3,
@@ -100,8 +99,8 @@ function chartConfig(key, charts) {
                 datasets: [{
                     label: 'Purchases',
                     data: charts.monthly_purchases?.data || [],
-                    borderColor: colors.red,
-                    backgroundColor: 'rgba(225, 29, 72, 0.12)',
+                    borderColor: colors.danger,
+                    backgroundColor: 'rgba(255, 62, 29, 0.14)',
                     tension: 0.35,
                     fill: true,
                     pointRadius: 3,
@@ -118,13 +117,13 @@ function chartConfig(key, charts) {
                     {
                         label: 'Sales',
                         data: charts.sales_vs_purchases?.sales || [],
-                        backgroundColor: colors.green,
+                        backgroundColor: colors.primary,
                         borderRadius: 10,
                     },
                     {
                         label: 'Purchases',
                         data: charts.sales_vs_purchases?.purchases || [],
-                        backgroundColor: colors.red,
+                        backgroundColor: colors.warning,
                         borderRadius: 10,
                     },
                 ],
@@ -137,7 +136,7 @@ function chartConfig(key, charts) {
                 labels: charts.gst_split?.labels || [],
                 datasets: [{
                     data: charts.gst_split?.data || [],
-                    backgroundColor: [colors.cyan, colors.slate],
+                    backgroundColor: [colors.info, colors.secondary],
                     borderWidth: 0,
                 }],
             },
@@ -145,7 +144,7 @@ function chartConfig(key, charts) {
                 responsive: true,
                 maintainAspectRatio: false,
                 cutout: '68%',
-                plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, color: '#475569', font: { weight: '700' } } } },
+                plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, color: '#697a8d', font: { weight: '600' } } } },
             },
         },
         cash_flow: {
@@ -155,7 +154,7 @@ function chartConfig(key, charts) {
                 datasets: [{
                     label: 'Amount',
                     data: charts.cash_flow?.data || [],
-                    backgroundColor: [colors.green, colors.red, colors.cyan, colors.orange],
+                    backgroundColor: [colors.success, colors.danger, colors.info, colors.warning],
                     borderRadius: 10,
                 }],
             },
@@ -168,7 +167,7 @@ function chartConfig(key, charts) {
                 datasets: [{
                     label: 'Sold Quantity',
                     data: charts.top_products?.data || [],
-                    backgroundColor: colors.cyan,
+                    backgroundColor: colors.info,
                     borderRadius: 10,
                 }],
             },
@@ -180,7 +179,7 @@ function chartConfig(key, charts) {
                 labels: charts.expense_categories?.labels || [],
                 datasets: [{
                     data: charts.expense_categories?.data || [],
-                    backgroundColor: [colors.green, colors.cyan, colors.indigo, colors.orange, colors.red, '#84cc16', '#a855f7', colors.slate],
+                    backgroundColor: [colors.primary, colors.info, colors.success, colors.warning, colors.danger, colors.purple, colors.teal, colors.secondary],
                     borderWidth: 0,
                 }],
             },
@@ -188,7 +187,7 @@ function chartConfig(key, charts) {
                 responsive: true,
                 maintainAspectRatio: false,
                 cutout: '62%',
-                plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, color: '#475569', font: { weight: '700' } } } },
+                plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, color: '#697a8d', font: { weight: '600' } } } },
             },
         },
         stock_value: {
@@ -198,7 +197,7 @@ function chartConfig(key, charts) {
                 datasets: [{
                     label: 'Stock Value',
                     data: charts.stock_value?.data || [],
-                    backgroundColor: colors.blue,
+                    backgroundColor: colors.primary,
                     borderRadius: 10,
                 }],
             },
@@ -211,11 +210,50 @@ function chartConfig(key, charts) {
                 datasets: [{
                     label: 'Pending',
                     data: charts.pending_payments?.data || [],
-                    backgroundColor: [colors.amber, colors.red, colors.indigo],
+                    backgroundColor: [colors.warning, colors.danger, colors.primary],
                     borderRadius: 10,
                 }],
             },
             options: common,
+        },
+        period_business_mix: {
+            type: 'bar',
+            data: {
+                labels: charts.period_business_mix?.labels || [],
+                datasets: [{
+                    label: 'Amount',
+                    data: charts.period_business_mix?.data || [],
+                    backgroundColor: [colors.primary, colors.warning, colors.info, colors.danger],
+                    borderRadius: 10,
+                }],
+            },
+            options: common,
+        },
+        profit_vs_expense: {
+            type: 'bar',
+            data: {
+                labels: charts.profit_vs_expense?.labels || [],
+                datasets: [{
+                    label: 'Amount',
+                    data: charts.profit_vs_expense?.data || [],
+                    backgroundColor: [colors.success, colors.danger, colors.primary],
+                    borderRadius: 10,
+                }],
+            },
+            options: common,
+        },
+        stock_units_by_category: {
+            type: 'bar',
+            data: {
+                labels: charts.stock_units_by_category?.labels || [],
+                datasets: [{
+                    label: 'Stock Units',
+                    data: charts.stock_units_by_category?.data || [],
+                    backgroundColor: colors.success,
+                    borderRadius: 10,
+                }],
+            },
+            options: { ...common, indexAxis: 'y' },
         },
     };
 

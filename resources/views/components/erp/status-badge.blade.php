@@ -12,6 +12,6 @@
     };
 @endphp
 
-<span {{ $attributes->merge(['class' => 'erp-badge erp-badge-'.$tone]) }}>
+<span {{ $attributes->merge(['class' => 'erp-badge badge erp-badge-'.$tone]) }}>
     {{ $value }}
 </span>

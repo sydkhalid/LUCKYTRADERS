@@ -175,6 +175,9 @@ class DashboardController extends Controller
             'expense_categories' => $this->expenseCategories($filters),
             'stock_value' => $this->stockValueByCategory(),
             'pending_payments' => $this->pendingPayments(),
+            'period_business_mix' => $this->periodBusinessMix($filters),
+            'profit_vs_expense' => $this->profitVsExpense($filters),
+            'stock_units_by_category' => $this->stockUnitsByCategory(),
         ];
     }
 
@@ -361,6 +364,63 @@ class DashboardController extends Controller
         return [
             'labels' => ['Customer Collection', 'Supplier Payable', 'Active Loans'],
             'data' => [$customerPending, $supplierPending, $activeLoans],
+        ];
+    }
+
+    private function periodBusinessMix(array $filters): array
+    {
+        $sales = (float) $this->periodSales($filters)->sum('total_amount');
+        $purchases = (float) $this->periodPurchases($filters)->sum('total_amount');
+        $collection = (float) Cashbook::query()
+            ->whereDate('entry_date', '>=', $filters['from_date'])
+            ->whereDate('entry_date', '<=', $filters['to_date'])
+            ->whereIn('transaction_type', ['cash_in', 'bank_in'])
+            ->sum('amount');
+        $expenses = Schema::hasTable('expenses')
+            ? (float) Expense::whereDate('expense_date', '>=', $filters['from_date'])
+                ->whereDate('expense_date', '<=', $filters['to_date'])
+                ->sum('amount')
+            : 0;
+
+        return [
+            'labels' => ['Sales', 'Purchases', 'Collection', 'Expenses'],
+            'data' => [$sales, $purchases, $collection, $expenses],
+        ];
+    }
+
+    private function profitVsExpense(array $filters): array
+    {
+        $grossProfit = (float) SaleItem::query()
+            ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
+            ->whereDate('sales.sale_date', '>=', $filters['from_date'])
+            ->whereDate('sales.sale_date', '<=', $filters['to_date'])
+            ->sum('sale_items.profit_amount');
+        $expenses = Schema::hasTable('expenses')
+            ? (float) Expense::whereDate('expense_date', '>=', $filters['from_date'])
+                ->whereDate('expense_date', '<=', $filters['to_date'])
+                ->sum('amount')
+            : 0;
+
+        return [
+            'labels' => ['Gross Profit', 'Expenses', 'Net Profit'],
+            'data' => [$grossProfit, $expenses, $grossProfit - $expenses],
+        ];
+    }
+
+    private function stockUnitsByCategory(): array
+    {
+        $rows = Product::query()
+            ->leftJoin('product_categories', 'products.product_category_id', '=', 'product_categories.id')
+            ->selectRaw("COALESCE(product_categories.name, 'Uncategorised') as category_name")
+            ->selectRaw('COALESCE(SUM(products.current_stock), 0) as stock_units')
+            ->groupBy('category_name')
+            ->orderByDesc('stock_units')
+            ->limit(8)
+            ->get();
+
+        return [
+            'labels' => $rows->pluck('category_name')->values()->all(),
+            'data' => $rows->pluck('stock_units')->map(fn ($value) => round((float) $value, 3))->values()->all(),
         ];
     }
 

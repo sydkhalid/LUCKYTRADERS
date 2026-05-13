@@ -41,23 +41,24 @@
     <link rel="stylesheet" href="{{ asset('theme/assets/css/icons.css') }}">
     <link rel="stylesheet" href="{{ asset('theme/assets/css/styles.css') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link rel="stylesheet" href="{{ asset('theme/assets/css/sneat-lucky.css') }}">
     @stack('styles')
 
     <style>
         :root {
-            --lt-primary: {{ $erpTheme['color'] ?? '#2563eb' }};
+            --lt-primary: {{ $erpTheme['color'] ?? '#696cff' }};
         }
     </style>
 </head>
-<body class="lt-app">
-    <div class="lt-shell">
+<body class="lt-app sneat-skin layout-wrapper layout-content-navbar">
+    <div class="lt-shell layout-container">
         @include('layouts.partials.sidebar')
 
-        <div class="lt-main-wrapper d-flex min-vh-100 flex-column">
+        <div class="lt-main-wrapper layout-page d-flex min-vh-100 flex-column">
             @include('layouts.partials.header')
 
-            <main class="lt-main erp-content flex-grow-1">
-                <div class="lt-page-shell">
+            <main class="lt-main erp-content content-wrapper flex-grow-1">
+                <div class="lt-page-shell container-xxl flex-grow-1 container-p-y">
                     @include('layouts.partials.alerts')
                     @yield('content')
                     {{ $slot ?? '' }}

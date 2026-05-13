@@ -3,24 +3,26 @@
     'description' => null,
 ])
 
-<section {{ $attributes->merge(['class' => 'erp-panel']) }}>
+<section {{ $attributes->merge(['class' => 'erp-panel card custom-card']) }}>
     @if ($title || $description || isset($actions))
-        <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div class="card-header d-flex flex-column flex-sm-row align-items-sm-start justify-content-between gap-3">
             <div>
                 @if ($title)
-                    <h3 class="text-sm font-black uppercase tracking-[0.16em] text-slate-600">{{ $title }}</h3>
+                    <h3 class="card-title mb-1">{{ $title }}</h3>
                 @endif
                 @if ($description)
-                    <p class="mt-1 text-sm font-semibold text-slate-500">{{ $description }}</p>
+                    <p class="card-subtitle text-muted mb-0">{{ $description }}</p>
                 @endif
             </div>
             @isset($actions)
-                <div class="flex flex-wrap items-center gap-2">
+                <div class="d-flex flex-wrap align-items-center gap-2">
                     {{ $actions }}
                 </div>
             @endisset
         </div>
     @endif
 
-    {{ $slot }}
+    <div class="card-body">
+        {{ $slot }}
+    </div>
 </section>

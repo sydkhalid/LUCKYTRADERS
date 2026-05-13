@@ -12,10 +12,10 @@ import Swal from 'sweetalert2';
 import $ from 'jquery';
 import select2 from 'select2';
 import DataTable from 'datatables.net-dt';
-import Responsive from 'datatables.net-responsive-dt';
-import Buttons from 'datatables.net-buttons-dt';
-import ButtonsHtml5 from 'datatables.net-buttons/js/buttons.html5.mjs';
-import ButtonsPrint from 'datatables.net-buttons/js/buttons.print.mjs';
+import 'datatables.net-responsive-dt';
+import 'datatables.net-buttons-dt';
+import 'datatables.net-buttons/js/buttons.html5.mjs';
+import 'datatables.net-buttons/js/buttons.print.mjs';
 import JSZip from 'jszip';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
@@ -34,10 +34,7 @@ pdfMake.vfs = pdfFonts.vfs;
 window.pdfMake = pdfMake;
 
 select2($);
-DataTable(window, $);
-Responsive(window, $);
-Buttons(window, $);
-ButtonsHtml5(window, $);
-ButtonsPrint(window, $);
+
+window.DataTable = DataTable;
 
 Alpine.start();

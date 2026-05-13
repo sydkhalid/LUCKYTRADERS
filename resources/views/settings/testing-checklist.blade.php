@@ -23,21 +23,13 @@
         ];
     @endphp
 
-    <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div>
-            <p class="text-xs font-black uppercase tracking-[0.22em] text-cyan-700">Go-Live Verification</p>
-            <h2 class="mt-1 text-2xl font-black tracking-tight text-slate-950">Production Testing Checklist</h2>
-            <p class="mt-1 text-sm text-slate-500">Use this page before live billing to verify each ERP module and track unresolved bugs.</p>
-        </div>
-        <div class="flex flex-wrap gap-2">
-            <a href="{{ route('settings.testing-checklist') }}" class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50">Testing Checklist</a>
-            <a href="{{ route('settings.company') }}" class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50">Company Settings</a>
-            <a href="{{ route('settings.invoice') }}" class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50">Invoice Settings</a>
-            @role('Super Admin')
-                <a href="{{ route('settings.backups.index') }}" class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50">Backups</a>
-            @endrole
-        </div>
-    </div>
+    @include('settings.partials.header', [
+        'active' => 'testing',
+        'kicker' => 'Go-Live Verification',
+        'title' => 'Production Testing Checklist',
+        'description' => 'Verify each ERP module, track unresolved bugs, and keep live billing readiness visible.',
+        'icon' => 'testing',
+    ])
 
     <div class="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <div class="erp-summary-card">

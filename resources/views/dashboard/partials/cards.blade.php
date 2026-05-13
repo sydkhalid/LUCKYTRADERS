@@ -2,21 +2,21 @@
     $money = fn ($value) => ($erpCurrency['symbol'] ?? 'Rs.').' '.number_format((float) $value, 2);
     $number = fn ($value) => number_format((float) $value, 0);
     $cardItems = [
-        ['label' => 'Today Sales', 'value' => $money($cards['today_sales']), 'hint' => 'Current day billing', 'icon' => 'sales', 'tone' => 'emerald'],
-        ['label' => 'This Month Sales', 'value' => $money($cards['month_sales']), 'hint' => 'Month to date', 'icon' => 'trend', 'tone' => 'cyan'],
-        ['label' => 'Period Sales', 'value' => $money($cards['period_sales']), 'hint' => $filters['label'], 'icon' => 'invoice', 'tone' => 'blue'],
-        ['label' => 'Today Collection', 'value' => $money($cards['today_collection']), 'hint' => 'Cash and bank inflow', 'icon' => 'receipt', 'tone' => 'green'],
-        ['label' => 'Today Purchase', 'value' => $money($cards['today_purchase']), 'hint' => 'Current day buying', 'icon' => 'cart', 'tone' => 'rose'],
-        ['label' => 'This Month Purchase', 'value' => $money($cards['month_purchase']), 'hint' => 'Month to date', 'icon' => 'truck', 'tone' => 'orange'],
-        ['label' => 'Outstanding Receivables', 'value' => $money($cards['pending_customer_collection']), 'hint' => 'Customer balance due', 'icon' => 'wallet', 'tone' => 'amber'],
-        ['label' => 'Outstanding Payables', 'value' => $money($cards['supplier_payable']), 'hint' => 'Supplier balance due', 'icon' => 'payable', 'tone' => 'red'],
-        ['label' => 'Cash in Hand', 'value' => $money($cards['cash_balance']), 'hint' => 'Cashbook net', 'icon' => 'cash', 'tone' => 'slate'],
-        ['label' => 'Bank Balance', 'value' => $money($cards['bank_balance']), 'hint' => 'Bankbook net', 'icon' => 'bank', 'tone' => 'indigo'],
-        ['label' => 'Stock Value', 'value' => $money($cards['stock_value']), 'hint' => $number($cards['stock_units']).' stock units', 'icon' => 'stock', 'tone' => 'violet'],
-        ['label' => 'Total Expense', 'value' => $money($cards['total_expense']), 'hint' => 'Filtered period', 'icon' => 'expense', 'tone' => 'pink'],
-        ['label' => 'Active Loans', 'value' => $money($cards['active_loans']), 'hint' => 'Open balances', 'icon' => 'loan', 'tone' => 'purple'],
-        ['label' => 'Partner Investment', 'value' => $money($cards['partner_investment']), 'hint' => 'Capital balance', 'icon' => 'partner', 'tone' => 'teal'],
-        ['label' => 'Net Profit', 'value' => $money($cards['net_profit']), 'hint' => number_format((float) $cards['profit_margin'], 2).'% margin', 'icon' => 'profit', 'tone' => $cards['net_profit'] >= 0 ? 'emerald' : 'red'],
+        ['label' => 'Today Sales', 'value' => $money($cards['today_sales']), 'hint' => 'Current day billing', 'icon' => 'sales', 'tone' => 'success'],
+        ['label' => 'This Month Sales', 'value' => $money($cards['month_sales']), 'hint' => 'Month to date', 'icon' => 'trend', 'tone' => 'info'],
+        ['label' => 'Period Sales', 'value' => $money($cards['period_sales']), 'hint' => $filters['label'], 'icon' => 'invoice', 'tone' => 'primary'],
+        ['label' => 'Today Collection', 'value' => $money($cards['today_collection']), 'hint' => 'Cash and bank inflow', 'icon' => 'receipt', 'tone' => 'success'],
+        ['label' => 'Today Purchase', 'value' => $money($cards['today_purchase']), 'hint' => 'Current day buying', 'icon' => 'cart', 'tone' => 'danger'],
+        ['label' => 'This Month Purchase', 'value' => $money($cards['month_purchase']), 'hint' => 'Month to date', 'icon' => 'truck', 'tone' => 'warning'],
+        ['label' => 'Outstanding Receivables', 'value' => $money($cards['pending_customer_collection']), 'hint' => 'Customer balance due', 'icon' => 'wallet', 'tone' => 'warning'],
+        ['label' => 'Outstanding Payables', 'value' => $money($cards['supplier_payable']), 'hint' => 'Supplier balance due', 'icon' => 'payable', 'tone' => 'danger'],
+        ['label' => 'Cash in Hand', 'value' => $money($cards['cash_balance']), 'hint' => 'Cashbook net', 'icon' => 'cash', 'tone' => 'secondary'],
+        ['label' => 'Bank Balance', 'value' => $money($cards['bank_balance']), 'hint' => 'Bankbook net', 'icon' => 'bank', 'tone' => 'primary'],
+        ['label' => 'Stock Value', 'value' => $money($cards['stock_value']), 'hint' => $number($cards['stock_units']).' stock units', 'icon' => 'stock', 'tone' => 'primary'],
+        ['label' => 'Total Expense', 'value' => $money($cards['total_expense']), 'hint' => 'Filtered period', 'icon' => 'expense', 'tone' => 'danger'],
+        ['label' => 'Active Loans', 'value' => $money($cards['active_loans']), 'hint' => 'Open balances', 'icon' => 'loan', 'tone' => 'primary'],
+        ['label' => 'Partner Investment', 'value' => $money($cards['partner_investment']), 'hint' => 'Capital balance', 'icon' => 'partner', 'tone' => 'success'],
+        ['label' => 'Net Profit', 'value' => $money($cards['net_profit']), 'hint' => number_format((float) $cards['profit_margin'], 2).'% margin', 'icon' => 'profit', 'tone' => $cards['net_profit'] >= 0 ? 'success' : 'danger'],
     ];
     $icons = [
         'sales' => '<path d="M4 19V5m0 14h16M8 16V9m4 7V5m4 11v-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />',
@@ -37,17 +37,24 @@
     ];
 @endphp
 
-<div class="lt-kpi-grid">
+<div class="row g-4 lt-kpi-grid">
     @foreach ($cardItems as $item)
-        <article class="lt-kpi-card lt-kpi-{{ $item['tone'] }}">
-            <div class="lt-kpi-icon">
-                <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">{!! $icons[$item['icon']] !!}</svg>
-            </div>
-            <div class="min-w-0">
-                <p class="lt-kpi-label">{{ $item['label'] }}</p>
-                <h3 class="lt-kpi-value">{{ $item['value'] }}</h3>
-                <p class="lt-kpi-hint">{{ $item['hint'] }}</p>
-            </div>
-        </article>
+        <div class="col-sm-6 col-xl-4 col-xxl-3">
+            <article class="card h-100 lt-kpi-card sneat-kpi-card lt-kpi-{{ $item['tone'] }}">
+                <span class="sneat-kpi-accent bg-{{ $item['tone'] }}"></span>
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between gap-3">
+                        <div class="min-w-0">
+                            <span class="lt-kpi-label">{{ $item['label'] }}</span>
+                            <h4 class="lt-kpi-value mb-1">{{ $item['value'] }}</h4>
+                            <span class="lt-kpi-hint">{{ $item['hint'] }}</span>
+                        </div>
+                        <span class="avatar rounded bg-label-{{ $item['tone'] }} lt-kpi-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">{!! $icons[$item['icon']] !!}</svg>
+                        </span>
+                    </div>
+                </div>
+            </article>
+        </div>
     @endforeach
 </div>

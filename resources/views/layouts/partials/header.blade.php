@@ -7,16 +7,16 @@
         ->values();
 @endphp
 
-<header class="lt-header">
-    <div class="lt-header-grid">
-        <div class="lt-title-row">
-            <button type="button" class="btn lt-icon-button d-lg-none" data-lt-sidebar-open aria-label="Open sidebar">
+<header class="lt-header layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme">
+    <div class="lt-header-grid navbar-nav-right d-flex align-items-center w-100">
+        <div class="lt-title-row navbar-nav align-items-center">
+            <button type="button" class="btn lt-icon-button layout-menu-toggle d-lg-none" data-lt-sidebar-open aria-label="Open sidebar">
                 <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                 </svg>
             </button>
 
-            <button type="button" class="btn lt-icon-button d-none d-lg-inline-flex" data-lt-sidebar-collapse aria-label="Toggle sidebar">
+            <button type="button" class="btn lt-icon-button layout-menu-toggle d-none d-lg-inline-flex" data-lt-sidebar-collapse aria-label="Toggle sidebar">
                 <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                 </svg>
@@ -38,15 +38,15 @@
             </div>
         </div>
 
-        <div class="lt-header-actions">
-            <div class="lt-header-action-row">
+        <div class="lt-header-actions navbar-nav flex-row align-items-center ms-auto">
+            <div class="lt-header-action-row d-flex align-items-center">
                 <x-global-search />
                 <x-notification-bell />
 
-                <div class="dropdown no-print">
+                <div class="dropdown no-print nav-item navbar-dropdown dropdown-user">
                     <button
                         type="button"
-                        class="lt-user-button"
+                        class="lt-user-button nav-link dropdown-toggle hide-arrow"
                         data-bs-toggle="dropdown"
                         data-bs-auto-close="outside"
                         aria-expanded="false"

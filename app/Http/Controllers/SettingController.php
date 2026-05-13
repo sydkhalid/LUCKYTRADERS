@@ -74,15 +74,15 @@ class SettingController extends Controller
             $validated['logo'] = $this->storeOptimizedImage($request->file('logo'));
         }
 
-        $settings->update($validated);
-        app(SystemSettingService::class)->syncLegacySettings();
-
         if ($systemPayload !== []) {
             $columns = array_flip(Schema::getColumnListing('system_settings'));
             SystemSetting::current()
                 ->forceFill(array_intersect_key($systemPayload, $columns))
                 ->save();
         }
+
+        $settings->update($validated);
+        app(SystemSettingService::class)->syncLegacySettings();
 
         return $this->backSuccessResponse($request, 'Company settings updated successfully.');
     }

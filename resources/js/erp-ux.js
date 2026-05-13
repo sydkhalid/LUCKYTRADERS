@@ -286,6 +286,10 @@ function attachAdvancedTableSearch(form, instance, placeholder = 'Search records
 
 function initializeFilterForms() {
     document.querySelectorAll('.erp-content form').forEach((form) => {
+        if (form.matches('[data-dashboard-filter], [data-no-advanced-search]')) {
+            return;
+        }
+
         const id = (form.id || '').toLowerCase();
         const method = (form.getAttribute('method') || form.method || '').toLowerCase();
         const hasFilterInput = form.querySelector('input[name="from_date"], input[name="to_date"], input[type="date"], input[type="month"], select[name*="status"], select[name*="type"]');
