@@ -14,6 +14,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // The first ERP admin is created through the setup register screen.
+        $this->call(RolePermissionSeeder::class);
     }
 }

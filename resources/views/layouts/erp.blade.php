@@ -16,25 +16,54 @@
         </div>
 
         <nav class="p-4 space-y-2">
-            <a href="{{ route('dashboard') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('dashboard') ? 'bg-slate-700' : '' }}">Dashboard</a>
-            <a href="{{ route('products.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('products.*') ? 'bg-slate-700' : '' }}">Products</a>
-            <a href="{{ route('product-categories.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('product-categories.*') ? 'bg-slate-700' : '' }}">Categories</a>
-            <a href="{{ route('customers.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('customers.*') ? 'bg-slate-700' : '' }}">Customers</a>
-            <a href="{{ route('suppliers.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('suppliers.*') ? 'bg-slate-700' : '' }}">Suppliers</a>
-            <a href="{{ route('purchases.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('purchases.*') ? 'bg-slate-700' : '' }}">Purchases</a>
-            <a href="{{ route('quotations.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('quotations.*') ? 'bg-slate-700' : '' }}">Quotations</a>
-            <a href="{{ route('sales.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('sales.*') ? 'bg-slate-700' : '' }}">Sales / Billing</a>
-            <a href="{{ route('sales-returns.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('sales-returns.*') ? 'bg-slate-700' : '' }}">Sales Returns</a>
-            <a href="{{ route('purchase-returns.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('purchase-returns.*') ? 'bg-slate-700' : '' }}">Purchase Returns</a>
-            <a href="{{ route('receipts.create') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('receipts.*') ? 'bg-slate-700' : '' }}">Receipts</a>
-            <a href="{{ route('payments.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('payments.*', 'supplier-payments.*') ? 'bg-slate-700' : '' }}">Payments</a>
-            <a href="{{ route('ledgers.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('ledgers.*') ? 'bg-slate-700' : '' }}">Ledgers</a>
-            <a href="{{ route('cashbook.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('cashbook.*', 'bankbook.*') ? 'bg-slate-700' : '' }}">Cashbook</a>
-            <a href="{{ route('expenses.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('expenses.*', 'expense-categories.*') ? 'bg-slate-700' : '' }}">Expenses</a>
-            <a href="{{ route('stock-adjustments.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('stock-adjustments.*') ? 'bg-slate-700' : '' }}">Stock Adjustments</a>
-            <a href="{{ route('loans.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('loans.*') ? 'bg-slate-700' : '' }}">Loans</a>
-            <a href="{{ route('partners.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('partners.*') ? 'bg-slate-700' : '' }}">Partners</a>
-            <a href="{{ route('gst-reports.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('gst-reports.*') ? 'bg-slate-700' : '' }}">GST Reports</a>
+            @can('view_dashboard')
+                <a href="{{ route('dashboard') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('dashboard') ? 'bg-slate-700' : '' }}">Dashboard</a>
+            @endcan
+            @can('manage_products')
+                <a href="{{ route('products.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('products.*') ? 'bg-slate-700' : '' }}">Products</a>
+                <a href="{{ route('product-categories.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('product-categories.*') ? 'bg-slate-700' : '' }}">Categories</a>
+            @endcan
+            @can('manage_customers')
+                <a href="{{ route('customers.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('customers.*') ? 'bg-slate-700' : '' }}">Customers</a>
+            @endcan
+            @can('manage_suppliers')
+                <a href="{{ route('suppliers.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('suppliers.*') ? 'bg-slate-700' : '' }}">Suppliers</a>
+            @endcan
+            @can('manage_purchases')
+                <a href="{{ route('purchases.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('purchases.*') ? 'bg-slate-700' : '' }}">Purchases</a>
+                <a href="{{ route('purchase-returns.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('purchase-returns.*') ? 'bg-slate-700' : '' }}">Purchase Returns</a>
+            @endcan
+            @can('manage_sales')
+                <a href="{{ route('quotations.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('quotations.*') ? 'bg-slate-700' : '' }}">Quotations</a>
+                <a href="{{ route('sales.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('sales.*') ? 'bg-slate-700' : '' }}">Sales / Billing</a>
+                <a href="{{ route('sales-returns.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('sales-returns.*') ? 'bg-slate-700' : '' }}">Sales Returns</a>
+            @endcan
+            @canany(['manage_sales', 'manage_payments'])
+                <a href="{{ route('receipts.create') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('receipts.*') ? 'bg-slate-700' : '' }}">Receipts</a>
+            @endcanany
+            @can('manage_payments')
+                <a href="{{ route('payments.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('payments.*', 'supplier-payments.*') ? 'bg-slate-700' : '' }}">Payments</a>
+                <a href="{{ route('ledgers.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('ledgers.*') ? 'bg-slate-700' : '' }}">Ledgers</a>
+                <a href="{{ route('cashbook.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('cashbook.*', 'bankbook.*') ? 'bg-slate-700' : '' }}">Cashbook</a>
+            @endcan
+            @can('manage_expenses')
+                <a href="{{ route('expenses.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('expenses.*', 'expense-categories.*') ? 'bg-slate-700' : '' }}">Expenses</a>
+            @endcan
+            @can('manage_stock_adjustments')
+                <a href="{{ route('stock-adjustments.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('stock-adjustments.*') ? 'bg-slate-700' : '' }}">Stock Adjustments</a>
+            @endcan
+            @can('manage_loans')
+                <a href="{{ route('loans.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('loans.*') ? 'bg-slate-700' : '' }}">Loans</a>
+            @endcan
+            @can('manage_partners')
+                <a href="{{ route('partners.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('partners.*') ? 'bg-slate-700' : '' }}">Partners</a>
+            @endcan
+            @can('view_gst_reports')
+                <a href="{{ route('gst-reports.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('gst-reports.*') ? 'bg-slate-700' : '' }}">GST Reports</a>
+            @endcan
+            @can('manage_users')
+                <a href="{{ route('users.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('users.*') ? 'bg-slate-700' : '' }}">Users & Roles</a>
+            @endcan
         </nav>
     </aside>
 

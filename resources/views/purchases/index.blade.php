@@ -44,12 +44,16 @@
                         <td class="px-4 py-3">
                             <div class="flex justify-end gap-3">
                                 <a href="{{ route('purchases.show', $purchase) }}" class="font-semibold text-slate-700 hover:text-slate-900">View</a>
-                                <a href="{{ route('purchases.edit', $purchase) }}" class="font-semibold text-slate-700 hover:text-slate-900">Edit</a>
-                                <form method="POST" action="{{ route('purchases.destroy', $purchase) }}" onsubmit="return confirm('Delete this purchase and reverse stock?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="font-semibold text-red-600 hover:text-red-800">Delete</button>
-                                </form>
+                                @can('edit_old_records')
+                                    <a href="{{ route('purchases.edit', $purchase) }}" class="font-semibold text-slate-700 hover:text-slate-900">Edit</a>
+                                @endcan
+                                @can('delete_records')
+                                    <form method="POST" action="{{ route('purchases.destroy', $purchase) }}" onsubmit="return confirm('Delete this purchase and reverse stock?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="font-semibold text-red-600 hover:text-red-800">Delete</button>
+                                    </form>
+                                @endcan
                             </div>
                         </td>
                     </tr>

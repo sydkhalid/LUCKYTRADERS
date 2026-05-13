@@ -71,8 +71,9 @@ class PurchaseController extends Controller
         return view('purchases.show', compact('purchase'));
     }
 
-    public function edit(Purchase $purchase)
+    public function edit(Request $request, Purchase $purchase)
     {
+        $this->authorizePermission($request, 'edit_old_records');
         $purchase->load('items');
 
         return view('purchases.edit', array_merge($this->formData(), compact('purchase')));
@@ -80,6 +81,7 @@ class PurchaseController extends Controller
 
     public function update(Request $request, Purchase $purchase)
     {
+        $this->authorizePermission($request, 'edit_old_records');
         $this->ensureNoExternalSupplierPayments($purchase);
 
         $data = $this->validatedData($request);
@@ -118,8 +120,10 @@ class PurchaseController extends Controller
             ->with('success', 'Purchase '.$purchase->purchase_no.' updated successfully.');
     }
 
-    public function destroy(Purchase $purchase)
+    public function destroy(Request $request, Purchase $purchase)
     {
+        $this->authorizePermission($request, 'delete_records');
+
         if ($this->hasExternalSupplierPayments($purchase)) {
             return back()->with('error', 'Cannot delete purchase while supplier payments are linked to it.');
         }
@@ -387,5 +391,10 @@ class PurchaseController extends Controller
         return Payment::where('reference_type', 'purchase')
             ->where('reference_id', $purchase->id)
             ->exists();
+    }
+
+    private function authorizePermission(Request $request, string $permission): void
+    {
+        abort_unless($request->user()?->can($permission), 403);
     }
 }

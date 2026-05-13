@@ -45,14 +45,16 @@
                             <div class="flex justify-end gap-3">
                                 <a href="{{ route('sales.show', $sale) }}" class="font-semibold text-slate-700 hover:text-slate-900">View</a>
                                 <a href="{{ route('sales.print', $sale) }}" class="font-semibold text-slate-700 hover:text-slate-900">Print</a>
-                                @if (auth()->user()?->is_admin)
+                                @can('edit_old_records')
                                     <a href="{{ route('sales.edit', $sale) }}" class="font-semibold text-slate-700 hover:text-slate-900">Edit</a>
+                                @endcan
+                                @can('delete_records')
                                     <form method="POST" action="{{ route('sales.destroy', $sale) }}" onsubmit="return confirm('Delete this sale and reverse stock?')">
                                         @csrf
                                         @method('DELETE')
                                         <button class="font-semibold text-red-600 hover:text-red-800">Delete</button>
                                     </form>
-                                @endif
+                                @endcan
                             </div>
                         </td>
                     </tr>

@@ -74,7 +74,7 @@ class SaleController extends Controller
 
     public function edit(Request $request, Sale $sale)
     {
-        $this->authorizeAdmin($request);
+        $this->authorizePermission($request, 'edit_old_records');
         $sale->load('items');
 
         return view('sales.edit', array_merge($this->formData(), compact('sale')));
@@ -82,7 +82,7 @@ class SaleController extends Controller
 
     public function update(Request $request, Sale $sale)
     {
-        $this->authorizeAdmin($request);
+        $this->authorizePermission($request, 'edit_old_records');
         $this->ensureNoExternalReceipts($sale);
 
         $data = $this->validatedData($request);
@@ -120,7 +120,7 @@ class SaleController extends Controller
 
     public function destroy(Request $request, Sale $sale)
     {
-        $this->authorizeAdmin($request);
+        $this->authorizePermission($request, 'delete_records');
         $this->ensureNoExternalReceipts($sale);
 
         DB::transaction(function () use ($sale) {
@@ -397,8 +397,8 @@ class SaleController extends Controller
         return $paymentNo;
     }
 
-    private function authorizeAdmin(Request $request): void
+    private function authorizePermission(Request $request, string $permission): void
     {
-        abort_unless((bool) $request->user()?->is_admin, 403);
+        abort_unless($request->user()?->can($permission), 403);
     }
 }

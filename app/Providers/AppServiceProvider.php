@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\User;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +22,18 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Gate::before(function (User $user, string $ability): ?bool {
+            $roleTablesReady = Schema::hasTable('roles') && Schema::hasTable('model_has_roles');
+
+            if ($roleTablesReady && $user->hasRole('Super Admin')) {
+                return true;
+            }
+
+            if ((! $roleTablesReady || ! $user->roles()->exists()) && (bool) $user->is_admin) {
+                return true;
+            }
+
+            return null;
+        });
     }
 }

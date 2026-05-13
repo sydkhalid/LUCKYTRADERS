@@ -9,9 +9,11 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Spatie\Permission\Models\Role;
 
 class RegisteredUserController extends Controller
 {
@@ -50,10 +52,33 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
+        $this->assignInitialAdminRole($user);
+
         event(new Registered($user));
 
         Auth::login($user);
 
         return redirect(route('dashboard', absolute: false));
+    }
+
+    private function assignInitialAdminRole(User $user): void
+    {
+        $updates = [];
+
+        if (Schema::hasColumn('users', 'is_admin')) {
+            $updates['is_admin'] = true;
+        }
+
+        if (Schema::hasColumn('users', 'role')) {
+            $updates['role'] = 'Super Admin';
+        }
+
+        if ($updates !== []) {
+            $user->forceFill($updates)->save();
+        }
+
+        if (Schema::hasTable('roles') && Role::where('name', 'Super Admin')->exists()) {
+            $user->assignRole('Super Admin');
+        }
     }
 }
