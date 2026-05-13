@@ -11,7 +11,7 @@
     ])->values();
 @endphp
 
-@extends('layouts.erp')
+@extends('layouts.app')
 
 @section('title', 'Customer Receipt')
 

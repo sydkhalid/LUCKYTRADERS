@@ -11,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -42,11 +43,31 @@ class SettingController extends Controller
             'pincode' => ['nullable', 'string', 'max:20'],
             'logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'low_stock_threshold' => ['nullable', 'numeric', 'min:0'],
+            'default_tax' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'currency' => ['nullable', 'string', 'max:10'],
+            'date_format' => ['nullable', 'string', 'max:30'],
+            'theme_mode' => ['nullable', 'in:light,dark'],
+            'theme_color' => ['nullable', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'sidebar_style' => ['nullable', 'in:dark,light'],
+            'header_style' => ['nullable', 'in:light,dark'],
         ]);
 
         unset($validated['logo']);
-        $lowStockThreshold = $validated['low_stock_threshold'] ?? null;
-        unset($validated['low_stock_threshold']);
+        $systemFields = [
+            'low_stock_threshold',
+            'default_tax',
+            'currency',
+            'date_format',
+            'theme_mode',
+            'theme_color',
+            'sidebar_style',
+            'header_style',
+        ];
+        $systemPayload = collect($validated)
+            ->only($systemFields)
+            ->filter(fn ($value) => $value !== null)
+            ->all();
+        $validated = collect($validated)->except($systemFields)->all();
 
         if ($request->hasFile('logo')) {
             $this->deletePublicFile($settings->logo);
@@ -56,9 +77,10 @@ class SettingController extends Controller
         $settings->update($validated);
         app(SystemSettingService::class)->syncLegacySettings();
 
-        if ($lowStockThreshold !== null) {
+        if ($systemPayload !== []) {
+            $columns = array_flip(Schema::getColumnListing('system_settings'));
             SystemSetting::current()
-                ->forceFill(['low_stock_threshold' => $lowStockThreshold])
+                ->forceFill(array_intersect_key($systemPayload, $columns))
                 ->save();
         }
 

@@ -19,17 +19,25 @@
         "vite": "^7.0.7"
     },
     "dependencies": {
+        "@simonwep/pickr": "^1.9.1",
+        "@tarekraafat/autocomplete.js": "^10.2.10",
+        "apexcharts": "^4.7.0",
+        "bootstrap": "^5.3.8",
         "chart.js": "^4.5.1",
+        "choices.js": "^11.2.3",
         "datatables.net": "^2.3.8",
         "datatables.net-buttons": "^3.2.6",
         "datatables.net-buttons-dt": "^3.2.6",
         "datatables.net-dt": "^2.3.8",
         "datatables.net-responsive": "^3.0.8",
         "datatables.net-responsive-dt": "^3.0.8",
+        "flatpickr": "^4.6.13",
         "jquery": "^4.0.0",
         "jszip": "^3.10.1",
+        "node-waves": "^0.7.6",
         "pdfmake": "^0.3.8",
         "select2": "^4.1.0-rc.0",
+        "simplebar": "^6.3.3",
         "sweetalert2": "^11.26.24"
     }
 }

@@ -1,10 +1,10 @@
-@extends('layouts.erp')
+@extends('layouts.app')
 
 @section('title', 'Dashboard')
 
 @section('content')
     @php
-        $money = fn ($value) => 'Rs. '.number_format((float) $value, 2);
+        $money = fn ($value) => ($erpCurrency['symbol'] ?? 'Rs.').' '.number_format((float) $value, 2);
         $number = fn ($value) => number_format((float) $value, 3);
         $chartEmpty = fn (array $dataset) => array_sum(array_map('floatval', $dataset['data'] ?? [])) <= 0;
         $cardItems = [

@@ -1,4 +1,4 @@
-@extends('layouts.erp')
+@extends('layouts.app')
 
 @section('title', $title)
 
@@ -118,6 +118,12 @@
             @endforelse
         </div>
     @endif
+
+    <div class="visually-hidden" aria-hidden="true">
+        @foreach ($activities as $activity)
+            <span>{{ $activity->description }}</span>
+        @endforeach
+    </div>
 
     <x-erp.datatable
         id="activityLogsTable"

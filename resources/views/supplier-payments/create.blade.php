@@ -10,7 +10,7 @@
     ])->values();
 @endphp
 
-@extends('layouts.erp')
+@extends('layouts.app')
 
 @section('title', 'Supplier Payment')
 

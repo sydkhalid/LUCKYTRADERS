@@ -1,36 +1,84 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="{{ $erpTheme['mode'] ?? 'light' }}" data-header-style="{{ $erpTheme['header_style'] ?? 'light' }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>@yield('title', 'ERP') | {{ $erpCompany['name'] ?? 'LUCKY TRADERS' }}</title>
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+    @php
+        $erpFlash = [
+            'success' => session('success'),
+            'error' => session('error'),
+            'warning' => session('warning'),
+        ];
+    @endphp
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <script>
+        window.erpFlash = {{ \Illuminate\Support\Js::from($erpFlash) }};
+        window.erpSettings = {{ \Illuminate\Support\Js::from([
+            'company' => $erpCompany ?? [],
+            'currency' => $erpCurrency ?? ['code' => 'INR', 'symbol' => 'Rs.'],
+            'defaultTax' => (float) ($erpSystemSettings->default_tax ?? 18),
+            'dateFormat' => $erpSystemSettings->date_format ?? 'd M Y',
+            'invoiceFooter' => $erpInvoiceSettings->terms_and_conditions ?? null,
+            'theme' => $erpTheme ?? [],
+        ]) }};
+    </script>
 
-        <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100">
-            @include('layouts.navigation')
+    <link rel="stylesheet" href="{{ asset('theme/assets/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('theme/assets/libs/simplebar/simplebar.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('theme/assets/libs/node-waves/waves.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('theme/assets/libs/choices.js/public/assets/styles/choices.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('theme/assets/libs/flatpickr/flatpickr.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('theme/assets/libs/@simonwep/pickr/themes/classic.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('theme/assets/libs/autocomplete.js/css/autoComplete.02.css') }}">
+    <link rel="stylesheet" href="{{ asset('theme/assets/libs/sweetalert2/sweetalert2.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('theme/assets/libs/datatables.net/css/dataTables.dataTables.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('theme/assets/libs/datatables.net-responsive/css/responsive.dataTables.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('theme/assets/libs/datatables.net-buttons/css/buttons.dataTables.min.css') }}">
 
-            <!-- Page Heading -->
-            @isset($header)
-                <header class="bg-white shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
-                    </div>
-                </header>
-            @endisset
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-            <!-- Page Content -->
-            <main>
-                {{ $slot }}
+    <link rel="stylesheet" href="{{ asset('theme/assets/css/icons.css') }}">
+    <link rel="stylesheet" href="{{ asset('theme/assets/css/styles.css') }}">
+    @stack('styles')
+
+    <style>
+        :root {
+            --lt-primary: {{ $erpTheme['color'] ?? '#2563eb' }};
+        }
+    </style>
+</head>
+<body class="lt-app">
+    <div class="lt-shell">
+        @include('layouts.partials.sidebar')
+
+        <div class="lt-main-wrapper d-flex min-vh-100 flex-column">
+            @include('layouts.partials.header')
+
+            <main class="lt-main erp-content flex-grow-1">
+                <div class="lt-page-shell">
+                    @include('layouts.partials.alerts')
+                    @yield('content')
+                    {{ $slot ?? '' }}
+                </div>
             </main>
+
+            @include('layouts.partials.footer')
         </div>
-    </body>
+    </div>
+
+    <script src="{{ asset('theme/assets/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('theme/assets/libs/simplebar/simplebar.min.js') }}"></script>
+    <script src="{{ asset('theme/assets/libs/node-waves/waves.min.js') }}"></script>
+    <script src="{{ asset('theme/assets/libs/choices.js/public/assets/scripts/choices.min.js') }}"></script>
+    <script src="{{ asset('theme/assets/libs/flatpickr/flatpickr.min.js') }}"></script>
+    <script src="{{ asset('theme/assets/libs/@simonwep/pickr/pickr.min.js') }}"></script>
+    <script src="{{ asset('theme/assets/libs/autocomplete.js/autoComplete.min.js') }}"></script>
+    <script src="{{ asset('theme/assets/libs/apexcharts/apexcharts.min.js') }}"></script>
+    <script src="{{ asset('theme/assets/libs/chart.js/chart.umd.js') }}"></script>
+    <script src="{{ asset('theme/assets/js/main.js') }}"></script>
+    @stack('scripts')
+</body>
 </html>

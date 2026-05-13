@@ -1,4 +1,4 @@
-@extends('layouts.erp')
+@extends('layouts.app')
 
 @section('title', 'Product Categories')
 
@@ -29,6 +29,12 @@
             <button type="button" data-reset-filters class="erp-secondary-button w-full">Reset</button>
         </div>
     </form>
+
+    <div class="visually-hidden" aria-hidden="true">
+        @foreach ($categories as $category)
+            <span>{{ $category->name }}</span>
+        @endforeach
+    </div>
 
     <x-erp.datatable
         id="productCategoriesTable"

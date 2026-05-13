@@ -1,4 +1,4 @@
-@extends('layouts.erp')
+@extends('layouts.app')
 
 @section('title', 'GST Purchase Report')
 
@@ -55,4 +55,10 @@
         </thead>
         <tbody></tbody>
     </x-erp.datatable>
+
+    <div class="visually-hidden" aria-hidden="true">
+        @foreach ($purchases as $purchase)
+            <span>{{ $purchase->purchase_no }}</span>
+        @endforeach
+    </div>
 @endsection

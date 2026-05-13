@@ -1,4 +1,4 @@
-@extends('layouts.erp')
+@extends('layouts.app')
 
 @section('title', 'Company Settings')
 
@@ -66,6 +66,51 @@
             <div>
                 <label class="block text-sm font-semibold text-gray-700">Low Stock Threshold</label>
                 <input type="number" min="0" step="0.001" name="low_stock_threshold" value="{{ old('low_stock_threshold', $systemSettings->low_stock_threshold ?? 10) }}" class="mt-1 w-full rounded border-gray-300 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700">Default Tax (%)</label>
+                <input type="number" min="0" max="100" step="0.01" name="default_tax" value="{{ old('default_tax', $systemSettings->default_tax ?? 18) }}" class="mt-1 w-full rounded border-gray-300 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700">Currency</label>
+                <select name="currency" class="mt-1 w-full rounded border-gray-300 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500">
+                    @foreach (['INR', 'USD', 'EUR', 'GBP', 'AED', 'SGD'] as $currency)
+                        <option value="{{ $currency }}" @selected(old('currency', $systemSettings->currency ?? 'INR') === $currency)>{{ $currency }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700">Date Format</label>
+                <select name="date_format" class="mt-1 w-full rounded border-gray-300 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500">
+                    @foreach (['d M Y', 'd-m-Y', 'Y-m-d', 'm/d/Y'] as $format)
+                        <option value="{{ $format }}" @selected(old('date_format', $systemSettings->date_format ?? 'd M Y') === $format)>{{ now()->format($format) }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700">Theme Mode</label>
+                <select name="theme_mode" class="mt-1 w-full rounded border-gray-300 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500">
+                    <option value="light" @selected(old('theme_mode', $systemSettings->theme_mode ?? 'light') === 'light')>Light</option>
+                    <option value="dark" @selected(old('theme_mode', $systemSettings->theme_mode ?? 'light') === 'dark')>Dark</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700">Theme Color</label>
+                <input type="color" name="theme_color" value="{{ old('theme_color', $systemSettings->theme_color ?? '#2563eb') }}" class="mt-1 h-11 w-full rounded border-gray-300 p-1 shadow-sm">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700">Sidebar Style</label>
+                <select name="sidebar_style" class="mt-1 w-full rounded border-gray-300 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500">
+                    <option value="dark" @selected(old('sidebar_style', $systemSettings->sidebar_style ?? 'dark') === 'dark')>Dark</option>
+                    <option value="light" @selected(old('sidebar_style', $systemSettings->sidebar_style ?? 'dark') === 'light')>Light</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700">Header Style</label>
+                <select name="header_style" class="mt-1 w-full rounded border-gray-300 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500">
+                    <option value="light" @selected(old('header_style', $systemSettings->header_style ?? 'light') === 'light')>Light</option>
+                    <option value="dark" @selected(old('header_style', $systemSettings->header_style ?? 'light') === 'dark')>Dark</option>
+                </select>
             </div>
         </div>
 

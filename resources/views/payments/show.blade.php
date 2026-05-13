@@ -1,4 +1,4 @@
-@extends('layouts.erp')
+@extends('layouts.app')
 
 @section('title', $payment->transaction_type === 'receipt' ? 'Customer Receipt' : 'Supplier Payment')
 
