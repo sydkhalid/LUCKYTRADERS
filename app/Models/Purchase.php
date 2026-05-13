@@ -23,6 +23,7 @@ class Purchase extends Model
         'paid_amount',
         'balance_amount',
         'payment_status',
+        'payment_mode',
         'notes',
     ];
 

@@ -21,6 +21,7 @@ return new class extends Migration
             $table->decimal('paid_amount', 15, 2)->default(0);
             $table->decimal('balance_amount', 15, 2)->default(0);
             $table->enum('payment_status', ['paid', 'partial', 'pending'])->default('pending');
+            $table->enum('payment_mode', ['cash', 'bank', 'upi', 'cheque', 'credit'])->default('credit');
             $table->text('notes')->nullable();
             $table->timestamps();
 

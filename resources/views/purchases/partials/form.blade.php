@@ -33,7 +33,7 @@
         @method($method)
     @endif
 
-    <div class="grid grid-cols-1 gap-5 md:grid-cols-4">
+    <div class="grid grid-cols-1 gap-5 md:grid-cols-5">
         <div>
             <label class="mb-1 block text-sm font-medium text-gray-700">Supplier</label>
             <select name="supplier_id" class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
@@ -60,6 +60,17 @@
         <div>
             <label class="mb-1 block text-sm font-medium text-gray-700">Supplier Invoice No</label>
             <input type="text" name="supplier_invoice_no" value="{{ old('supplier_invoice_no', $purchase->supplier_invoice_no ?? '') }}" class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500">
+        </div>
+
+        <div>
+            <label class="mb-1 block text-sm font-medium text-gray-700">Payment Mode</label>
+            <select name="payment_mode" id="paymentMode" class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
+                <option value="credit" @selected(old('payment_mode', $purchase->payment_mode ?? 'credit') === 'credit')>Credit</option>
+                <option value="cash" @selected(old('payment_mode', $purchase->payment_mode ?? 'credit') === 'cash')>Cash</option>
+                <option value="bank" @selected(old('payment_mode', $purchase->payment_mode ?? 'credit') === 'bank')>Bank</option>
+                <option value="upi" @selected(old('payment_mode', $purchase->payment_mode ?? 'credit') === 'upi')>UPI</option>
+                <option value="cheque" @selected(old('payment_mode', $purchase->payment_mode ?? 'credit') === 'cheque')>Cheque</option>
+            </select>
         </div>
     </div>
 

@@ -357,7 +357,9 @@ class SaleController extends Controller
 
     private function ensureNoExternalReceipts(Sale $sale): void
     {
-        if (Payment::where('reference_type', 'sale')->where('reference_id', $sale->id)->exists()) {
+        if (Payment::whereIn('reference_type', ['sale', 'gst_invoice', 'normal_bill'])
+            ->where('reference_id', $sale->id)
+            ->exists()) {
             abort(409, 'This sale has customer receipts linked to it and cannot be edited or deleted.');
         }
     }

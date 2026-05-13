@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cashbook;
 use App\Models\Ledger;
 use App\Models\Payment;
 use App\Models\Product;
@@ -48,11 +49,12 @@ class PurchaseController extends Controller
                 'paid_amount' => $totals['paid_amount'],
                 'balance_amount' => $totals['balance_amount'],
                 'payment_status' => $this->paymentStatus($totals['paid_amount'], $totals['total_amount']),
+                'payment_mode' => $data['payment_mode'],
                 'notes' => $data['notes'] ?? null,
             ]);
 
             $this->createItemsAndStock($purchase, $totals['items']);
-            $this->increaseSupplierPayable($purchase);
+            $this->postSupplierAccounting($purchase);
 
             return $purchase;
         });
@@ -78,6 +80,8 @@ class PurchaseController extends Controller
 
     public function update(Request $request, Purchase $purchase)
     {
+        $this->ensureNoExternalSupplierPayments($purchase);
+
         $data = $this->validatedData($request);
         $totals = $this->calculateTotals($data);
 
@@ -96,6 +100,7 @@ class PurchaseController extends Controller
                 'paid_amount' => $totals['paid_amount'],
                 'balance_amount' => $totals['balance_amount'],
                 'payment_status' => $this->paymentStatus($totals['paid_amount'], $totals['total_amount']),
+                'payment_mode' => $data['payment_mode'],
                 'notes' => $data['notes'] ?? null,
             ]);
 
@@ -105,7 +110,7 @@ class PurchaseController extends Controller
                 ->delete();
 
             $this->createItemsAndStock($purchase, $totals['items']);
-            $this->increaseSupplierPayable($purchase);
+            $this->postSupplierAccounting($purchase);
         });
 
         return redirect()
@@ -115,7 +120,7 @@ class PurchaseController extends Controller
 
     public function destroy(Purchase $purchase)
     {
-        if (Payment::where('reference_type', 'purchase')->where('reference_id', $purchase->id)->exists()) {
+        if ($this->hasExternalSupplierPayments($purchase)) {
             return back()->with('error', 'Cannot delete purchase while supplier payments are linked to it.');
         }
 
@@ -127,6 +132,12 @@ class PurchaseController extends Controller
                 ->where('reference_id', $purchase->id)
                 ->delete();
             Ledger::where('reference_type', 'purchase')
+                ->where('reference_id', $purchase->id)
+                ->delete();
+            Cashbook::where('reference_type', 'purchase_direct_payment')
+                ->where('reference_id', $purchase->id)
+                ->delete();
+            Payment::where('reference_type', 'purchase_direct_payment')
                 ->where('reference_id', $purchase->id)
                 ->delete();
 
@@ -161,6 +172,7 @@ class PurchaseController extends Controller
             'bill_type' => ['required', Rule::in(['gst', 'non_gst'])],
             'supplier_invoice_no' => ['nullable', 'string', 'max:255'],
             'paid_amount' => ['required', 'numeric', 'min:0'],
+            'payment_mode' => ['required', Rule::in(['cash', 'bank', 'upi', 'cheque', 'credit'])],
             'notes' => ['nullable', 'string'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.product_id' => ['required', 'exists:products,id'],
@@ -211,6 +223,12 @@ class PurchaseController extends Controller
             ]);
         }
 
+        if ($paidAmount > 0 && $data['payment_mode'] === 'credit') {
+            throw ValidationException::withMessages([
+                'payment_mode' => 'Use cash, bank, UPI, or cheque when paid amount is entered.',
+            ]);
+        }
+
         return [
             'items' => $items,
             'subtotal' => $subtotal,
@@ -242,25 +260,62 @@ class PurchaseController extends Controller
         }
     }
 
-    private function increaseSupplierPayable(Purchase $purchase): void
+    private function postSupplierAccounting(Purchase $purchase): void
     {
         $supplier = Supplier::lockForUpdate()->findOrFail($purchase->supplier_id);
-        $newBalance = round((float) $supplier->current_balance + (float) $purchase->balance_amount, 2);
-        $supplier->forceFill(['current_balance' => $newBalance])->save();
+        $balanceAfterPurchase = round((float) $supplier->current_balance + (float) $purchase->total_amount, 2);
+        $finalBalance = round($balanceAfterPurchase - (float) $purchase->paid_amount, 2);
 
-        if ((float) $purchase->balance_amount > 0) {
+        Ledger::create([
+            'ledger_date' => $purchase->purchase_date,
+            'party_type' => 'supplier',
+            'party_id' => $supplier->id,
+            'reference_type' => 'purchase',
+            'reference_id' => $purchase->id,
+            'debit' => 0,
+            'credit' => $purchase->total_amount,
+            'balance' => $balanceAfterPurchase,
+            'remarks' => 'Purchase '.$purchase->purchase_no,
+        ]);
+
+        if ((float) $purchase->paid_amount > 0) {
+            $payment = Payment::create([
+                'payment_no' => $this->nextPaymentNo('PAY'),
+                'payment_date' => $purchase->purchase_date,
+                'party_type' => 'supplier',
+                'party_id' => $supplier->id,
+                'transaction_type' => 'payment',
+                'reference_type' => 'purchase_direct_payment',
+                'reference_id' => $purchase->id,
+                'amount' => $purchase->paid_amount,
+                'payment_mode' => $purchase->payment_mode,
+                'notes' => 'Direct payment for '.$purchase->purchase_no,
+            ]);
+
             Ledger::create([
                 'ledger_date' => $purchase->purchase_date,
                 'party_type' => 'supplier',
                 'party_id' => $supplier->id,
-                'reference_type' => 'purchase',
+                'reference_type' => 'purchase_direct_payment',
                 'reference_id' => $purchase->id,
-                'debit' => 0,
-                'credit' => $purchase->balance_amount,
-                'balance' => $newBalance,
-                'remarks' => 'Purchase payable '.$purchase->purchase_no,
+                'debit' => $purchase->paid_amount,
+                'credit' => 0,
+                'balance' => $finalBalance,
+                'remarks' => 'Purchase payment '.$payment->payment_no,
+            ]);
+
+            Cashbook::create([
+                'entry_date' => $purchase->purchase_date,
+                'transaction_type' => $purchase->payment_mode === 'cash' ? 'cash_out' : 'bank_out',
+                'reference_type' => 'purchase_direct_payment',
+                'reference_id' => $purchase->id,
+                'amount' => $purchase->paid_amount,
+                'payment_mode' => $purchase->payment_mode,
+                'remarks' => $purchase->purchase_no.' - '.$supplier->name,
             ]);
         }
+
+        $supplier->forceFill(['current_balance' => $finalBalance])->save();
     }
 
     private function reversePurchasePosting(Purchase $purchase): void
@@ -274,7 +329,13 @@ class PurchaseController extends Controller
             'current_balance' => round((float) $supplier->current_balance - (float) $purchase->balance_amount, 2),
         ])->save();
 
-        Ledger::where('reference_type', 'purchase')
+        Ledger::whereIn('reference_type', ['purchase', 'purchase_direct_payment'])
+            ->where('reference_id', $purchase->id)
+            ->delete();
+        Cashbook::where('reference_type', 'purchase_direct_payment')
+            ->where('reference_id', $purchase->id)
+            ->delete();
+        Payment::where('reference_type', 'purchase_direct_payment')
             ->where('reference_id', $purchase->id)
             ->delete();
     }
@@ -298,5 +359,33 @@ class PurchaseController extends Controller
         } while (Purchase::where('purchase_no', $purchaseNo)->exists());
 
         return $purchaseNo;
+    }
+
+    private function nextPaymentNo(string $prefix): string
+    {
+        $date = now()->format('Ymd');
+        $sequence = Payment::where('payment_no', 'like', $prefix.'-'.$date.'-%')->count() + 1;
+
+        do {
+            $paymentNo = sprintf('%s-%s-%05d', $prefix, $date, $sequence++);
+        } while (Payment::where('payment_no', $paymentNo)->exists());
+
+        return $paymentNo;
+    }
+
+    private function ensureNoExternalSupplierPayments(Purchase $purchase): void
+    {
+        abort_if(
+            $this->hasExternalSupplierPayments($purchase),
+            409,
+            'This purchase has supplier payments linked to it and cannot be edited or deleted.'
+        );
+    }
+
+    private function hasExternalSupplierPayments(Purchase $purchase): bool
+    {
+        return Payment::where('reference_type', 'purchase')
+            ->where('reference_id', $purchase->id)
+            ->exists();
     }
 }

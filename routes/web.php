@@ -4,6 +4,8 @@ use App\Http\Controllers\CashbookController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CustomerReceiptController;
 use App\Http\Controllers\LedgerController;
+use App\Http\Controllers\LoanController;
+use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
@@ -51,6 +53,20 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/cashbook', [CashbookController::class, 'cashbook'])->name('cashbook.index');
     Route::get('/bankbook', [CashbookController::class, 'bankbook'])->name('bankbook.index');
+
+    Route::get('/loans/reports/active', [LoanController::class, 'activeReport'])->name('loans.reports.active');
+    Route::get('/loans/reports/closed', [LoanController::class, 'closedReport'])->name('loans.reports.closed');
+    Route::get('/loans/{loan}/transactions', [LoanController::class, 'transactions'])->name('loans.transactions.index');
+    Route::get('/loans/{loan}/transactions/create', [LoanController::class, 'createTransaction'])->name('loans.transactions.create');
+    Route::post('/loans/{loan}/transactions', [LoanController::class, 'storeTransaction'])->name('loans.transactions.store');
+    Route::resource('loans', LoanController::class)->only(['index', 'create', 'store', 'show']);
+
+    Route::get('/partners/profit-share', [PartnerController::class, 'profitShareReport'])->name('partners.profit-share');
+    Route::get('/partners/{partner}/investments/create', [PartnerController::class, 'createInvestment'])->name('partners.investments.create');
+    Route::get('/partners/{partner}/withdrawals/create', [PartnerController::class, 'createWithdrawal'])->name('partners.withdrawals.create');
+    Route::get('/partners/{partner}/transactions/create', [PartnerController::class, 'createTransaction'])->name('partners.transactions.create');
+    Route::post('/partners/{partner}/transactions', [PartnerController::class, 'storeTransaction'])->name('partners.transactions.store');
+    Route::resource('partners', PartnerController::class)->only(['index', 'create', 'store', 'show']);
 });
 
 require __DIR__.'/auth.php';
