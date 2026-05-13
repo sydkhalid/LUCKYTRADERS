@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\RespondsToAjax;
 use App\Models\ProductCategory;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class ProductCategoryController extends Controller
 {
+    use RespondsToAjax;
+
     public function index(Request $request)
     {
         $search = trim((string) $request->query('search'));
@@ -35,9 +38,7 @@ class ProductCategoryController extends Controller
     {
         ProductCategory::create($this->validatedData($request));
 
-        return redirect()
-            ->route('product-categories.index')
-            ->with('success', 'Product category created successfully.');
+        return $this->successResponse($request, 'Product category created successfully.', route('product-categories.index'));
     }
 
     public function edit(ProductCategory $productCategory)
@@ -60,9 +61,7 @@ class ProductCategoryController extends Controller
     {
         $productCategory->update($this->validatedData($request));
 
-        return redirect()
-            ->route('product-categories.index')
-            ->with('success', 'Product category updated successfully.');
+        return $this->successResponse($request, 'Product category updated successfully.', route('product-categories.index'));
     }
 
     public function destroy(Request $request, ProductCategory $productCategory)
@@ -70,14 +69,12 @@ class ProductCategoryController extends Controller
         $this->authorizeDelete($request);
 
         if ($productCategory->products()->exists()) {
-            return back()->with('error', 'Cannot delete category while products are linked to it.');
+            return $this->errorResponse($request, 'Cannot delete category while products are linked to it.', 409);
         }
 
         $productCategory->delete();
 
-        return redirect()
-            ->route('product-categories.index')
-            ->with('success', 'Product category deleted successfully.');
+        return $this->successResponse($request, 'Product category deleted successfully.', route('product-categories.index'));
     }
 
     private function validatedData(Request $request): array

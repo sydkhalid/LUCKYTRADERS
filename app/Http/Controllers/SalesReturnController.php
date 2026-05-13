@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\RespondsToAjax;
 use App\Http\Requests\Returns\StoreSalesReturnRequest;
 use App\Models\Sale;
 use App\Models\SalesReturn;
@@ -13,6 +14,8 @@ use Illuminate\Http\Request;
 
 class SalesReturnController extends Controller
 {
+    use RespondsToAjax;
+
     public function index()
     {
         $returns = SalesReturn::with(['sale', 'customer'])
@@ -43,9 +46,7 @@ class SalesReturnController extends Controller
     {
         $salesReturn = $postingService->recordSalesReturn($request->validated());
 
-        return redirect()
-            ->route('sales-returns.show', $salesReturn)
-            ->with('success', 'Sales return '.$salesReturn->return_no.' saved successfully.');
+        return $this->successResponse($request, 'Sales return '.$salesReturn->return_no.' saved successfully.', route('sales-returns.show', $salesReturn));
     }
 
     public function show(SalesReturn $salesReturn)

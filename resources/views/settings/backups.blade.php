@@ -11,12 +11,26 @@
         <div class="flex flex-wrap gap-2">
             <a href="{{ route('settings.backups.settings') }}" class="rounded border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Backup Settings</a>
             <a href="{{ route('settings.company') }}" class="rounded border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Company Settings</a>
-            <form method="POST" action="{{ route('settings.backups.store') }}">
+            <form
+                method="POST"
+                action="{{ route('settings.backups.store') }}"
+                data-confirm-action
+                data-confirm-title="Create database backup?"
+                data-confirm-text="The backup task may take a few moments to complete."
+                data-confirm-button="Create backup"
+            >
                 @csrf
                 <input type="hidden" name="backup_type" value="database">
                 <button class="rounded bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">Create Database Backup</button>
             </form>
-            <form method="POST" action="{{ route('settings.backups.store') }}">
+            <form
+                method="POST"
+                action="{{ route('settings.backups.store') }}"
+                data-confirm-action
+                data-confirm-title="Create full backup?"
+                data-confirm-text="This includes files and database and may take longer than a database-only backup."
+                data-confirm-button="Create full backup"
+            >
                 @csrf
                 <input type="hidden" name="backup_type" value="full">
                 <button class="rounded bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800">Create Full Backup</button>
@@ -68,7 +82,13 @@
                         <td class="px-4 py-3">
                             <div class="flex justify-end gap-2">
                                 <a href="{{ route('settings.backups.download', $backup['encoded']) }}" class="rounded border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50">Download</a>
-                                <form method="POST" action="{{ route('settings.backups.destroy', $backup['encoded']) }}" onsubmit="return confirm('Delete this backup file?')">
+                                <form
+                                    method="POST"
+                                    action="{{ route('settings.backups.destroy', $backup['encoded']) }}"
+                                    data-confirm-delete
+                                    data-confirm-title="Delete this backup file?"
+                                    data-confirm-text="This backup file will be permanently removed from private storage."
+                                >
                                     @csrf
                                     @method('DELETE')
                                     <button class="rounded bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700">Delete</button>

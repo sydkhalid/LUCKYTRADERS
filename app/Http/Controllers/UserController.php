@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\RespondsToAjax;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -14,6 +16,8 @@ use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
+    use RespondsToAjax;
+
     public function index(): View
     {
         $users = User::with('roles')
@@ -34,7 +38,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): JsonResponse|RedirectResponse
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -53,9 +57,7 @@ class UserController extends Controller
 
         $user->syncRoles([$data['role']]);
 
-        return redirect()
-            ->route('users.index')
-            ->with('success', 'Staff user created successfully.');
+        return $this->successResponse($request, 'Staff user created successfully.', route('users.index'));
     }
 
     public function edit(User $user): View
@@ -68,7 +70,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function update(Request $request, User $user): RedirectResponse
+    public function update(Request $request, User $user): JsonResponse|RedirectResponse
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -100,9 +102,7 @@ class UserController extends Controller
         $user->forceFill($updates)->save();
         $user->syncRoles([$data['role']]);
 
-        return redirect()
-            ->route('users.index')
-            ->with('success', 'Staff user updated successfully.');
+        return $this->successResponse($request, 'Staff user updated successfully.', route('users.index'));
     }
 
     /**

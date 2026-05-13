@@ -95,25 +95,28 @@
     ></div>
 
     <aside
-        class="erp-sidebar fixed inset-y-0 left-0 z-50 flex w-72 -translate-x-full flex-col border-r border-white/10 bg-slate-950 text-white shadow-2xl transition-all duration-200 lg:static lg:z-auto lg:w-72 lg:translate-x-0 lg:shadow-none"
+        class="erp-sidebar fixed inset-y-0 left-0 z-50 flex w-72 -translate-x-full flex-col border-r border-white/10 text-white shadow-2xl transition-all duration-200 lg:sticky lg:top-0 lg:z-auto lg:h-screen lg:w-72 lg:translate-x-0 lg:shadow-none"
         :class="{ 'translate-x-0': sidebarOpen, 'lg:!w-20': sidebarCollapsed, 'lg:!w-72': !sidebarCollapsed }"
         aria-label="Primary"
     >
         <div class="flex h-20 items-center gap-3 border-b border-white/10 px-5">
-            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-cyan-400 text-sm font-black tracking-wide text-slate-950">
+            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-300 text-sm font-black tracking-wide text-slate-950 shadow-lg shadow-amber-950/20 ring-1 ring-white/20">
                 {{ $erpInitials }}
             </div>
             <div class="min-w-0" x-show="!sidebarCollapsed" x-transition.opacity>
                 <p class="truncate text-base font-black tracking-wide">{{ $erpCompanyName }}</p>
-                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Steel ERP</p>
+                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100/70">Steel ERP</p>
             </div>
             <button
                 type="button"
-                class="ml-auto hidden h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white lg:inline-flex"
+                class="ml-auto hidden h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-cyan-100 hover:bg-white/10 hover:text-white lg:inline-flex"
                 @click="toggleSidebarCollapse()"
                 :aria-label="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
             >
-                <span x-text="sidebarCollapsed ? '>' : '<'" class="text-sm font-black"></span>
+                <svg class="h-4 w-4 transition-transform" :class="{ 'rotate-180': sidebarCollapsed }" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M11.78 4.22a.75.75 0 0 1 0 1.06L7.06 10l4.72 4.72a.75.75 0 1 1-1.06 1.06l-5.25-5.25a.75.75 0 0 1 0-1.06l5.25-5.25a.75.75 0 0 1 1.06 0Z" clip-rule="evenodd" />
+                    <path fill-rule="evenodd" d="M15.78 4.22a.75.75 0 0 1 0 1.06L11.06 10l4.72 4.72a.75.75 0 1 1-1.06 1.06l-5.25-5.25a.75.75 0 0 1 0-1.06l5.25-5.25a.75.75 0 0 1 1.06 0Z" clip-rule="evenodd" />
+                </svg>
             </button>
         </div>
 
@@ -127,14 +130,26 @@
 
                 @if ($hasChildren)
                     <div
-                        x-data="{ open: {{ $isParentActive ? 'true' : 'false' }} }"
+                        x-data="{
+                            open: {{ $isParentActive ? 'true' : 'false' }},
+                            toggle() {
+                                if (sidebarCollapsed) {
+                                    setSidebarCollapsed(false);
+                                    this.open = true;
+                                    return;
+                                }
+
+                                this.open = ! this.open;
+                            }
+                        }"
                         class="space-y-1"
                     >
                         <button
                             type="button"
                             class="erp-nav-parent {{ $isParentActive ? 'erp-nav-parent-active' : '' }}"
-                            @click="if (sidebarCollapsed) { setSidebarCollapsed(false); open = true } else { open = ! open }"
+                            @click="toggle()"
                             :aria-expanded="open.toString()"
+                            title="{{ $item['label'] }}"
                         >
                             <span class="erp-nav-icon">
                                 <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -150,8 +165,13 @@
                         <div
                             x-cloak
                             x-show="open && !sidebarCollapsed"
-                            x-transition.opacity
-                            class="space-y-1 pl-11 pr-1"
+                            x-transition:enter="transition ease-out duration-150"
+                            x-transition:enter-start="opacity-0 -translate-y-1"
+                            x-transition:enter-end="opacity-100 translate-y-0"
+                            x-transition:leave="transition ease-in duration-100"
+                            x-transition:leave-start="opacity-100 translate-y-0"
+                            x-transition:leave-end="opacity-0 -translate-y-1"
+                            class="erp-nav-children space-y-1"
                         >
                             @foreach ($children as $child)
                                 @php $isActive = $erpItemActive($child); @endphp
@@ -173,6 +193,7 @@
                         href="{{ route($item['route']) }}"
                         class="erp-nav-parent {{ $isActive ? 'erp-nav-parent-active' : '' }}"
                         @click="sidebarOpen = false"
+                        title="{{ $item['label'] }}"
                         @if ($isActive) aria-current="page" @endif
                     >
                         <span class="erp-nav-icon">
@@ -187,9 +208,9 @@
         </nav>
 
         <div class="border-t border-white/10 p-4">
-            <div class="rounded-2xl bg-white/5 p-3" x-show="!sidebarCollapsed" x-transition.opacity>
+            <div class="rounded-xl border border-white/10 bg-white/5 p-3 shadow-inner shadow-black/10" x-show="!sidebarCollapsed" x-transition.opacity>
                 <p class="truncate text-sm font-semibold">{{ $erpUser?->name }}</p>
-                <p class="mt-1 truncate text-xs text-slate-400">{{ $erpUser?->role ?: 'ERP User' }}</p>
+                <p class="mt-1 truncate text-xs text-cyan-100/65">{{ $erpUser?->role ?: 'ERP User' }}</p>
             </div>
         </div>
     </aside>

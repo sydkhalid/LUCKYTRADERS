@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\RespondsToAjax;
 use App\Http\Requests\Partners\StorePartnerRequest;
 use App\Http\Requests\Partners\UpdatePartnerRequest;
 use App\Models\Ledger;
@@ -11,6 +12,8 @@ use Illuminate\Http\Request;
 
 class PartnerController extends Controller
 {
+    use RespondsToAjax;
+
     public function index()
     {
         $partners = Partner::orderBy('name')->paginate(20);
@@ -30,9 +33,7 @@ class PartnerController extends Controller
     {
         $partner = $postingService->createPartner($request->validated());
 
-        return redirect()
-            ->route('partners.show', $partner)
-            ->with('success', 'Partner '.$partner->name.' created successfully.');
+        return $this->successResponse($request, 'Partner '.$partner->name.' created successfully.', route('partners.show', $partner));
     }
 
     public function show(Partner $partner)
@@ -61,9 +62,7 @@ class PartnerController extends Controller
     {
         $partner->update($request->validated());
 
-        return redirect()
-            ->route('partners.show', $partner)
-            ->with('success', 'Partner '.$partner->name.' updated successfully.');
+        return $this->successResponse($request, 'Partner '.$partner->name.' updated successfully.', route('partners.show', $partner));
     }
 
     public function profitShareReport(Request $request, PartnerPostingService $postingService)

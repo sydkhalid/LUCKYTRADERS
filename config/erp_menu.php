@@ -14,7 +14,6 @@ return [
         'children' => [
             ['label' => 'Product Categories', 'route' => 'product-categories.index', 'active' => ['product-categories.*'], 'permission' => 'manage_products'],
             ['label' => 'Products', 'route' => 'products.index', 'active' => ['products.*'], 'permission' => 'manage_products'],
-            ['label' => 'Units', 'route' => 'units.index', 'active' => ['units.*'], 'permission' => 'manage_products'],
             ['label' => 'Customers', 'route' => 'customers.index', 'active' => ['customers.*'], 'permission' => 'manage_customers'],
             ['label' => 'Suppliers', 'route' => 'suppliers.index', 'active' => ['suppliers.*'], 'permission' => 'manage_suppliers'],
         ],
@@ -26,7 +25,6 @@ return [
             ['label' => 'Stock Summary', 'route' => 'reports.stock-valuation', 'active' => ['reports.stock-valuation'], 'permission' => 'manage_products|manage_stock_adjustments|view_reports'],
             ['label' => 'Stock Movements', 'route' => 'stock-adjustments.movements', 'active' => ['stock-adjustments.movements', 'stock-adjustments.products.history'], 'permission' => 'manage_stock_adjustments'],
             ['label' => 'Stock Adjustments', 'route' => 'stock-adjustments.index', 'active' => ['stock-adjustments.index', 'stock-adjustments.create', 'stock-adjustments.show', 'stock-adjustments.product-report'], 'permission' => 'manage_stock_adjustments'],
-            ['label' => 'Low Stock Alerts', 'route' => 'inventory.low-stock-alerts', 'active' => ['inventory.low-stock-alerts'], 'permission' => 'manage_products|manage_stock_adjustments'],
         ],
     ],
     [
@@ -62,16 +60,14 @@ return [
             ['label' => 'Ledgers', 'route' => 'ledgers.index', 'active' => ['ledgers.*'], 'permission' => 'manage_ledgers'],
             ['label' => 'Expenses', 'route' => 'expenses.index', 'active' => ['expenses.*', 'expense-categories.*'], 'permission' => 'manage_expenses'],
             ['label' => 'Profit & Loss', 'route' => 'reports.profit-loss', 'active' => ['reports.profit-loss'], 'permission' => 'manage_expenses|view_reports'],
-            ['label' => 'Journal Entries', 'route' => 'journal-entries.index', 'active' => ['journal-entries.*'], 'permission' => 'manage_ledgers'],
         ],
     ],
     [
         'label' => 'Loans',
         'icon' => 'M5 8h14M7 4h10v16H7V4Zm3 8h4M10 16h4',
         'children' => [
-            ['label' => 'Loan Taken', 'route' => 'loans.taken', 'active' => ['loans.taken'], 'permission' => 'manage_loans'],
-            ['label' => 'Loan Given', 'route' => 'loans.given', 'active' => ['loans.given'], 'permission' => 'manage_loans'],
-            ['label' => 'Loan Transactions', 'route' => 'loans.transactions.all', 'active' => ['loans.transactions.*'], 'permission' => 'manage_loans'],
+            ['label' => 'Loan List', 'route' => 'loans.index', 'active' => ['loans.index', 'loans.show'], 'permission' => 'manage_loans'],
+            ['label' => 'Create Loan', 'route' => 'loans.create', 'active' => ['loans.create'], 'permission' => 'manage_loans'],
             ['label' => 'Active Loans', 'route' => 'loans.reports.active', 'active' => ['loans.reports.active'], 'permission' => 'manage_loans'],
             ['label' => 'Closed Loans', 'route' => 'loans.reports.closed', 'active' => ['loans.reports.closed'], 'permission' => 'manage_loans'],
         ],
@@ -80,9 +76,8 @@ return [
         'label' => 'Partners',
         'icon' => 'M8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm8 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM3.5 20a4.5 4.5 0 0 1 9 0M11.5 20a4.5 4.5 0 0 1 9 0',
         'children' => [
-            ['label' => 'Partner List', 'route' => 'partners.index', 'active' => ['partners.index', 'partners.show', 'partners.create', 'partners.edit'], 'permission' => 'manage_partners'],
-            ['label' => 'Investments', 'route' => 'partners.investments.index', 'active' => ['partners.investments.*'], 'permission' => 'manage_partners'],
-            ['label' => 'Withdrawals', 'route' => 'partners.withdrawals.index', 'active' => ['partners.withdrawals.*'], 'permission' => 'manage_partners'],
+            ['label' => 'Partner List', 'route' => 'partners.index', 'active' => ['partners.index', 'partners.show', 'partners.edit'], 'permission' => 'manage_partners'],
+            ['label' => 'Add Partner', 'route' => 'partners.create', 'active' => ['partners.create'], 'permission' => 'manage_partners'],
             ['label' => 'Profit Share', 'route' => 'partners.profit-share', 'active' => ['partners.profit-share'], 'permission' => 'manage_partners'],
             ['label' => 'Partner Ledger', 'route' => 'reports.partner-balance', 'active' => ['reports.partner-balance', 'partners.transactions.*'], 'permission' => 'manage_partners|view_reports'],
         ],
@@ -93,7 +88,8 @@ return [
         'children' => [
             ['label' => 'GST Sales Report', 'route' => 'gst-reports.sales', 'active' => ['gst-reports.sales'], 'permission' => 'view_gst_reports'],
             ['label' => 'GST Purchase Report', 'route' => 'gst-reports.purchases', 'active' => ['gst-reports.purchases'], 'permission' => 'view_gst_reports'],
-            ['label' => 'GST Return Report', 'route' => 'gst-reports.returns', 'active' => ['gst-reports.returns', 'gst-reports.sales-returns', 'gst-reports.purchase-returns'], 'permission' => 'view_gst_reports'],
+            ['label' => 'Sales Return GST', 'route' => 'gst-reports.sales-returns', 'active' => ['gst-reports.sales-returns'], 'permission' => 'view_gst_reports'],
+            ['label' => 'Purchase Return GST', 'route' => 'gst-reports.purchase-returns', 'active' => ['gst-reports.purchase-returns'], 'permission' => 'view_gst_reports'],
             ['label' => 'GST Summary', 'route' => 'gst-reports.index', 'active' => ['gst-reports.index'], 'permission' => 'view_gst_reports'],
             ['label' => 'Auditor Export', 'route' => 'gst-reports.export', 'active' => ['gst-reports.export'], 'permission' => 'export_gst_reports'],
         ],
@@ -102,8 +98,7 @@ return [
         'label' => 'Reports',
         'icon' => 'M5 19V5m0 14h14M9 15V9m4 6V7m4 8v-4',
         'children' => [
-            ['label' => 'Sales Report', 'route' => 'reports.sales', 'active' => ['reports.sales'], 'permission' => 'view_reports'],
-            ['label' => 'Purchase Report', 'route' => 'reports.purchases', 'active' => ['reports.purchases'], 'permission' => 'view_reports'],
+            ['label' => 'Report Center', 'route' => 'reports.index', 'active' => ['reports.index'], 'permission' => 'view_reports'],
             ['label' => 'Stock Report', 'route' => 'reports.stock-valuation', 'active' => ['reports.stock-valuation'], 'permission' => 'view_reports'],
             ['label' => 'Product Profit Report', 'route' => 'reports.product-profit', 'active' => ['reports.product-profit'], 'permission' => 'view_reports'],
             ['label' => 'Customer Report', 'route' => 'reports.customer-outstanding', 'active' => ['reports.customer-outstanding'], 'permission' => 'view_reports'],
@@ -117,8 +112,6 @@ return [
         'icon' => 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 8a7 7 0 0 1 14 0M18 8h3M19.5 6.5v3',
         'children' => [
             ['label' => 'Users', 'route' => 'users.index', 'active' => ['users.*'], 'permission' => 'manage_users'],
-            ['label' => 'Roles', 'route' => 'roles.index', 'active' => ['roles.*'], 'permission' => 'manage_users'],
-            ['label' => 'Permissions', 'route' => 'permissions.index', 'active' => ['permissions.*'], 'permission' => 'manage_users'],
             ['label' => 'Activity Logs', 'route' => 'activity-logs.index', 'active' => ['activity-logs.*'], 'permission' => 'view_activity_logs'],
         ],
     ],
@@ -130,7 +123,6 @@ return [
             ['label' => 'Invoice Settings', 'route' => 'settings.invoice', 'active' => ['settings.invoice', 'settings.bank', 'settings.terms', 'settings.media'], 'permission' => 'manage_settings'],
             ['label' => 'Backup', 'route' => 'settings.backups.index', 'active' => ['settings.backups.*'], 'permission' => 'manage_settings', 'super_admin' => true],
             ['label' => 'Notifications', 'route' => 'notifications.index', 'active' => ['notifications.*'], 'permission' => null],
-            ['label' => 'Security Settings', 'route' => 'settings.security', 'active' => ['settings.security'], 'permission' => 'manage_settings'],
         ],
     ],
 ];

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\RespondsToAjax;
 use App\Http\Requests\Quotations\ConvertQuotationRequest;
 use App\Http\Requests\Quotations\StoreQuotationRequest;
 use App\Http\Requests\Quotations\UpdateQuotationRequest;
@@ -15,6 +16,8 @@ use Illuminate\Http\Request;
 
 class QuotationController extends Controller
 {
+    use RespondsToAjax;
+
     public function index()
     {
         $quotations = Quotation::with('customer')
@@ -38,9 +41,7 @@ class QuotationController extends Controller
     {
         $quotation = $quotationService->createQuotation($request->validated());
 
-        return redirect()
-            ->route('quotations.show', $quotation)
-            ->with('success', 'Quotation '.$quotation->quotation_no.' created successfully.');
+        return $this->successResponse($request, 'Quotation '.$quotation->quotation_no.' created successfully.', route('quotations.show', $quotation));
     }
 
     public function show(Quotation $quotation)
@@ -79,9 +80,7 @@ class QuotationController extends Controller
             );
         }
 
-        return redirect()
-            ->route('quotations.show', $quotation)
-            ->with('success', 'Quotation '.$quotation->quotation_no.' updated successfully.');
+        return $this->successResponse($request, 'Quotation '.$quotation->quotation_no.' updated successfully.', route('quotations.show', $quotation));
     }
 
     public function print(Quotation $quotation)
@@ -120,9 +119,7 @@ class QuotationController extends Controller
     {
         $sale = $quotationService->convertToSale($quotation, $request->validated());
 
-        return redirect()
-            ->route('sales.show', $sale)
-            ->with('success', 'Quotation '.$quotation->quotation_no.' converted to sale '.$sale->sale_no.'.');
+        return $this->successResponse($request, 'Quotation '.$quotation->quotation_no.' converted to sale '.$sale->sale_no.'.', route('sales.show', $sale));
     }
 
     private function formData(): array

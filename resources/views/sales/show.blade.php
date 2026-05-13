@@ -16,7 +16,14 @@
                 <a href="{{ route('sales.edit', $sale) }}" class="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Edit</a>
             @endcan
             @if (auth()->user()?->hasRole('Super Admin') || auth()->user()?->hasRole('Admin'))
-                <form method="POST" action="{{ route('sales.destroy', $sale) }}" onsubmit="return confirm('Cancel this sale and reverse stock?')">
+                <form
+                    method="POST"
+                    action="{{ route('sales.destroy', $sale) }}"
+                    data-confirm-delete
+                    data-confirm-title="Cancel this sale?"
+                    data-confirm-text="This will reverse stock and remove linked direct payment entries."
+                    data-confirm-button="Yes, cancel sale"
+                >
                     @csrf
                     @method('DELETE')
                     <button class="rounded border border-red-200 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50">Cancel Sale</button>

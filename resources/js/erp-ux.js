@@ -63,6 +63,13 @@ function escapeSelector(value) {
     return String(value).replace(/"/g, '\\"');
 }
 
+function escapeHtml(value) {
+    const element = document.createElement('div');
+    element.textContent = value || '';
+
+    return element.innerHTML;
+}
+
 function inputNameFromErrorKey(key) {
     const parts = String(key).split('.');
 
@@ -83,6 +90,10 @@ function clearAjaxErrors(form) {
         element.innerHTML = '';
         element.classList.add('hidden');
     });
+    form.querySelectorAll('[data-error-for]').forEach((element) => {
+        element.textContent = '';
+        element.classList.add('hidden');
+    });
 }
 
 function renderAjaxErrors(form, errors) {
@@ -90,7 +101,7 @@ function renderAjaxErrors(form, errors) {
     const messages = Object.values(errors || {}).flat();
 
     if (summary && messages.length) {
-        summary.innerHTML = `<ul class="list-disc space-y-1 pl-5">${messages.map((message) => `<li>${message}</li>`).join('')}</ul>`;
+        summary.innerHTML = `<ul class="list-disc space-y-1 pl-5">${messages.map((message) => `<li>${escapeHtml(message)}</li>`).join('')}</ul>`;
         summary.classList.remove('hidden');
     }
 
@@ -328,6 +339,13 @@ function initializeDataTables() {
 
                     return data;
                 },
+                error(xhr) {
+                    const message = xhr.status === 403
+                        ? 'You do not have permission to view this table.'
+                        : 'Unable to load table records.';
+
+                    modal('error', 'Table loading failed', message);
+                },
             };
             options.columns = columns;
         }
@@ -345,6 +363,7 @@ function initializeDataTables() {
             });
             filterForm?.querySelector('[data-reset-filters]')?.addEventListener('click', () => {
                 filterForm.reset();
+                window.$?.(filterForm).find('select[data-searchable], select.js-searchable').trigger('change.select2');
                 instance.ajax.reload();
             });
         }

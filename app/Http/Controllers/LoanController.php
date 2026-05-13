@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\RespondsToAjax;
 use App\Http\Requests\Loans\StoreLoanRequest;
 use App\Models\Loan;
 use App\Models\Partner;
@@ -9,6 +10,8 @@ use App\Services\LoanPostingService;
 
 class LoanController extends Controller
 {
+    use RespondsToAjax;
+
     public function index()
     {
         $loans = Loan::with('partner')
@@ -37,9 +40,7 @@ class LoanController extends Controller
     {
         $loan = $postingService->createLoan($request->validated());
 
-        return redirect()
-            ->route('loans.show', $loan)
-            ->with('success', 'Loan '.$loan->loan_no.' created successfully.');
+        return $this->successResponse($request, 'Loan '.$loan->loan_no.' created successfully.', route('loans.show', $loan));
     }
 
     public function show(Loan $loan, LoanPostingService $postingService)

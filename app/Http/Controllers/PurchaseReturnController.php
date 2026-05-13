@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\RespondsToAjax;
 use App\Http\Requests\Returns\StorePurchaseReturnRequest;
 use App\Models\Purchase;
 use App\Models\PurchaseReturn;
@@ -13,6 +14,8 @@ use Illuminate\Http\Request;
 
 class PurchaseReturnController extends Controller
 {
+    use RespondsToAjax;
+
     public function index()
     {
         $returns = PurchaseReturn::with(['purchase', 'supplier'])
@@ -43,9 +46,7 @@ class PurchaseReturnController extends Controller
     {
         $purchaseReturn = $postingService->recordPurchaseReturn($request->validated());
 
-        return redirect()
-            ->route('purchase-returns.show', $purchaseReturn)
-            ->with('success', 'Purchase return '.$purchaseReturn->return_no.' saved successfully.');
+        return $this->successResponse($request, 'Purchase return '.$purchaseReturn->return_no.' saved successfully.', route('purchase-returns.show', $purchaseReturn));
     }
 
     public function show(PurchaseReturn $purchaseReturn)

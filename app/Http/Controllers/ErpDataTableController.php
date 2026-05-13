@@ -280,8 +280,8 @@ class ErpDataTableController extends Controller
 
         return DataTables::eloquent($query)
             ->editColumn('loan_date', fn (Loan $loan) => $this->date($loan->loan_date))
-            ->editColumn('type', fn (Loan $loan) => $this->badge($loan->typeLabel()))
-            ->editColumn('amount', fn (Loan $loan) => $this->money($loan->amount))
+            ->editColumn('loan_type', fn (Loan $loan) => $this->badge($loan->typeLabel()))
+            ->editColumn('total_amount', fn (Loan $loan) => $this->money($loan->total_amount))
             ->editColumn('balance_amount', fn (Loan $loan) => $this->money($loan->balance_amount))
             ->editColumn('status', fn (Loan $loan) => $this->badge($loan->status))
             ->addColumn('actions', fn (Loan $loan) => $this->actions([
@@ -289,7 +289,7 @@ class ErpDataTableController extends Controller
                 ['Transaction', route('loans.transactions.create', $loan)],
                 ['PDF', route('loans.pdf', $loan)],
             ]))
-            ->rawColumns(['type', 'status', 'actions'])
+            ->rawColumns(['loan_type', 'status', 'actions'])
             ->toJson();
     }
 

@@ -57,7 +57,16 @@ class ProductManagementTest extends TestCase
         $this->actingAs($admin)
             ->get(route('products.index', ['search' => 'Updated']))
             ->assertOk()
-            ->assertSee('MS Rod Updated');
+            ->assertSee('data-erp-datatable', false);
+
+        $this->assertDataTableSearchHas($admin, 'products', 'Updated', 'MS Rod Updated', [
+            'name',
+            'code',
+            'size',
+            'unit',
+            'hsn_code',
+            'status',
+        ]);
 
         $this->actingAs($admin)
             ->get(route('products.show', $product))
@@ -83,7 +92,13 @@ class ProductManagementTest extends TestCase
         $this->actingAs($admin)
             ->get(route('product-categories.index', ['search' => 'angle']))
             ->assertOk()
-            ->assertSee('Angles');
+            ->assertSee('data-erp-datatable', false);
+
+        $this->assertDataTableSearchHas($admin, 'product-categories', 'angle', 'Angles', [
+            'name',
+            'description',
+            'status',
+        ]);
 
         $this->actingAs($admin)
             ->get(route('product-categories.show', $category))
@@ -183,7 +198,16 @@ class ProductManagementTest extends TestCase
         $this->actingAs($admin)
             ->get(route('customers.index', ['search' => 'Arun']))
             ->assertOk()
-            ->assertSee('Arun Steel');
+            ->assertSee('data-erp-datatable', false);
+
+        $this->assertDataTableSearchHas($admin, 'customers', 'Arun', 'Arun Steel', [
+            'name',
+            'phone',
+            'email',
+            'gst_number',
+            'address',
+            'status',
+        ]);
 
         $this->actingAs($admin)
             ->get(route('customers.show', $customer))
@@ -217,7 +241,16 @@ class ProductManagementTest extends TestCase
         $this->actingAs($admin)
             ->get(route('suppliers.index', ['search' => 'Lucky']))
             ->assertOk()
-            ->assertSee('Lucky Supplier');
+            ->assertSee('data-erp-datatable', false);
+
+        $this->assertDataTableSearchHas($admin, 'suppliers', 'Lucky', 'Lucky Supplier', [
+            'name',
+            'phone',
+            'email',
+            'gst_number',
+            'address',
+            'status',
+        ]);
 
         $this->actingAs($admin)
             ->get(route('suppliers.show', $supplier))
@@ -300,6 +333,41 @@ class ProductManagementTest extends TestCase
         $user->syncRoles([$role]);
 
         return $user->refresh();
+    }
+
+    private function assertDataTableSearchHas(User $user, string $module, string $search, string $needle, array $columns): void
+    {
+        $params = [
+            'draw' => 1,
+            'start' => 0,
+            'length' => 10,
+            'search' => [
+                'value' => $search,
+                'regex' => 'false',
+            ],
+            'columns' => array_map(fn (string $column): array => [
+                'data' => $column,
+                'name' => $column,
+                'searchable' => 'true',
+                'orderable' => 'true',
+                'search' => [
+                    'value' => '',
+                    'regex' => 'false',
+                ],
+            ], $columns),
+            'order' => [
+                [
+                    'column' => 0,
+                    'dir' => 'asc',
+                ],
+            ],
+        ];
+
+        $response = $this->actingAs($user)
+            ->getJson(route('erp.datatables', $module).'?'.http_build_query($params));
+
+        $response->assertOk();
+        $this->assertStringContainsString($needle, $response->getContent());
     }
 
     private function productPayload(ProductCategory $category, array $overrides = []): array

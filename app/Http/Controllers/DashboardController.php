@@ -92,10 +92,12 @@ class DashboardController extends Controller
 
         $grossProfit = (float) SaleItem::query()
             ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
-            ->whereBetween('sales.sale_date', [$filters['from_date'], $filters['to_date']])
+            ->whereDate('sales.sale_date', '>=', $filters['from_date'])
+            ->whereDate('sales.sale_date', '<=', $filters['to_date'])
             ->sum('sale_items.profit_amount');
         $expenses = Schema::hasTable('expenses')
-            ? (float) Expense::whereBetween('expense_date', [$filters['from_date'], $filters['to_date']])
+            ? (float) Expense::whereDate('expense_date', '>=', $filters['from_date'])
+                ->whereDate('expense_date', '<=', $filters['to_date'])
                 ->sum('amount')
             : 0;
 
@@ -154,13 +156,15 @@ class DashboardController extends Controller
                 ->limit(8)
                 ->get(),
             'pending_customer_payments' => Sale::with('customer')
-                ->whereBetween('sale_date', [$filters['from_date'], $filters['to_date']])
+                ->whereDate('sale_date', '>=', $filters['from_date'])
+                ->whereDate('sale_date', '<=', $filters['to_date'])
                 ->where('balance_amount', '>', 0)
                 ->oldest('sale_date')
                 ->limit(8)
                 ->get(),
             'pending_supplier_payments' => Purchase::with('supplier')
-                ->whereBetween('purchase_date', [$filters['from_date'], $filters['to_date']])
+                ->whereDate('purchase_date', '>=', $filters['from_date'])
+                ->whereDate('purchase_date', '<=', $filters['to_date'])
                 ->where('balance_amount', '>', 0)
                 ->oldest('purchase_date')
                 ->limit(8)
@@ -180,7 +184,8 @@ class DashboardController extends Controller
         $data = [];
         $monthExpression = $this->monthExpression($dateColumn);
         $totals = $modelClass::query()
-            ->whereBetween($dateColumn, [$filters['from_date'], $filters['to_date']])
+            ->whereDate($dateColumn, '>=', $filters['from_date'])
+            ->whereDate($dateColumn, '<=', $filters['to_date'])
             ->selectRaw($monthExpression.' as month_key')
             ->selectRaw('COALESCE(SUM('.$amountColumn.'), 0) as total_amount')
             ->groupByRaw($monthExpression)
@@ -222,7 +227,8 @@ class DashboardController extends Controller
     private function cashFlow(array $filters): array
     {
         $totals = Cashbook::query()
-            ->whereBetween('entry_date', [$filters['from_date'], $filters['to_date']])
+            ->whereDate('entry_date', '>=', $filters['from_date'])
+            ->whereDate('entry_date', '<=', $filters['to_date'])
             ->select('transaction_type')
             ->selectRaw('COALESCE(SUM(amount), 0) as total_amount')
             ->groupBy('transaction_type')
@@ -244,7 +250,8 @@ class DashboardController extends Controller
         $rows = SaleItem::query()
             ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
             ->join('products', 'sale_items.product_id', '=', 'products.id')
-            ->whereBetween('sales.sale_date', [$filters['from_date'], $filters['to_date']])
+            ->whereDate('sales.sale_date', '>=', $filters['from_date'])
+            ->whereDate('sales.sale_date', '<=', $filters['to_date'])
             ->select('products.name')
             ->selectRaw('SUM(sale_items.quantity) as sold_quantity')
             ->groupBy('products.id', 'products.name')
@@ -266,7 +273,8 @@ class DashboardController extends Controller
 
         $rows = Expense::query()
             ->leftJoin('expense_categories', 'expenses.expense_category_id', '=', 'expense_categories.id')
-            ->whereBetween('expenses.expense_date', [$filters['from_date'], $filters['to_date']])
+            ->whereDate('expenses.expense_date', '>=', $filters['from_date'])
+            ->whereDate('expenses.expense_date', '<=', $filters['to_date'])
             ->selectRaw("COALESCE(expense_categories.name, 'Uncategorised') as category_name")
             ->selectRaw('COALESCE(SUM(expenses.amount), 0) as total_amount')
             ->groupBy('category_name')
@@ -311,12 +319,14 @@ class DashboardController extends Controller
 
     private function periodSales(array $filters)
     {
-        return Sale::whereBetween('sale_date', [$filters['from_date'], $filters['to_date']]);
+        return Sale::whereDate('sale_date', '>=', $filters['from_date'])
+            ->whereDate('sale_date', '<=', $filters['to_date']);
     }
 
     private function periodPurchases(array $filters)
     {
-        return Purchase::whereBetween('purchase_date', [$filters['from_date'], $filters['to_date']]);
+        return Purchase::whereDate('purchase_date', '>=', $filters['from_date'])
+            ->whereDate('purchase_date', '<=', $filters['to_date']);
     }
 
     private function monthExpression(string $column): string

@@ -65,9 +65,9 @@
             <tr>
                 <th class="px-4 py-3" data-column="loan_no">Loan No</th>
                 <th class="px-4 py-3" data-column="loan_date">Date</th>
-                <th class="px-4 py-3" data-column="type">Type</th>
+                <th class="px-4 py-3" data-column="loan_type">Type</th>
                 <th class="px-4 py-3" data-column="party_name">Party</th>
-                <th class="px-4 py-3 text-right" data-column="amount">Amount</th>
+                <th class="px-4 py-3 text-right" data-column="total_amount">Amount</th>
                 <th class="px-4 py-3 text-right" data-column="balance_amount">Balance</th>
                 <th class="px-4 py-3" data-column="status">Status</th>
                 <th class="px-4 py-3 text-right" data-column="actions" data-orderable="false" data-searchable="false">Action</th>

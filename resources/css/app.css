@@ -21,21 +21,40 @@
 }
 
 @layer components {
+    .erp-sidebar {
+        background: linear-gradient(180deg, #082f49 0%, #0f172a 48%, #12312c 100%);
+        box-shadow: inset -1px 0 0 rgb(255 255 255 / 0.08);
+    }
+
+    .erp-sidebar nav {
+        scrollbar-width: thin;
+        scrollbar-color: rgb(125 211 252 / 0.45) transparent;
+    }
+
+    .erp-sidebar nav::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .erp-sidebar nav::-webkit-scrollbar-thumb {
+        border-radius: 999px;
+        background: rgb(125 211 252 / 0.35);
+    }
+
     .erp-nav-parent {
-        @apply relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-300 transition duration-150 hover:bg-white/10 hover:text-white;
+        @apply relative flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-extrabold text-cyan-50/75 transition duration-150 hover:bg-white/10 hover:text-white;
     }
 
     .erp-nav-parent-active {
-        @apply bg-cyan-400/15 text-white ring-1 ring-cyan-300/20;
+        @apply bg-white text-slate-950 shadow-lg shadow-black/10 ring-1 ring-white/20 hover:bg-white hover:text-slate-950;
     }
 
     .erp-nav-parent-active::before {
         content: '';
-        @apply absolute left-0 top-1/2 h-7 w-1 -translate-y-1/2 rounded-r-full bg-cyan-300;
+        @apply absolute left-0 top-1/2 h-7 w-1 -translate-y-1/2 rounded-r-full bg-amber-300;
     }
 
     .erp-nav-icon {
-        @apply flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/5 text-slate-400 ring-1 ring-white/5 transition duration-150;
+        @apply flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white/10 text-cyan-50/70 ring-1 ring-white/10 transition duration-150;
     }
 
     .erp-nav-icon svg {
@@ -49,24 +68,28 @@
 
     .erp-nav-parent:hover .erp-nav-icon,
     .erp-nav-parent-active .erp-nav-icon {
-        @apply bg-cyan-300/15 text-cyan-200 ring-cyan-300/20;
+        @apply bg-slate-950 text-amber-200 ring-slate-900/10;
+    }
+
+    .erp-nav-children {
+        @apply ml-4 border-l border-white/10 pl-4 pr-1;
     }
 
     .erp-nav-child-link {
-        @apply relative flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] font-semibold text-slate-400 transition duration-150 hover:bg-white/5 hover:text-white;
+        @apply relative flex items-center gap-2.5 rounded-md px-3 py-2 text-[13px] font-semibold text-cyan-50/60 transition duration-150 hover:bg-white/10 hover:text-white;
     }
 
     .erp-nav-child-link-active {
-        @apply bg-white/10 text-white;
+        @apply bg-amber-300/15 text-amber-50 ring-1 ring-amber-200/15;
     }
 
     .erp-nav-child-dot {
-        @apply h-1.5 w-1.5 shrink-0 rounded-full bg-slate-600 transition duration-150;
+        @apply h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-100/30 transition duration-150;
     }
 
     .erp-nav-child-link:hover .erp-nav-child-dot,
     .erp-nav-child-link-active .erp-nav-child-dot {
-        @apply bg-cyan-300;
+        @apply bg-amber-300;
     }
 
     .erp-content > * {

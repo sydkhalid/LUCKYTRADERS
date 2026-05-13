@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\RespondsToAjax;
 use App\Models\CompanySetting;
 use App\Models\InvoiceSetting;
 use App\Models\SystemSetting;
 use App\Services\SystemSettingService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -15,6 +17,8 @@ use Illuminate\View\View;
 
 class SettingController extends Controller
 {
+    use RespondsToAjax;
+
     public function company(): View
     {
         return view('settings.company', [
@@ -24,7 +28,7 @@ class SettingController extends Controller
         ]);
     }
 
-    public function updateCompany(Request $request): RedirectResponse
+    public function updateCompany(Request $request): JsonResponse|RedirectResponse
     {
         $settings = CompanySetting::current();
         $validated = $request->validate([
@@ -58,7 +62,7 @@ class SettingController extends Controller
                 ->save();
         }
 
-        return back()->with('success', 'Company settings updated successfully.');
+        return $this->backSuccessResponse($request, 'Company settings updated successfully.');
     }
 
     public function invoice(): View
@@ -68,7 +72,7 @@ class SettingController extends Controller
         ]);
     }
 
-    public function updateInvoice(Request $request): RedirectResponse
+    public function updateInvoice(Request $request): JsonResponse|RedirectResponse
     {
         $settings = InvoiceSetting::current();
         $validated = $request->validate([
@@ -97,7 +101,7 @@ class SettingController extends Controller
         $settings->update($validated);
         app(SystemSettingService::class)->syncLegacySettings();
 
-        return back()->with('success', 'Invoice settings updated successfully.');
+        return $this->backSuccessResponse($request, 'Invoice settings updated successfully.');
     }
 
     public function bank(): View
@@ -107,7 +111,7 @@ class SettingController extends Controller
         ]);
     }
 
-    public function updateBank(Request $request): RedirectResponse
+    public function updateBank(Request $request): JsonResponse|RedirectResponse
     {
         InvoiceSetting::current()->update($request->validate([
             'bank_details' => ['nullable', 'string'],
@@ -115,7 +119,7 @@ class SettingController extends Controller
 
         app(SystemSettingService::class)->syncLegacySettings();
 
-        return back()->with('success', 'Bank details updated successfully.');
+        return $this->backSuccessResponse($request, 'Bank details updated successfully.');
     }
 
     public function terms(): View
@@ -125,7 +129,7 @@ class SettingController extends Controller
         ]);
     }
 
-    public function updateTerms(Request $request): RedirectResponse
+    public function updateTerms(Request $request): JsonResponse|RedirectResponse
     {
         InvoiceSetting::current()->update($request->validate([
             'terms_and_conditions' => ['nullable', 'string'],
@@ -133,7 +137,7 @@ class SettingController extends Controller
 
         app(SystemSettingService::class)->syncLegacySettings();
 
-        return back()->with('success', 'Terms and conditions updated successfully.');
+        return $this->backSuccessResponse($request, 'Terms and conditions updated successfully.');
     }
 
     public function media(): View
@@ -144,7 +148,7 @@ class SettingController extends Controller
         ]);
     }
 
-    public function updateMedia(Request $request): RedirectResponse
+    public function updateMedia(Request $request): JsonResponse|RedirectResponse
     {
         $validated = $request->validate([
             'logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
@@ -177,7 +181,7 @@ class SettingController extends Controller
 
         app(SystemSettingService::class)->syncLegacySettings();
 
-        return back()->with('success', 'Logo and signature updated successfully.');
+        return $this->backSuccessResponse($request, 'Logo and signature updated successfully.');
     }
 
     private function prefixRule(): string

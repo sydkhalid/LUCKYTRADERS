@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\RespondsToAjax;
 use App\Http\Requests\Expenses\StoreExpenseCategoryRequest;
 use App\Http\Requests\Expenses\UpdateExpenseCategoryRequest;
 use App\Models\ExpenseCategory;
@@ -9,6 +10,8 @@ use Illuminate\Http\Request;
 
 class ExpenseCategoryController extends Controller
 {
+    use RespondsToAjax;
+
     public function index()
     {
         $categories = ExpenseCategory::withCount('expenses')
@@ -27,9 +30,7 @@ class ExpenseCategoryController extends Controller
     {
         $category = ExpenseCategory::create($request->validated());
 
-        return redirect()
-            ->route('expense-categories.index')
-            ->with('success', 'Expense category '.$category->name.' created successfully.');
+        return $this->successResponse($request, 'Expense category '.$category->name.' created successfully.', route('expense-categories.index'));
     }
 
     public function edit(ExpenseCategory $expenseCategory)
@@ -41,9 +42,7 @@ class ExpenseCategoryController extends Controller
     {
         $expenseCategory->update($request->validated());
 
-        return redirect()
-            ->route('expense-categories.index')
-            ->with('success', 'Expense category '.$expenseCategory->name.' updated successfully.');
+        return $this->successResponse($request, 'Expense category '.$expenseCategory->name.' updated successfully.', route('expense-categories.index'));
     }
 
     public function destroy(Request $request, ExpenseCategory $expenseCategory)
@@ -52,8 +51,6 @@ class ExpenseCategoryController extends Controller
 
         $expenseCategory->delete();
 
-        return redirect()
-            ->route('expense-categories.index')
-            ->with('success', 'Expense category '.$expenseCategory->name.' deleted successfully.');
+        return $this->successResponse($request, 'Expense category '.$expenseCategory->name.' deleted successfully.', route('expense-categories.index'));
     }
 }

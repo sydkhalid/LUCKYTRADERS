@@ -10,7 +10,14 @@
         </div>
         <div class="flex flex-wrap gap-2">
             <a href="{{ route('settings.backups.index') }}" class="rounded border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Backup List</a>
-            <form method="POST" action="{{ route('settings.backups.cleanup') }}" onsubmit="return confirm('Run backup cleanup now?')">
+            <form
+                method="POST"
+                action="{{ route('settings.backups.cleanup') }}"
+                data-confirm-action
+                data-confirm-title="Run backup cleanup now?"
+                data-confirm-text="Old backups matching the retention rules will be deleted."
+                data-confirm-button="Run cleanup"
+            >
                 @csrf
                 <button class="rounded bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">Run Cleanup</button>
             </form>
