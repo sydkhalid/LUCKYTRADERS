@@ -12,6 +12,7 @@ use App\Models\Sale;
 use App\Models\StockMovement;
 use App\Services\ActivityLogger;
 use App\Services\SystemSettingService;
+use App\Support\AmountInWords;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -165,6 +166,7 @@ class SaleController extends Controller
             'termsAndConditions' => $settings->termsAndConditions(),
             'bankDetails' => $settings->bankDetails(),
             'signatureImagePath' => $settings->signatureImagePath(),
+            'amountWords' => AmountInWords::rupees($sale->total_amount),
         ]);
     }
 

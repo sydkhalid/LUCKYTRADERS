@@ -47,6 +47,7 @@
             @page { size: A4; margin: 24px; }
             body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
+        @yield('styles')
     </style>
 </head>
 <body>

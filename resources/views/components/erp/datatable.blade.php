@@ -8,7 +8,8 @@
     'pageLength' => 15,
 ])
 
-<div class="overflow-x-auto">
+<div class="erp-datatable-shell">
+    <div class="erp-datatable-table overflow-x-auto">
     <table
         id="{{ $id }}"
         data-erp-datatable
@@ -22,4 +23,5 @@
     >
         {{ $slot }}
     </table>
+    </div>
 </div>

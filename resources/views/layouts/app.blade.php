@@ -38,10 +38,9 @@
     <link rel="stylesheet" href="{{ asset('theme/assets/libs/datatables.net-responsive/css/responsive.dataTables.min.css') }}">
     <link rel="stylesheet" href="{{ asset('theme/assets/libs/datatables.net-buttons/css/buttons.dataTables.min.css') }}">
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-
     <link rel="stylesheet" href="{{ asset('theme/assets/css/icons.css') }}">
     <link rel="stylesheet" href="{{ asset('theme/assets/css/styles.css') }}">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
 
     <style>
