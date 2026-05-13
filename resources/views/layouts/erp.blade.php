@@ -31,59 +31,57 @@
         ->reject(fn ($segment) => is_numeric($segment))
         ->map(fn ($segment) => \Illuminate\Support\Str::headline($segment))
         ->values();
-    $erpCan = fn (?string $permission) => $permission === null || ($erpUser && $erpUser->can($permission));
+    $erpCan = function (?string $permission) use ($erpUser): bool {
+        if ($permission === null) {
+            return true;
+        }
+
+        if (! $erpUser) {
+            return false;
+        }
+
+        return collect(explode('|', $permission))
+            ->map(fn ($value) => trim($value))
+            ->filter()
+            ->contains(fn ($value) => $erpUser->can($value));
+    };
     $erpIsSuperAdmin = $erpUser && method_exists($erpUser, 'hasRole') && $erpUser->hasRole('Super Admin');
-    $erpNavSections = [
-        'Overview' => [
-            ['label' => 'Dashboard', 'route' => 'dashboard', 'active' => ['dashboard'], 'permission' => 'view_dashboard'],
-            ['label' => 'Notifications', 'route' => 'notifications.index', 'active' => ['notifications.*'], 'permission' => null],
-        ],
-        'Masters' => [
-            ['label' => 'Product Categories', 'route' => 'product-categories.index', 'active' => ['product-categories.*'], 'permission' => 'manage_products'],
-            ['label' => 'Products', 'route' => 'products.index', 'active' => ['products.*'], 'permission' => 'manage_products'],
-            ['label' => 'Customers', 'route' => 'customers.index', 'active' => ['customers.*'], 'permission' => 'manage_customers'],
-            ['label' => 'Suppliers', 'route' => 'suppliers.index', 'active' => ['suppliers.*'], 'permission' => 'manage_suppliers'],
-        ],
-        'Trading' => [
-            ['label' => 'Purchases', 'route' => 'purchases.index', 'active' => ['purchases.*'], 'permission' => 'manage_purchases'],
-            ['label' => 'Purchase Returns', 'route' => 'purchase-returns.index', 'active' => ['purchase-returns.*'], 'permission' => 'manage_returns'],
-            ['label' => 'Quotations', 'route' => 'quotations.index', 'active' => ['quotations.*'], 'permission' => 'manage_quotations'],
-            ['label' => 'Sales / Billing', 'route' => 'sales.index', 'active' => ['sales.*'], 'permission' => 'manage_sales'],
-            ['label' => 'Sales Returns', 'route' => 'sales-returns.index', 'active' => ['sales-returns.*'], 'permission' => 'manage_returns'],
-            ['label' => 'Stock Adjustments', 'route' => 'stock-adjustments.index', 'active' => ['stock-adjustments.*'], 'permission' => 'manage_stock_adjustments'],
-        ],
-        'Accounts' => [
-            ['label' => 'Receipts', 'route' => 'receipts.index', 'active' => ['receipts.*'], 'permission' => 'manage_receipts'],
-            ['label' => 'Payments', 'route' => 'payments.index', 'active' => ['payments.*', 'supplier-payments.*'], 'permission' => 'manage_payments'],
-            ['label' => 'Ledgers', 'route' => 'ledgers.index', 'active' => ['ledgers.*'], 'permission' => 'manage_ledgers'],
-            ['label' => 'Cashbook', 'route' => 'cashbook.index', 'active' => ['cashbook.*', 'bankbook.*'], 'permission' => 'manage_ledgers'],
-            ['label' => 'Expenses', 'route' => 'expenses.index', 'active' => ['expenses.*', 'expense-categories.*'], 'permission' => 'manage_expenses'],
-        ],
-        'Business' => [
-            ['label' => 'Loans', 'route' => 'loans.index', 'active' => ['loans.*'], 'permission' => 'manage_loans'],
-            ['label' => 'Partners', 'route' => 'partners.index', 'active' => ['partners.*'], 'permission' => 'manage_partners'],
-        ],
-        'Reports' => [
-            ['label' => 'GST Reports', 'route' => 'gst-reports.index', 'active' => ['gst-reports.*'], 'permission' => 'view_gst_reports'],
-            ['label' => 'Reports', 'route' => 'reports.index', 'active' => ['reports.*'], 'permission' => 'view_reports'],
-        ],
-        'Admin' => [
-            ['label' => 'Users & Roles', 'route' => 'users.index', 'active' => ['users.*'], 'permission' => 'manage_users'],
-            ['label' => 'Activity Logs', 'route' => 'activity-logs.index', 'active' => ['activity-logs.*'], 'permission' => 'view_activity_logs'],
-            ['label' => 'Settings', 'route' => 'settings.company', 'active' => ['settings.company', 'settings.invoice', 'settings.bank', 'settings.terms', 'settings.media'], 'permission' => 'manage_settings'],
-            ['label' => 'Testing Checklist', 'route' => 'settings.testing-checklist', 'active' => ['settings.testing-checklist'], 'permission' => 'manage_settings'],
-            ['label' => 'Backup System', 'route' => 'settings.backups.index', 'active' => ['settings.backups.*'], 'permission' => null, 'super_admin' => true],
-        ],
-    ];
+    $erpRouteExists = fn (array $item): bool => empty($item['route']) || \Illuminate\Support\Facades\Route::has($item['route']);
+    $erpItemVisible = function (array $item) use ($erpCan, $erpIsSuperAdmin, $erpRouteExists): bool {
+        if (($item['super_admin'] ?? false) && ! $erpIsSuperAdmin) {
+            return false;
+        }
+
+        return $erpRouteExists($item) && $erpCan($item['permission'] ?? null);
+    };
+    $erpItemActive = fn (array $item): bool => request()->routeIs(...($item['active'] ?? [$item['route'] ?? '']));
+    $erpNavItems = collect(config('erp_menu', []))
+        ->map(function (array $item) use ($erpItemVisible) {
+            if (! empty($item['children'])) {
+                $item['children'] = collect($item['children'])
+                    ->filter(fn (array $child) => $erpItemVisible($child))
+                    ->values()
+                    ->all();
+
+                return empty($item['children']) ? null : $item;
+            }
+
+            return $erpItemVisible($item) ? $item : null;
+        })
+        ->filter()
+        ->values();
 @endphp
 
 <div
     x-data="{
         sidebarOpen: false,
         sidebarCollapsed: localStorage.getItem('erp-sidebar-collapsed') === 'true',
-        toggleSidebarCollapse() {
-            this.sidebarCollapsed = ! this.sidebarCollapsed;
+        setSidebarCollapsed(value) {
+            this.sidebarCollapsed = value;
             localStorage.setItem('erp-sidebar-collapsed', this.sidebarCollapsed ? 'true' : 'false');
+        },
+        toggleSidebarCollapse() {
+            this.setSidebarCollapsed(! this.sidebarCollapsed);
         }
     }"
     class="erp-shell min-h-screen lg:flex"
@@ -119,31 +117,71 @@
             </button>
         </div>
 
-        <nav class="flex-1 space-y-5 overflow-y-auto px-3 py-5">
-            @foreach ($erpNavSections as $section => $items)
+        <nav class="flex-1 space-y-2 overflow-y-auto px-3 py-5">
+            @foreach ($erpNavItems as $item)
                 @php
-                    $visibleItems = collect($items)->filter(function ($item) use ($erpCan, $erpIsSuperAdmin) {
-                        return ($item['super_admin'] ?? false) ? $erpIsSuperAdmin : $erpCan($item['permission'] ?? null);
-                    });
+                    $children = collect($item['children'] ?? []);
+                    $hasChildren = $children->isNotEmpty();
+                    $isParentActive = $erpItemActive($item) || $children->contains(fn (array $child) => $erpItemActive($child));
                 @endphp
 
-                @if ($visibleItems->isNotEmpty())
-                    <div>
-                        <p class="px-3 pb-2 text-[11px] font-bold uppercase tracking-[0.22em] text-slate-500" x-show="!sidebarCollapsed" x-transition.opacity>{{ $section }}</p>
-                        <div class="space-y-1">
-                            @foreach ($visibleItems as $item)
-                                @php $isActive = request()->routeIs(...$item['active']); @endphp
+                @if ($hasChildren)
+                    <div
+                        x-data="{ open: {{ $isParentActive ? 'true' : 'false' }} }"
+                        class="space-y-1"
+                    >
+                        <button
+                            type="button"
+                            class="erp-nav-parent {{ $isParentActive ? 'erp-nav-parent-active' : '' }}"
+                            @click="if (sidebarCollapsed) { setSidebarCollapsed(false); open = true } else { open = ! open }"
+                            :aria-expanded="open.toString()"
+                        >
+                            <span class="erp-nav-icon">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="{{ $item['icon'] }}" />
+                                </svg>
+                            </span>
+                            <span class="min-w-0 flex-1 truncate text-left" x-show="!sidebarCollapsed" x-transition.opacity>{{ $item['label'] }}</span>
+                            <svg class="h-4 w-4 shrink-0 transition-transform duration-150" :class="{ 'rotate-90': open }" x-show="!sidebarCollapsed" x-transition.opacity viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M7.22 4.22a.75.75 0 0 1 1.06 0l5.25 5.25a.75.75 0 0 1 0 1.06l-5.25 5.25a.75.75 0 0 1-1.06-1.06L11.94 10 7.22 5.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+
+                        <div
+                            x-cloak
+                            x-show="open && !sidebarCollapsed"
+                            x-transition.opacity
+                            class="space-y-1 pl-11 pr-1"
+                        >
+                            @foreach ($children as $child)
+                                @php $isActive = $erpItemActive($child); @endphp
                                 <a
-                                    href="{{ route($item['route']) }}"
-                                    class="erp-nav-link {{ $isActive ? 'erp-nav-link-active' : '' }}"
+                                    href="{{ route($child['route']) }}"
+                                    class="erp-nav-child-link {{ $isActive ? 'erp-nav-child-link-active' : '' }}"
+                                    @click="sidebarOpen = false"
                                     @if ($isActive) aria-current="page" @endif
                                 >
-                                    <span class="erp-nav-dot"></span>
-                                    <span class="truncate" x-show="!sidebarCollapsed" x-transition.opacity>{{ $item['label'] }}</span>
+                                    <span class="erp-nav-child-dot"></span>
+                                    <span class="truncate">{{ $child['label'] }}</span>
                                 </a>
                             @endforeach
                         </div>
                     </div>
+                @else
+                    @php $isActive = $erpItemActive($item); @endphp
+                    <a
+                        href="{{ route($item['route']) }}"
+                        class="erp-nav-parent {{ $isActive ? 'erp-nav-parent-active' : '' }}"
+                        @click="sidebarOpen = false"
+                        @if ($isActive) aria-current="page" @endif
+                    >
+                        <span class="erp-nav-icon">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="{{ $item['icon'] }}" />
+                            </svg>
+                        </span>
+                        <span class="min-w-0 flex-1 truncate" x-show="!sidebarCollapsed" x-transition.opacity>{{ $item['label'] }}</span>
+                    </a>
                 @endif
             @endforeach
         </nav>
