@@ -10,6 +10,9 @@
         </div>
         <div class="flex gap-2">
             <a href="{{ route('settings.company') }}" class="rounded border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Company Settings</a>
+            <a href="{{ route('settings.bank') }}" class="rounded border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Bank Details</a>
+            <a href="{{ route('settings.terms') }}" class="rounded border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Terms</a>
+            <a href="{{ route('settings.media') }}" class="rounded border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Logo & Signature</a>
             <a href="{{ route('settings.testing-checklist') }}" class="rounded border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Testing Checklist</a>
             @role('Super Admin')
                 <a href="{{ route('settings.backups.index') }}" class="rounded border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Backups</a>
@@ -27,7 +30,7 @@
         @csrf
         @method('PATCH')
 
-        <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+        <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-5">
             <div>
                 <label class="block text-sm font-semibold text-gray-700">GST Invoice Prefix</label>
                 <input name="gst_invoice_prefix" value="{{ old('gst_invoice_prefix', $settings->gst_invoice_prefix) }}" class="mt-1 w-full rounded border-gray-300 text-sm uppercase shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
@@ -43,6 +46,30 @@
             <div>
                 <label class="block text-sm font-semibold text-gray-700">Next Normal Bill No</label>
                 <input type="number" min="1" name="next_normal_bill_no" value="{{ old('next_normal_bill_no', $settings->next_normal_bill_no) }}" class="mt-1 w-full rounded border-gray-300 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700">Quotation Prefix</label>
+                <input name="quotation_prefix" value="{{ old('quotation_prefix', $settings->quotation_prefix) }}" class="mt-1 w-full rounded border-gray-300 text-sm uppercase shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700">Next Quotation No</label>
+                <input type="number" min="1" name="next_quotation_no" value="{{ old('next_quotation_no', $settings->next_quotation_no) }}" class="mt-1 w-full rounded border-gray-300 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700">Purchase Prefix</label>
+                <input name="purchase_prefix" value="{{ old('purchase_prefix', $settings->purchase_prefix) }}" class="mt-1 w-full rounded border-gray-300 text-sm uppercase shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700">Next Purchase No</label>
+                <input type="number" min="1" name="next_purchase_no" value="{{ old('next_purchase_no', $settings->next_purchase_no) }}" class="mt-1 w-full rounded border-gray-300 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700">Receipt Prefix</label>
+                <input name="receipt_prefix" value="{{ old('receipt_prefix', $settings->receipt_prefix) }}" class="mt-1 w-full rounded border-gray-300 text-sm uppercase shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700">Next Receipt No</label>
+                <input type="number" min="1" name="next_receipt_no" value="{{ old('next_receipt_no', $settings->next_receipt_no) }}" class="mt-1 w-full rounded border-gray-300 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
             </div>
         </div>
 

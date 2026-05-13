@@ -27,7 +27,7 @@ use App\Http\Controllers\SalesReturnController;
 use App\Http\Controllers\StockAdjustmentController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\SupplierPaymentController;
-use App\Http\Controllers\SystemSettingController;
+use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -44,10 +44,16 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::middleware('permission:manage_settings')->prefix('settings')->name('settings.')->group(function () {
-        Route::get('/company', [SystemSettingController::class, 'company'])->name('company');
-        Route::patch('/company', [SystemSettingController::class, 'updateCompany'])->name('company.update');
-        Route::get('/invoice', [SystemSettingController::class, 'invoice'])->name('invoice');
-        Route::patch('/invoice', [SystemSettingController::class, 'updateInvoice'])->name('invoice.update');
+        Route::get('/company', [SettingController::class, 'company'])->name('company');
+        Route::patch('/company', [SettingController::class, 'updateCompany'])->name('company.update');
+        Route::get('/invoice', [SettingController::class, 'invoice'])->name('invoice');
+        Route::patch('/invoice', [SettingController::class, 'updateInvoice'])->name('invoice.update');
+        Route::get('/bank', [SettingController::class, 'bank'])->name('bank');
+        Route::patch('/bank', [SettingController::class, 'updateBank'])->name('bank.update');
+        Route::get('/terms', [SettingController::class, 'terms'])->name('terms');
+        Route::patch('/terms', [SettingController::class, 'updateTerms'])->name('terms.update');
+        Route::get('/media', [SettingController::class, 'media'])->name('media');
+        Route::patch('/media', [SettingController::class, 'updateMedia'])->name('media.update');
         Route::get('/testing-checklist', [ProductionReadinessController::class, 'checklist'])->name('testing-checklist');
 
         Route::middleware('role:Super Admin')->prefix('backups')->name('backups.')->group(function () {

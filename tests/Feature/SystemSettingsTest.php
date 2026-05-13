@@ -3,9 +3,11 @@
 namespace Tests\Feature;
 
 use App\Models\Customer;
+use App\Models\CompanySetting;
 use App\Models\Payment;
 use App\Models\Product;
 use App\Models\ProductCategory;
+use App\Models\InvoiceSetting;
 use App\Models\Purchase;
 use App\Models\Quotation;
 use App\Models\Sale;
@@ -14,6 +16,8 @@ use App\Models\SystemSetting;
 use App\Models\User;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class SystemSettingsTest extends TestCase
@@ -43,17 +47,16 @@ class SystemSettingsTest extends TestCase
                 'phone' => '9876543210',
                 'email' => 'accounts@lucky.test',
                 'gst_number' => '33ABCDE1234F1Z5',
-                'invoice_prefix' => 'INV',
-                'quotation_prefix' => 'LQT',
-                'purchase_prefix' => 'LPR',
-                'receipt_prefix' => 'LRC',
+                'state' => 'Tamil Nadu',
+                'city' => 'Krishnagiri',
+                'pincode' => '635001',
             ])
             ->assertRedirect();
 
-        $this->assertDatabaseHas('system_settings', [
+        $this->assertDatabaseHas('company_settings', [
             'company_name' => 'Lucky Steel Traders',
-            'quotation_prefix' => 'LQT',
-            'receipt_prefix' => 'LRC',
+            'city' => 'Krishnagiri',
+            'pincode' => '635001',
         ]);
 
         $this->actingAs($admin)
@@ -65,17 +68,76 @@ class SystemSettingsTest extends TestCase
             ->patch(route('settings.invoice.update'), [
                 'gst_invoice_prefix' => 'GSTLT',
                 'normal_bill_prefix' => 'BILLLT',
+                'quotation_prefix' => 'LQT',
+                'purchase_prefix' => 'LPR',
+                'receipt_prefix' => 'LRC',
                 'next_gst_invoice_no' => 25,
                 'next_normal_bill_no' => 40,
+                'next_quotation_no' => 7,
+                'next_purchase_no' => 8,
+                'next_receipt_no' => 9,
                 'terms_and_conditions' => 'Payment due on delivery.',
                 'bank_details' => 'Bank: Test Bank',
             ])
             ->assertRedirect();
 
-        $settings = SystemSetting::current()->refresh();
+        $settings = InvoiceSetting::current()->refresh();
         $this->assertSame('GSTLT', $settings->gst_invoice_prefix);
         $this->assertSame(25, $settings->next_gst_invoice_no);
+        $this->assertSame(7, $settings->next_quotation_no);
         $this->assertSame('Payment due on delivery.', $settings->terms_and_conditions);
+
+        $this->assertSame('Lucky Steel Traders', SystemSetting::current()->refresh()->company_name);
+        $this->assertSame('GSTLT', SystemSetting::current()->refresh()->gst_invoice_prefix);
+    }
+
+    public function test_bank_terms_and_media_settings_pages_update_split_settings(): void
+    {
+        Storage::fake('public');
+        $admin = $this->userWithRole('Admin');
+
+        $this->actingAs($admin)
+            ->get(route('settings.bank'))
+            ->assertOk()
+            ->assertSee('Bank Details Settings');
+
+        $this->actingAs($admin)
+            ->patch(route('settings.bank.update'), [
+                'bank_details' => 'Bank: Lucky Bank',
+            ])
+            ->assertRedirect();
+
+        $this->actingAs($admin)
+            ->get(route('settings.terms'))
+            ->assertOk()
+            ->assertSee('Terms and Conditions Settings');
+
+        $this->actingAs($admin)
+            ->patch(route('settings.terms.update'), [
+                'terms_and_conditions' => 'Payment due within 7 days.',
+            ])
+            ->assertRedirect();
+
+        $this->actingAs($admin)
+            ->get(route('settings.media'))
+            ->assertOk()
+            ->assertSee('Logo and Signature Upload');
+
+        $this->actingAs($admin)
+            ->patch(route('settings.media.update'), [
+                'logo' => UploadedFile::fake()->image('logo.png', 200, 80),
+                'signature_image' => UploadedFile::fake()->image('signature.png', 300, 120),
+            ])
+            ->assertRedirect();
+
+        $company = CompanySetting::current()->refresh();
+        $invoice = InvoiceSetting::current()->refresh();
+        $this->assertSame('Bank: Lucky Bank', $invoice->bank_details);
+        $this->assertSame('Payment due within 7 days.', $invoice->terms_and_conditions);
+        $this->assertNotNull($company->logo);
+        $this->assertNotNull($invoice->signature_image);
+        Storage::disk('public')->assertExists($company->logo);
+        Storage::disk('public')->assertExists($invoice->signature_image);
     }
 
     public function test_backup_pages_are_super_admin_only(): void
@@ -113,7 +175,7 @@ class SystemSettingsTest extends TestCase
         $admin = $this->userWithRole('Admin');
         [$customer, $product] = $this->customerAndProduct();
 
-        SystemSetting::current()->update([
+        InvoiceSetting::current()->update([
             'gst_invoice_prefix' => 'GSTLT',
             'normal_bill_prefix' => 'BILLLT',
             'next_gst_invoice_no' => 10,
@@ -126,7 +188,7 @@ class SystemSettingsTest extends TestCase
         $this->assertSame('GSTLT-00010', Sale::where('bill_type', 'gst')->firstOrFail()->sale_no);
         $this->assertSame('BILLLT-00020', Sale::where('bill_type', 'non_gst')->firstOrFail()->sale_no);
 
-        $settings = SystemSetting::current()->refresh();
+        $settings = InvoiceSetting::current()->refresh();
         $this->assertSame(11, $settings->next_gst_invoice_no);
         $this->assertSame(21, $settings->next_normal_bill_no);
     }
@@ -140,10 +202,13 @@ class SystemSettingsTest extends TestCase
             'status' => 'active',
         ]);
 
-        SystemSetting::current()->update([
+        InvoiceSetting::current()->update([
             'quotation_prefix' => 'LQT',
             'purchase_prefix' => 'LPR',
             'receipt_prefix' => 'LRC',
+            'next_quotation_no' => 3,
+            'next_purchase_no' => 4,
+            'next_receipt_no' => 5,
         ]);
 
         $this->actingAs($admin)->post(route('quotations.store'), [
@@ -203,10 +268,14 @@ class SystemSettingsTest extends TestCase
             'payment_mode' => 'cash',
         ]);
 
-        $date = now()->format('Ymd');
-        $this->assertStringStartsWith('LQT-'.$date.'-', Quotation::firstOrFail()->quotation_no);
-        $this->assertStringStartsWith('LPR-'.$date.'-', Purchase::firstOrFail()->purchase_no);
-        $this->assertStringStartsWith('LRC-'.$date.'-', Payment::firstOrFail()->payment_no);
+        $this->assertSame('LQT-00003', Quotation::firstOrFail()->quotation_no);
+        $this->assertSame('LPR-00004', Purchase::firstOrFail()->purchase_no);
+        $this->assertSame('LRC-00005', Payment::firstOrFail()->payment_no);
+
+        $settings = InvoiceSetting::current()->refresh();
+        $this->assertSame(4, $settings->next_quotation_no);
+        $this->assertSame(5, $settings->next_purchase_no);
+        $this->assertSame(6, $settings->next_receipt_no);
     }
 
     private function userWithRole(string $role): User

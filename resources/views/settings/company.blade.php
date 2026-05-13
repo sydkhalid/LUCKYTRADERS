@@ -10,6 +10,9 @@
         </div>
         <div class="flex gap-2">
             <a href="{{ route('settings.invoice') }}" class="rounded border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Invoice Settings</a>
+            <a href="{{ route('settings.bank') }}" class="rounded border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Bank Details</a>
+            <a href="{{ route('settings.terms') }}" class="rounded border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Terms</a>
+            <a href="{{ route('settings.media') }}" class="rounded border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Logo & Signature</a>
             <a href="{{ route('settings.testing-checklist') }}" class="rounded border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Testing Checklist</a>
             @role('Super Admin')
                 <a href="{{ route('settings.backups.index') }}" class="rounded border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Backups</a>
@@ -48,27 +51,17 @@
                 <label class="block text-sm font-semibold text-gray-700">Address</label>
                 <textarea name="address" rows="3" class="mt-1 w-full rounded border-gray-300 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500">{{ old('address', $settings->address) }}</textarea>
             </div>
-        </div>
-
-        <div class="mt-8 border-t border-gray-200 pt-6">
-            <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-500">Document Prefixes</h3>
-            <div class="mt-4 grid gap-5 md:grid-cols-4">
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700">Invoice Prefix</label>
-                    <input name="invoice_prefix" value="{{ old('invoice_prefix', $settings->invoice_prefix) }}" class="mt-1 w-full rounded border-gray-300 text-sm uppercase shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700">Quotation Prefix</label>
-                    <input name="quotation_prefix" value="{{ old('quotation_prefix', $settings->quotation_prefix) }}" class="mt-1 w-full rounded border-gray-300 text-sm uppercase shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700">Purchase Prefix</label>
-                    <input name="purchase_prefix" value="{{ old('purchase_prefix', $settings->purchase_prefix) }}" class="mt-1 w-full rounded border-gray-300 text-sm uppercase shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700">Receipt Prefix</label>
-                    <input name="receipt_prefix" value="{{ old('receipt_prefix', $settings->receipt_prefix) }}" class="mt-1 w-full rounded border-gray-300 text-sm uppercase shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
-                </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700">State</label>
+                <input name="state" value="{{ old('state', $settings->state) }}" class="mt-1 w-full rounded border-gray-300 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700">City</label>
+                <input name="city" value="{{ old('city', $settings->city) }}" class="mt-1 w-full rounded border-gray-300 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700">Pincode</label>
+                <input name="pincode" value="{{ old('pincode', $settings->pincode) }}" class="mt-1 w-full rounded border-gray-300 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500">
             </div>
         </div>
 
