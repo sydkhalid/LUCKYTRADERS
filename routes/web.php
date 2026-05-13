@@ -3,6 +3,7 @@
 use App\Http\Controllers\CashbookController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CustomerReceiptController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GSTReportController;
 use App\Http\Controllers\LedgerController;
 use App\Http\Controllers\LoanController;
@@ -18,13 +19,8 @@ use App\Http\Controllers\SupplierPaymentController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->group(function () {
-    Route::get('/', function () {
-        return view('dashboard');
-    });
-
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    Route::get('/', [DashboardController::class, 'index']);
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
