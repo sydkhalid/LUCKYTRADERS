@@ -63,6 +63,10 @@
                 <label class="block text-sm font-semibold text-gray-700">Pincode</label>
                 <input name="pincode" value="{{ old('pincode', $settings->pincode) }}" class="mt-1 w-full rounded border-gray-300 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500">
             </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700">Low Stock Threshold</label>
+                <input type="number" min="0" step="0.001" name="low_stock_threshold" value="{{ old('low_stock_threshold', $systemSettings->low_stock_threshold ?? 10) }}" class="mt-1 w-full rounded border-gray-300 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500">
+            </div>
         </div>
 
         <div class="mt-8 border-t border-gray-200 pt-6">

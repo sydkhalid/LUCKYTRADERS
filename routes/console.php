@@ -1,6 +1,7 @@
 <?php
 
 use App\Services\BackupManager;
+use App\Services\NotificationAlertService;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -30,6 +31,14 @@ Artisan::command('erp:backup-clean {--notify : Send configured backup notificati
     return 0;
 })->purpose('Clean old LUCKY TRADERS backups using configured retention rules');
 
+Artisan::command('erp:generate-notifications', function () {
+    $count = app(NotificationAlertService::class)->generateAll();
+    $this->info($count.' ERP notifications generated or refreshed.');
+
+    return 0;
+})->purpose('Generate LUCKY TRADERS ERP notifications and alerts');
+
 Schedule::command('erp:backup-database')->dailyAt('01:00')->withoutOverlapping();
 Schedule::command('erp:backup-full')->weeklyOn(0, '02:00')->withoutOverlapping();
 Schedule::command('erp:backup-clean')->monthlyOn(1, '03:00')->withoutOverlapping();
+Schedule::command('erp:generate-notifications')->dailyAt('08:00')->withoutOverlapping();

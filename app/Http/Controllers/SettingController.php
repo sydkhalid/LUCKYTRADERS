@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CompanySetting;
 use App\Models\InvoiceSetting;
+use App\Models\SystemSetting;
 use App\Services\SystemSettingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,6 +18,7 @@ class SettingController extends Controller
         return view('settings.company', [
             'settings' => CompanySetting::current(),
             'invoiceSettings' => InvoiceSetting::current(),
+            'systemSettings' => SystemSetting::current(),
         ]);
     }
 
@@ -33,9 +35,12 @@ class SettingController extends Controller
             'city' => ['nullable', 'string', 'max:100'],
             'pincode' => ['nullable', 'string', 'max:20'],
             'logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'low_stock_threshold' => ['nullable', 'numeric', 'min:0'],
         ]);
 
         unset($validated['logo']);
+        $lowStockThreshold = $validated['low_stock_threshold'] ?? null;
+        unset($validated['low_stock_threshold']);
 
         if ($request->hasFile('logo')) {
             $this->deletePublicFile($settings->logo);
@@ -44,6 +49,12 @@ class SettingController extends Controller
 
         $settings->update($validated);
         app(SystemSettingService::class)->syncLegacySettings();
+
+        if ($lowStockThreshold !== null) {
+            SystemSetting::current()
+                ->forceFill(['low_stock_threshold' => $lowStockThreshold])
+                ->save();
+        }
 
         return back()->with('success', 'Company settings updated successfully.');
     }

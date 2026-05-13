@@ -27,11 +27,13 @@ class SystemSetting extends Model
         'terms_and_conditions',
         'bank_details',
         'signature_image',
+        'low_stock_threshold',
     ];
 
     protected $casts = [
         'next_gst_invoice_no' => 'integer',
         'next_normal_bill_no' => 'integer',
+        'low_stock_threshold' => 'decimal:3',
     ];
 
     public static function current(): self
@@ -61,6 +63,7 @@ class SystemSetting extends Model
             'normal_bill_prefix' => 'BILL',
             'next_gst_invoice_no' => 1,
             'next_normal_bill_no' => 1,
+            'low_stock_threshold' => 10,
             'terms_and_conditions' => implode("\n", [
                 '1. Goods once sold are subject to company return policy and stock verification.',
                 '2. Payment must be made as per agreed credit terms.',

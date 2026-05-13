@@ -1,5 +1,6 @@
 import './bootstrap';
 import './global-search';
+import './notifications';
 
 import Alpine from 'alpinejs';
 import Chart from 'chart.js/auto';

@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Lucky Traders ERP</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -96,6 +97,8 @@
             <h1 class="text-xl font-semibold">@yield('title')</h1>
 
             <x-global-search />
+
+            <x-notification-bell />
 
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
