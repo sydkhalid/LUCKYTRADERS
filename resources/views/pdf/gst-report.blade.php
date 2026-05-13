@@ -3,7 +3,9 @@
 @section('content')
     @include('pdf.partials.header', [
         'documentNo' => 'GST-REPORT',
+        'documentNoLabel' => 'Report',
         'documentDate' => $generatedAt->format('d M Y h:i A'),
+        'documentDateLabel' => 'Generated At',
     ])
 
     <div class="section">

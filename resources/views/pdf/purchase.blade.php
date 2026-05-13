@@ -4,7 +4,9 @@
     @php($isGst = $purchase->bill_type === 'gst')
     @include('pdf.partials.header', [
         'documentNo' => $purchase->purchase_no,
+        'documentNoLabel' => 'Purchase No',
         'documentDate' => $purchase->purchase_date?->format('d M Y'),
+        'documentDateLabel' => 'Purchase Date',
     ])
 
     <table class="grid-2 section">

@@ -10,6 +10,7 @@
         </div>
         <div class="flex gap-2">
             <a href="{{ route('purchases.print', $purchase) }}" target="_blank" class="rounded bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">Print</a>
+            <a href="{{ route('purchases.pdf', $purchase) }}" target="_blank" class="rounded border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">PDF</a>
             <a href="{{ route('purchases.pdf', ['purchase' => $purchase, 'download' => 1]) }}" class="rounded border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Download</a>
             @can('edit_old_records')
                 <a href="{{ route('purchases.edit', $purchase) }}" class="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Edit</a>

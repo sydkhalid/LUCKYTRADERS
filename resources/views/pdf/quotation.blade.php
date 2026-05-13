@@ -4,7 +4,9 @@
     @php($hasGst = (float) $quotation->gst_amount > 0)
     @include('pdf.partials.header', [
         'documentNo' => $quotation->quotation_no,
+        'documentNoLabel' => 'Quotation No',
         'documentDate' => $quotation->quotation_date?->format('d M Y'),
+        'documentDateLabel' => 'Quotation Date',
     ])
 
     <table class="grid-2 section">

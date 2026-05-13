@@ -34,18 +34,26 @@
             @endcan
             @can('manage_purchases')
                 <a href="{{ route('purchases.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('purchases.*') ? 'bg-slate-700' : '' }}">Purchases</a>
+            @endcan
+            @can('manage_returns')
                 <a href="{{ route('purchase-returns.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('purchase-returns.*') ? 'bg-slate-700' : '' }}">Purchase Returns</a>
             @endcan
-            @can('manage_sales')
+            @can('manage_quotations')
                 <a href="{{ route('quotations.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('quotations.*') ? 'bg-slate-700' : '' }}">Quotations</a>
+            @endcan
+            @can('manage_sales')
                 <a href="{{ route('sales.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('sales.*') ? 'bg-slate-700' : '' }}">Sales / Billing</a>
+            @endcan
+            @can('manage_returns')
                 <a href="{{ route('sales-returns.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('sales-returns.*') ? 'bg-slate-700' : '' }}">Sales Returns</a>
             @endcan
-            @canany(['manage_sales', 'manage_payments'])
+            @can('manage_receipts')
                 <a href="{{ route('receipts.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('receipts.*') ? 'bg-slate-700' : '' }}">Receipts</a>
-            @endcanany
+            @endcan
             @can('manage_payments')
                 <a href="{{ route('payments.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('payments.*', 'supplier-payments.*') ? 'bg-slate-700' : '' }}">Payments</a>
+            @endcan
+            @can('manage_ledgers')
                 <a href="{{ route('ledgers.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('ledgers.*') ? 'bg-slate-700' : '' }}">Ledgers</a>
                 <a href="{{ route('cashbook.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('cashbook.*', 'bankbook.*') ? 'bg-slate-700' : '' }}">Cashbook</a>
             @endcan

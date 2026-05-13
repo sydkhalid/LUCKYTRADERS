@@ -3,7 +3,9 @@
 @section('content')
     @include('pdf.partials.header', [
         'documentNo' => $loan->loan_no,
+        'documentNoLabel' => 'Loan No',
         'documentDate' => $loan->loan_date?->format('d M Y'),
+        'documentDateLabel' => 'Loan Date',
     ])
 
     <table class="grid-2 section">

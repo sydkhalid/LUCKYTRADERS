@@ -50,7 +50,7 @@ class PaymentLedgerTest extends TestCase
             'notes' => 'Cash received',
         ]);
 
-        $response->assertRedirect(route('payments.index'));
+        $response->assertRedirect(route('receipts.index'));
 
         $this->assertSame(500.0, (float) $customer->fresh()->current_balance);
         $this->assertSame(500.0, (float) $sale->fresh()->paid_amount);

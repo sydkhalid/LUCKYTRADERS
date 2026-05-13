@@ -4,7 +4,9 @@
     @php($isGst = $sale->bill_type === 'gst')
     @include('pdf.partials.header', [
         'documentNo' => $sale->sale_no,
+        'documentNoLabel' => $isGst ? 'GST Invoice No' : 'Normal Bill No',
         'documentDate' => $sale->sale_date?->format('d M Y'),
+        'documentDateLabel' => 'Invoice Date',
         'showCompanyGst' => $isGst,
     ])
 

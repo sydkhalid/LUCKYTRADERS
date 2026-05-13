@@ -3,7 +3,9 @@
 @section('content')
     @include('pdf.partials.header', [
         'documentNo' => $expense->expense_no,
+        'documentNoLabel' => 'Voucher No',
         'documentDate' => $expense->expense_date?->format('d M Y'),
+        'documentDateLabel' => 'Expense Date',
     ])
 
     <table class="grid-2 section">

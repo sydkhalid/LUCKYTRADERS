@@ -10,7 +10,9 @@
 
     @include('pdf.partials.header', [
         'documentNo' => $payment->payment_no,
+        'documentNoLabel' => $payment->transaction_type === 'receipt' ? 'Receipt No' : 'Voucher No',
         'documentDate' => $payment->payment_date?->format('d M Y'),
+        'documentDateLabel' => 'Payment Date',
     ])
 
     <table class="grid-2 section">

@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Models\Customer;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
+use App\Models\Cashbook;
+use App\Models\Ledger;
 use App\Models\Loan;
 use App\Models\LoanTransaction;
 use App\Models\Partner;
@@ -18,6 +20,7 @@ use App\Models\Quotation;
 use App\Models\QuotationItem;
 use App\Models\Sale;
 use App\Models\SaleItem;
+use App\Models\StockMovement;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Support\AmountInWords;
@@ -52,6 +55,11 @@ class PdfDocumentTest extends TestCase
             $response->assertOk();
             $this->assertStringContainsString('application/pdf', (string) $response->headers->get('content-type'));
         }
+
+        $this->assertStringContainsString(
+            'PdfController',
+            app('router')->getRoutes()->getByName('sales.pdf')->getActionName()
+        );
     }
 
     public function test_normal_bill_pdf_template_does_not_show_gst_columns(): void
@@ -72,8 +80,77 @@ class PdfDocumentTest extends TestCase
         ])->render();
 
         $this->assertStringContainsString('Normal Bill', $html);
+        $this->assertStringContainsString('Normal Bill No', $html);
         $this->assertStringNotContainsString('HSN', $html);
         $this->assertStringNotContainsString('GST Amount', $html);
+    }
+
+    public function test_gst_invoice_pdf_template_shows_tax_fields(): void
+    {
+        $records = $this->createPdfRecords();
+        $gstSale = $records['sale']->load(['customer', 'items.product']);
+
+        $html = view('pdf.sale', [
+            'title' => 'GST Invoice',
+            'company' => [
+                'name' => 'LUCKY TRADERS',
+                'address' => '2/164/14 Line Kollai, Venkatapuram, Krishnagiri, Tamil Nadu, India',
+                'gst_number' => '33GSTLUCKY001',
+            ],
+            'generatedAt' => now(),
+            'termsAndConditions' => '',
+            'bankDetails' => null,
+            'signatureImagePath' => null,
+            'sale' => $gstSale,
+            'amountWords' => AmountInWords::rupees($gstSale->total_amount),
+        ])->render();
+
+        $this->assertStringContainsString('GST Invoice No', $html);
+        $this->assertStringContainsString('Customer GSTIN', $html);
+        $this->assertStringContainsString('HSN', $html);
+        $this->assertStringContainsString('Taxable', $html);
+        $this->assertStringContainsString('GST %', $html);
+        $this->assertStringContainsString('GST Amount', $html);
+    }
+
+    public function test_pdf_generation_does_not_change_business_records(): void
+    {
+        $records = $this->createPdfRecords();
+        $user = User::factory()->create();
+
+        $before = [
+            'products' => Product::pluck('current_stock', 'id')->all(),
+            'payments' => Payment::count(),
+            'ledgers' => Ledger::count(),
+            'cashbooks' => Cashbook::count(),
+            'stock_movements' => StockMovement::count(),
+            'sale_paid' => (float) $records['sale']->fresh()->paid_amount,
+            'purchase_paid' => (float) $records['purchase']->fresh()->paid_amount,
+            'expense_amount' => (float) $records['expense']->fresh()->amount,
+        ];
+
+        foreach ([
+            route('sales.pdf', $records['sale']),
+            route('quotations.pdf', $records['quotation']),
+            route('purchases.pdf', $records['purchase']),
+            route('payments.pdf', $records['receipt']),
+            route('payments.pdf', $records['supplierPayment']),
+            route('loans.pdf', $records['loan']),
+            route('partners.transactions.pdf', ['partner' => $records['partner'], 'transaction' => $records['partnerTransaction']]),
+            route('expenses.pdf', $records['expense']),
+            route('gst-reports.pdf'),
+        ] as $route) {
+            $this->actingAs($user)->get($route)->assertOk();
+        }
+
+        $this->assertSame($before['products'], Product::pluck('current_stock', 'id')->all());
+        $this->assertSame($before['payments'], Payment::count());
+        $this->assertSame($before['ledgers'], Ledger::count());
+        $this->assertSame($before['cashbooks'], Cashbook::count());
+        $this->assertSame($before['stock_movements'], StockMovement::count());
+        $this->assertSame($before['sale_paid'], (float) $records['sale']->fresh()->paid_amount);
+        $this->assertSame($before['purchase_paid'], (float) $records['purchase']->fresh()->paid_amount);
+        $this->assertSame($before['expense_amount'], (float) $records['expense']->fresh()->amount);
     }
 
     private function createPdfRecords(): array

@@ -58,7 +58,7 @@ class CustomerReceiptController extends Controller
         $payment = $postingService->recordCustomerReceipt($customer, $request->validated());
 
         return redirect()
-            ->route('payments.index')
+            ->route('receipts.index')
             ->with('success', 'Customer receipt '.$payment->payment_no.' saved successfully.');
     }
 

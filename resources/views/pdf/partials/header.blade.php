@@ -26,10 +26,10 @@
         <td class="title-box" style="width: 42%; vertical-align: top;">
             <h2 class="title">{{ $title }}</h2>
             @isset($documentNo)
-                <p class="muted">No: <span class="bold">{{ $documentNo }}</span></p>
+                <p class="muted">{{ $documentNoLabel ?? 'No' }}: <span class="bold">{{ $documentNo }}</span></p>
             @endisset
             @isset($documentDate)
-                <p class="muted">Date: <span class="bold">{{ $documentDate }}</span></p>
+                <p class="muted">{{ $documentDateLabel ?? 'Date' }}: <span class="bold">{{ $documentDate }}</span></p>
             @endisset
             <span class="badge">A4 Printable PDF</span>
         </td>

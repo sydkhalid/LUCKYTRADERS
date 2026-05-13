@@ -42,6 +42,11 @@
         .signature-line { border-top: 1px solid #111827; display: inline-block; min-width: 180px; padding-top: 5px; text-align: center; }
         .badge { border: 1px solid #111827; display: inline-block; font-size: 9px; font-weight: 700; margin-top: 6px; padding: 2px 6px; text-transform: uppercase; }
         .page-break { page-break-before: always; }
+        .avoid-break { page-break-inside: avoid; }
+        @media print {
+            @page { size: A4; margin: 24px; }
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
     </style>
 </head>
 <body>

@@ -3,7 +3,9 @@
 @section('content')
     @include('pdf.partials.header', [
         'documentNo' => 'PTR-'.$transaction->id,
+        'documentNoLabel' => 'Voucher No',
         'documentDate' => $transaction->transaction_date?->format('d M Y'),
+        'documentDateLabel' => 'Transaction Date',
     ])
 
     <table class="grid-2 section">
