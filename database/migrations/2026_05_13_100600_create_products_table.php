@@ -25,8 +25,10 @@ return new class extends Migration
             $table->decimal('current_stock', 15, 3)->default(0);
             $table->string('status')->default('active');
             $table->timestamps();
+            $table->softDeletes();
 
             $table->index(['product_category_id', 'status']);
+            $table->index('hsn_code');
         });
     }
 

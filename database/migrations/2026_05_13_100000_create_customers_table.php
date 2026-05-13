@@ -20,6 +20,11 @@ return new class extends Migration
             $table->decimal('current_balance', 15, 2)->default(0);
             $table->string('status')->default('active');
             $table->timestamps();
+            $table->softDeletes();
+
+            $table->index('phone');
+            $table->index('gst_number');
+            $table->index('status');
         });
     }
 
