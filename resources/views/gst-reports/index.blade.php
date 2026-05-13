@@ -54,5 +54,13 @@
             <p class="text-sm text-gray-500">Normal Bill Report</p>
             <h3 class="mt-1 text-lg font-bold text-slate-800">Open Non-GST Sales</h3>
         </a>
+        <div class="rounded bg-white p-5 shadow">
+            <p class="text-sm text-gray-500">GST Sales Returns</p>
+            <h3 class="mt-1 text-2xl font-bold text-red-700">Rs. {{ number_format((float) $summary['sales_returns'], 2) }}</h3>
+        </div>
+        <div class="rounded bg-white p-5 shadow">
+            <p class="text-sm text-gray-500">GST Purchase Returns</p>
+            <h3 class="mt-1 text-2xl font-bold text-emerald-700">Rs. {{ number_format((float) $summary['purchase_returns'], 2) }}</h3>
+        </div>
     </div>
 @endsection

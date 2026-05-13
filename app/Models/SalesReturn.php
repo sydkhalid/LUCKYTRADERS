@@ -7,33 +7,37 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Sale extends Model
+class SalesReturn extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'sale_no',
+        'return_no',
+        'sale_id',
         'customer_id',
-        'sale_date',
-        'bill_type',
+        'return_date',
         'subtotal',
         'gst_amount',
         'total_amount',
-        'paid_amount',
-        'balance_amount',
-        'payment_status',
+        'refund_amount',
+        'adjustment_amount',
         'payment_mode',
         'notes',
     ];
 
     protected $casts = [
-        'sale_date' => 'date',
+        'return_date' => 'date',
         'subtotal' => 'decimal:2',
         'gst_amount' => 'decimal:2',
         'total_amount' => 'decimal:2',
-        'paid_amount' => 'decimal:2',
-        'balance_amount' => 'decimal:2',
+        'refund_amount' => 'decimal:2',
+        'adjustment_amount' => 'decimal:2',
     ];
+
+    public function sale(): BelongsTo
+    {
+        return $this->belongsTo(Sale::class);
+    }
 
     public function customer(): BelongsTo
     {
@@ -42,11 +46,6 @@ class Sale extends Model
 
     public function items(): HasMany
     {
-        return $this->hasMany(SaleItem::class);
-    }
-
-    public function returns(): HasMany
-    {
-        return $this->hasMany(SalesReturn::class);
+        return $this->hasMany(SalesReturnItem::class);
     }
 }

@@ -37,6 +37,10 @@
             <p class="text-sm text-gray-500">Balance</p>
             <h3 class="mt-1 text-xl font-bold text-red-700">Rs. {{ number_format((float) $totals['balance'], 2) }}</h3>
         </div>
+        <div class="rounded bg-white p-4 shadow">
+            <p class="text-sm text-gray-500">GST Returns</p>
+            <h3 class="mt-1 text-xl font-bold text-emerald-700">Rs. {{ number_format((float) $totals['returns'], 2) }}</h3>
+        </div>
     </div>
 
     <div class="overflow-hidden rounded bg-white shadow">

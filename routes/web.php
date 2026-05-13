@@ -15,8 +15,10 @@ use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\PurchaseReturnController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\SaleController;
+use App\Http\Controllers\SalesReturnController;
 use App\Http\Controllers\StockAdjustmentController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\SupplierPaymentController;
@@ -44,6 +46,10 @@ Route::middleware('auth')->group(function () {
     Route::resource('quotations', QuotationController::class)->except(['destroy']);
     Route::get('/sales/{sale}/print', [SaleController::class, 'printInvoice'])->name('sales.print');
     Route::resource('sales', SaleController::class);
+    Route::get('/sales-returns/report', [SalesReturnController::class, 'report'])->name('sales-returns.report');
+    Route::resource('sales-returns', SalesReturnController::class)->only(['index', 'create', 'store', 'show']);
+    Route::get('/purchase-returns/report', [PurchaseReturnController::class, 'report'])->name('purchase-returns.report');
+    Route::resource('purchase-returns', PurchaseReturnController::class)->only(['index', 'create', 'store', 'show']);
 
     Route::get('/receipts/create', [CustomerReceiptController::class, 'create'])->name('receipts.create');
     Route::post('/receipts', [CustomerReceiptController::class, 'store'])->name('receipts.store');

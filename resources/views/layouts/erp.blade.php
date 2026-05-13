@@ -24,6 +24,8 @@
             <a href="{{ route('purchases.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('purchases.*') ? 'bg-slate-700' : '' }}">Purchases</a>
             <a href="{{ route('quotations.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('quotations.*') ? 'bg-slate-700' : '' }}">Quotations</a>
             <a href="{{ route('sales.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('sales.*') ? 'bg-slate-700' : '' }}">Sales / Billing</a>
+            <a href="{{ route('sales-returns.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('sales-returns.*') ? 'bg-slate-700' : '' }}">Sales Returns</a>
+            <a href="{{ route('purchase-returns.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('purchase-returns.*') ? 'bg-slate-700' : '' }}">Purchase Returns</a>
             <a href="{{ route('receipts.create') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('receipts.*') ? 'bg-slate-700' : '' }}">Receipts</a>
             <a href="{{ route('payments.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('payments.*', 'supplier-payments.*') ? 'bg-slate-700' : '' }}">Payments</a>
             <a href="{{ route('ledgers.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('ledgers.*') ? 'bg-slate-700' : '' }}">Ledgers</a>

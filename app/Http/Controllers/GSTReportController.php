@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Purchase;
+use App\Models\PurchaseReturn;
 use App\Models\Sale;
+use App\Models\SalesReturn;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -15,20 +17,30 @@ class GSTReportController extends Controller
         $salesTotals = $this->salesQuery($filters, 'gst')->selectRaw(
             'COALESCE(SUM(subtotal), 0) as taxable, COALESCE(SUM(gst_amount), 0) as gst, COALESCE(SUM(total_amount), 0) as total'
         )->first();
+        $salesReturnTotals = $this->salesReturnQuery($filters, 'gst')->selectRaw(
+            'COALESCE(SUM(sales_returns.subtotal), 0) as taxable, COALESCE(SUM(sales_returns.gst_amount), 0) as gst, COALESCE(SUM(sales_returns.total_amount), 0) as total'
+        )->first();
         $purchaseTotals = $this->purchasesQuery($filters, 'gst')->selectRaw(
             'COALESCE(SUM(subtotal), 0) as taxable, COALESCE(SUM(gst_amount), 0) as gst, COALESCE(SUM(total_amount), 0) as total'
         )->first();
+        $purchaseReturnTotals = $this->purchaseReturnQuery($filters, 'gst')->selectRaw(
+            'COALESCE(SUM(purchase_returns.subtotal), 0) as taxable, COALESCE(SUM(purchase_returns.gst_amount), 0) as gst, COALESCE(SUM(purchase_returns.total_amount), 0) as total'
+        )->first();
         $nonGstSalesTotal = $this->salesQuery($filters, 'non_gst')->sum('total_amount');
+        $outputGst = (float) $salesTotals->gst - (float) $salesReturnTotals->gst;
+        $inputGst = (float) $purchaseTotals->gst - (float) $purchaseReturnTotals->gst;
 
         $summary = [
-            'taxable_sales' => (float) $salesTotals->taxable,
-            'output_gst' => (float) $salesTotals->gst,
-            'total_sales' => (float) $salesTotals->total,
-            'taxable_purchases' => (float) $purchaseTotals->taxable,
-            'input_gst' => (float) $purchaseTotals->gst,
-            'total_purchases' => (float) $purchaseTotals->total,
-            'net_gst_payable' => (float) $salesTotals->gst - (float) $purchaseTotals->gst,
+            'taxable_sales' => (float) $salesTotals->taxable - (float) $salesReturnTotals->taxable,
+            'output_gst' => $outputGst,
+            'total_sales' => (float) $salesTotals->total - (float) $salesReturnTotals->total,
+            'taxable_purchases' => (float) $purchaseTotals->taxable - (float) $purchaseReturnTotals->taxable,
+            'input_gst' => $inputGst,
+            'total_purchases' => (float) $purchaseTotals->total - (float) $purchaseReturnTotals->total,
+            'net_gst_payable' => $outputGst - $inputGst,
             'non_gst_sales' => (float) $nonGstSalesTotal,
+            'sales_returns' => (float) $salesReturnTotals->total,
+            'purchase_returns' => (float) $purchaseReturnTotals->total,
         ];
 
         return view('gst-reports.index', compact('filters', 'summary'));
@@ -129,29 +141,52 @@ class GSTReportController extends Controller
             ->when($filters['to_date'] ?? null, fn ($query, $date) => $query->whereDate('purchase_date', '<=', $date));
     }
 
+    private function salesReturnQuery(array $filters, string $billType)
+    {
+        return SalesReturn::query()
+            ->join('sales', 'sales_returns.sale_id', '=', 'sales.id')
+            ->where('sales.bill_type', $billType)
+            ->when($filters['from_date'] ?? null, fn ($query, $date) => $query->whereDate('sales_returns.return_date', '>=', $date))
+            ->when($filters['to_date'] ?? null, fn ($query, $date) => $query->whereDate('sales_returns.return_date', '<=', $date));
+    }
+
+    private function purchaseReturnQuery(array $filters, string $billType)
+    {
+        return PurchaseReturn::query()
+            ->join('purchases', 'purchase_returns.purchase_id', '=', 'purchases.id')
+            ->where('purchases.bill_type', $billType)
+            ->when($filters['from_date'] ?? null, fn ($query, $date) => $query->whereDate('purchase_returns.return_date', '>=', $date))
+            ->when($filters['to_date'] ?? null, fn ($query, $date) => $query->whereDate('purchase_returns.return_date', '<=', $date));
+    }
+
     private function salesTotals(array $filters, string $billType): array
     {
         $query = $this->salesQuery($filters, $billType);
 
+        $returns = $this->salesReturnQuery($filters, $billType);
+
         return [
-            'taxable' => (float) (clone $query)->sum('subtotal'),
-            'gst' => (float) (clone $query)->sum('gst_amount'),
-            'total' => (float) (clone $query)->sum('total_amount'),
+            'taxable' => (float) (clone $query)->sum('subtotal') - (float) (clone $returns)->sum('sales_returns.subtotal'),
+            'gst' => (float) (clone $query)->sum('gst_amount') - (float) (clone $returns)->sum('sales_returns.gst_amount'),
+            'total' => (float) (clone $query)->sum('total_amount') - (float) (clone $returns)->sum('sales_returns.total_amount'),
             'paid' => (float) (clone $query)->sum('paid_amount'),
             'balance' => (float) (clone $query)->sum('balance_amount'),
+            'returns' => (float) (clone $returns)->sum('sales_returns.total_amount'),
         ];
     }
 
     private function purchaseTotals(array $filters, string $billType): array
     {
         $query = $this->purchasesQuery($filters, $billType);
+        $returns = $this->purchaseReturnQuery($filters, $billType);
 
         return [
-            'taxable' => (float) (clone $query)->sum('subtotal'),
-            'gst' => (float) (clone $query)->sum('gst_amount'),
-            'total' => (float) (clone $query)->sum('total_amount'),
+            'taxable' => (float) (clone $query)->sum('subtotal') - (float) (clone $returns)->sum('purchase_returns.subtotal'),
+            'gst' => (float) (clone $query)->sum('gst_amount') - (float) (clone $returns)->sum('purchase_returns.gst_amount'),
+            'total' => (float) (clone $query)->sum('total_amount') - (float) (clone $returns)->sum('purchase_returns.total_amount'),
             'paid' => (float) (clone $query)->sum('paid_amount'),
             'balance' => (float) (clone $query)->sum('balance_amount'),
+            'returns' => (float) (clone $returns)->sum('purchase_returns.total_amount'),
         ];
     }
 
@@ -188,6 +223,28 @@ class GSTReportController extends Controller
                         number_format((float) $sale->total_amount, 2, '.', ''),
                         number_format((float) $sale->paid_amount, 2, '.', ''),
                         number_format((float) $sale->balance_amount, 2, '.', ''),
+                    ]);
+                }
+            });
+
+        SalesReturn::with(['sale.customer'])
+            ->whereHas('sale', fn ($query) => $query->where('bill_type', 'gst'))
+            ->when($filters['from_date'] ?? null, fn ($query, $date) => $query->whereDate('return_date', '>=', $date))
+            ->when($filters['to_date'] ?? null, fn ($query, $date) => $query->whereDate('return_date', '<=', $date))
+            ->orderBy('return_date')
+            ->orderBy('id')
+            ->chunk(500, function ($returns) use ($handle) {
+                foreach ($returns as $return) {
+                    fputcsv($handle, [
+                        'RETURN '.$return->return_no.' / '.$return->sale?->sale_no,
+                        optional($return->return_date)->format('Y-m-d'),
+                        $return->customer?->name,
+                        $return->customer?->gst_number,
+                        number_format(-1 * (float) $return->subtotal, 2, '.', ''),
+                        number_format(-1 * (float) $return->gst_amount, 2, '.', ''),
+                        number_format(-1 * (float) $return->total_amount, 2, '.', ''),
+                        number_format(0, 2, '.', ''),
+                        number_format(-1 * (float) $return->adjustment_amount, 2, '.', ''),
                     ]);
                 }
             });
@@ -228,6 +285,29 @@ class GSTReportController extends Controller
                         number_format((float) $purchase->total_amount, 2, '.', ''),
                         number_format((float) $purchase->paid_amount, 2, '.', ''),
                         number_format((float) $purchase->balance_amount, 2, '.', ''),
+                    ]);
+                }
+            });
+
+        PurchaseReturn::with(['purchase.supplier'])
+            ->whereHas('purchase', fn ($query) => $query->where('bill_type', 'gst'))
+            ->when($filters['from_date'] ?? null, fn ($query, $date) => $query->whereDate('return_date', '>=', $date))
+            ->when($filters['to_date'] ?? null, fn ($query, $date) => $query->whereDate('return_date', '<=', $date))
+            ->orderBy('return_date')
+            ->orderBy('id')
+            ->chunk(500, function ($returns) use ($handle) {
+                foreach ($returns as $return) {
+                    fputcsv($handle, [
+                        'RETURN '.$return->return_no.' / '.$return->purchase?->purchase_no,
+                        $return->purchase?->supplier_invoice_no,
+                        optional($return->return_date)->format('Y-m-d'),
+                        $return->supplier?->name,
+                        $return->supplier?->gst_number,
+                        number_format(-1 * (float) $return->subtotal, 2, '.', ''),
+                        number_format(-1 * (float) $return->gst_amount, 2, '.', ''),
+                        number_format(-1 * (float) $return->total_amount, 2, '.', ''),
+                        number_format(0, 2, '.', ''),
+                        number_format(-1 * (float) $return->adjustment_amount, 2, '.', ''),
                     ]);
                 }
             });

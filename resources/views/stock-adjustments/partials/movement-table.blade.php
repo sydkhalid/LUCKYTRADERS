@@ -21,12 +21,18 @@
                     $movementLabel = match ($movement->movement_type) {
                         'purchase_in' => 'Purchase In',
                         'sale_out' => 'Sale Out',
-                        'adjustment' => $adjustment ? 'Adjustment '.$adjustment->typeLabel() : 'Adjustment',
+                        'adjustment' => match ($movement->reference_type) {
+                            'sales_return' => 'Sales Return',
+                            'purchase_return' => 'Purchase Return',
+                            default => $adjustment ? 'Adjustment '.$adjustment->typeLabel() : 'Adjustment',
+                        },
                         default => ucfirst(str_replace('_', ' ', $movement->movement_type)),
                     };
                     $isIn = $movement->movement_type === 'purchase_in'
+                        || $movement->reference_type === 'sales_return'
                         || ($movement->movement_type === 'adjustment' && $adjustment?->adjustment_type === 'increase');
                     $isOut = $movement->movement_type === 'sale_out'
+                        || $movement->reference_type === 'purchase_return'
                         || ($movement->movement_type === 'adjustment' && $adjustment?->adjustment_type === 'decrease');
                 @endphp
                 <tr class="hover:bg-gray-50">
@@ -40,6 +46,10 @@
                     <td class="px-4 py-3 text-gray-700">
                         @if ($adjustment)
                             <a href="{{ route('stock-adjustments.show', $adjustment) }}" class="font-semibold text-slate-700 hover:text-slate-900">{{ $adjustment->adjustment_no }}</a>
+                        @elseif ($movement->reference_type === 'sales_return' && $movement->reference_id)
+                            <a href="{{ route('sales-returns.show', $movement->reference_id) }}" class="font-semibold text-slate-700 hover:text-slate-900">Sales Return #{{ $movement->reference_id }}</a>
+                        @elseif ($movement->reference_type === 'purchase_return' && $movement->reference_id)
+                            <a href="{{ route('purchase-returns.show', $movement->reference_id) }}" class="font-semibold text-slate-700 hover:text-slate-900">Purchase Return #{{ $movement->reference_id }}</a>
                         @else
                             {{ ucfirst(str_replace('_', ' ', $movement->reference_type ?? '-')) }}
                             @if ($movement->reference_id)
