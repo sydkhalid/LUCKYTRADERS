@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\RespondsToAjax;
 use App\Http\Requests\Payments\StoreSupplierPaymentRequest;
 use App\Models\Payment;
 use App\Models\Purchase;
@@ -10,6 +11,8 @@ use App\Services\PaymentPostingService;
 
 class SupplierPaymentController extends Controller
 {
+    use RespondsToAjax;
+
     public function index()
     {
         $payments = Payment::where('transaction_type', 'payment')
@@ -57,9 +60,7 @@ class SupplierPaymentController extends Controller
 
         $payment = $postingService->recordSupplierPayment($supplier, $request->validated());
 
-        return redirect()
-            ->route('payments.index')
-            ->with('success', 'Supplier payment '.$payment->payment_no.' saved successfully.');
+        return $this->successResponse($request, 'Supplier payment '.$payment->payment_no.' saved successfully.', route('payments.index'));
     }
 
     private function reference(Payment $payment): ?Purchase

@@ -30,6 +30,11 @@ class DashboardController extends Controller
         ]);
     }
 
+    public function chartData(Request $request)
+    {
+        return response()->json($this->charts($this->filters($request)));
+    }
+
     private function filters(Request $request): array
     {
         $validated = $request->validate([
@@ -116,9 +121,13 @@ class DashboardController extends Controller
         return [
             'monthly_sales' => $this->monthlyDataset(Sale::class, 'sale_date', 'total_amount', $filters),
             'monthly_purchases' => $this->monthlyDataset(Purchase::class, 'purchase_date', 'total_amount', $filters),
+            'sales_vs_purchases' => $this->salesVsPurchases($filters),
             'gst_split' => $this->gstSplit($filters),
             'cash_flow' => $this->cashFlow($filters),
             'top_products' => $this->topProducts($filters),
+            'expense_categories' => $this->expenseCategories($filters),
+            'stock_value' => $this->stockValueByCategory(),
+            'pending_payments' => $this->pendingPayments(),
         ];
     }
 
@@ -197,6 +206,19 @@ class DashboardController extends Controller
         ];
     }
 
+    private function salesVsPurchases(array $filters): array
+    {
+        $sales = $this->monthlyDataset(Sale::class, 'sale_date', 'total_amount', $filters);
+        $purchases = $this->monthlyDataset(Purchase::class, 'purchase_date', 'total_amount', $filters);
+
+        return [
+            'labels' => $sales['labels'],
+            'sales' => $sales['data'],
+            'purchases' => $purchases['data'],
+            'data' => array_merge($sales['data'], $purchases['data']),
+        ];
+    }
+
     private function cashFlow(array $filters): array
     {
         $totals = Cashbook::query()
@@ -233,6 +255,57 @@ class DashboardController extends Controller
         return [
             'labels' => $rows->pluck('name')->values()->all(),
             'data' => $rows->pluck('sold_quantity')->map(fn ($value) => round((float) $value, 3))->values()->all(),
+        ];
+    }
+
+    private function expenseCategories(array $filters): array
+    {
+        if (! Schema::hasTable('expenses') || ! Schema::hasTable('expense_categories')) {
+            return ['labels' => [], 'data' => []];
+        }
+
+        $rows = Expense::query()
+            ->leftJoin('expense_categories', 'expenses.expense_category_id', '=', 'expense_categories.id')
+            ->whereBetween('expenses.expense_date', [$filters['from_date'], $filters['to_date']])
+            ->selectRaw("COALESCE(expense_categories.name, 'Uncategorised') as category_name")
+            ->selectRaw('COALESCE(SUM(expenses.amount), 0) as total_amount')
+            ->groupBy('category_name')
+            ->orderByDesc('total_amount')
+            ->limit(8)
+            ->get();
+
+        return [
+            'labels' => $rows->pluck('category_name')->values()->all(),
+            'data' => $rows->pluck('total_amount')->map(fn ($value) => (float) $value)->values()->all(),
+        ];
+    }
+
+    private function stockValueByCategory(): array
+    {
+        $rows = Product::query()
+            ->leftJoin('product_categories', 'products.product_category_id', '=', 'product_categories.id')
+            ->selectRaw("COALESCE(product_categories.name, 'Uncategorised') as category_name")
+            ->selectRaw('COALESCE(SUM(products.current_stock * products.purchase_price), 0) as stock_value')
+            ->groupBy('category_name')
+            ->orderByDesc('stock_value')
+            ->limit(8)
+            ->get();
+
+        return [
+            'labels' => $rows->pluck('category_name')->values()->all(),
+            'data' => $rows->pluck('stock_value')->map(fn ($value) => (float) $value)->values()->all(),
+        ];
+    }
+
+    private function pendingPayments(): array
+    {
+        $customerPending = (float) Sale::where('balance_amount', '>', 0)->sum('balance_amount');
+        $supplierPending = (float) Purchase::where('balance_amount', '>', 0)->sum('balance_amount');
+        $activeLoans = Schema::hasTable('loans') ? (float) Loan::where('status', 'active')->sum('balance_amount') : 0;
+
+        return [
+            'labels' => ['Customer Collection', 'Supplier Payable', 'Active Loans'],
+            'data' => [$customerPending, $supplierPending, $activeLoans],
         ];
     }
 

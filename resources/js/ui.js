@@ -1,6 +1,10 @@
 function initializeSubmitLoading() {
     document.querySelectorAll('form').forEach((form) => {
         form.addEventListener('submit', (event) => {
+            if (form.matches('[data-ajax-form]')) {
+                return;
+            }
+
             const submitter = event.submitter || form.querySelector('button[type="submit"], button:not([type]), input[type="submit"]');
 
             if (!submitter || submitter.dataset.loadingAttached === 'true') {

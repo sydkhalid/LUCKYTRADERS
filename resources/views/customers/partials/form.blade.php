@@ -8,15 +8,17 @@
     </div>
 @endif
 
-<form method="POST" action="{{ $action }}">
+<form method="POST" action="{{ $action }}" data-ajax-form>
     @csrf
     @if ($method !== 'POST')
         @method($method)
     @endif
 
+    <x-erp.ajax-errors class="mb-5" />
+
     <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
         <div>
-            <label class="mb-1 block text-sm font-medium text-gray-700">Name</label>
+            <label class="erp-required mb-1 block text-sm font-medium text-gray-700">Name</label>
             <input type="text" name="name" value="{{ old('name', $customer->name ?? '') }}" class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
         </div>
 
@@ -36,21 +38,21 @@
         </div>
 
         <div>
-            <label class="mb-1 block text-sm font-medium text-gray-700">Opening Balance</label>
+            <label class="erp-required mb-1 block text-sm font-medium text-gray-700">Opening Balance</label>
             <input type="number" name="opening_balance" value="{{ old('opening_balance', $customer->opening_balance ?? '0') }}" step="0.01" min="0" class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
         </div>
 
         <div>
-            <label class="mb-1 block text-sm font-medium text-gray-700">Balance Type</label>
-            <select name="balance_type" class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
+            <label class="erp-required mb-1 block text-sm font-medium text-gray-700">Balance Type</label>
+            <select name="balance_type" data-searchable class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
                 <option value="debit" @selected(old('balance_type', $customer->balance_type ?? 'debit') === 'debit')>Debit</option>
                 <option value="credit" @selected(old('balance_type', $customer->balance_type ?? 'debit') === 'credit')>Credit</option>
             </select>
         </div>
 
         <div>
-            <label class="mb-1 block text-sm font-medium text-gray-700">Status</label>
-            <select name="status" class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
+            <label class="erp-required mb-1 block text-sm font-medium text-gray-700">Status</label>
+            <select name="status" data-searchable class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
                 <option value="active" @selected(old('status', $customer->status ?? 'active') === 'active')>Active</option>
                 <option value="inactive" @selected(old('status', $customer->status ?? 'active') === 'inactive')>Inactive</option>
             </select>

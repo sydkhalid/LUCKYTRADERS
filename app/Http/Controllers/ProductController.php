@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\RespondsToAjax;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use Illuminate\Http\Request;
@@ -9,6 +10,8 @@ use Illuminate\Validation\Rule;
 
 class ProductController extends Controller
 {
+    use RespondsToAjax;
+
     public function index(Request $request)
     {
         $search = trim((string) $request->query('search'));
@@ -44,9 +47,7 @@ class ProductController extends Controller
 
         Product::create($data);
 
-        return redirect()
-            ->route('products.index')
-            ->with('success', 'Product created successfully.');
+        return $this->successResponse($request, 'Product created successfully.', route('products.index'));
     }
 
     public function edit(Product $product)
@@ -63,13 +64,28 @@ class ProductController extends Controller
         return view('products.show', compact('product'));
     }
 
+    public function lookup(Product $product)
+    {
+        return response()->json([
+            'success' => true,
+            'product' => [
+                'id' => $product->id,
+                'name' => $product->name,
+                'code' => $product->code,
+                'unit' => $product->unit,
+                'selling_price' => (float) $product->selling_price,
+                'purchase_price' => (float) $product->purchase_price,
+                'gst_percentage' => (float) $product->gst_percentage,
+                'current_stock' => (float) $product->current_stock,
+            ],
+        ]);
+    }
+
     public function update(Request $request, Product $product)
     {
         $product->update($this->validatedData($request, $product));
 
-        return redirect()
-            ->route('products.index')
-            ->with('success', 'Product updated successfully.');
+        return $this->successResponse($request, 'Product updated successfully.', route('products.index'));
     }
 
     public function destroy(Request $request, Product $product)
@@ -78,9 +94,7 @@ class ProductController extends Controller
 
         $product->delete();
 
-        return redirect()
-            ->route('products.index')
-            ->with('success', 'Product deleted successfully.');
+        return $this->successResponse($request, 'Product deleted successfully.', route('products.index'));
     }
 
     private function validatedData(Request $request, ?Product $product = null): array

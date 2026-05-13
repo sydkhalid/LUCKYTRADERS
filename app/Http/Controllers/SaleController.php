@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\RespondsToAjax;
 use App\Models\Cashbook;
 use App\Models\Customer;
 use App\Models\Ledger;
@@ -18,6 +19,8 @@ use Illuminate\Validation\ValidationException;
 
 class SaleController extends Controller
 {
+    use RespondsToAjax;
+
     public function index()
     {
         $sales = Sale::with('customer')
@@ -62,9 +65,7 @@ class SaleController extends Controller
             return $sale;
         });
 
-        return redirect()
-            ->route('sales.show', $sale)
-            ->with('success', 'Sale '.$sale->sale_no.' created successfully.');
+        return $this->successResponse($request, 'Sale '.$sale->sale_no.' created successfully.', route('sales.show', $sale));
     }
 
     public function show(Sale $sale)
@@ -115,9 +116,7 @@ class SaleController extends Controller
             $this->postCustomerAccounting($sale);
         });
 
-        return redirect()
-            ->route('sales.show', $sale)
-            ->with('success', 'Sale '.$sale->sale_no.' updated successfully.');
+        return $this->successResponse($request, 'Sale '.$sale->sale_no.' updated successfully.', route('sales.show', $sale));
     }
 
     public function destroy(Request $request, Sale $sale)
@@ -142,9 +141,7 @@ class SaleController extends Controller
             );
         });
 
-        return redirect()
-            ->route('sales.index')
-            ->with('success', 'Sale cancelled and stock reversed successfully.');
+        return $this->successResponse($request, 'Sale cancelled and stock reversed successfully.', route('sales.index'));
     }
 
     public function printInvoice(Sale $sale)

@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\RespondsToAjax;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class CustomerController extends Controller
 {
+    use RespondsToAjax;
+
     public function index(Request $request)
     {
         $search = trim((string) $request->query('search'));
@@ -37,9 +40,7 @@ class CustomerController extends Controller
     {
         Customer::create($this->validatedData($request));
 
-        return redirect()
-            ->route('customers.index')
-            ->with('success', 'Customer created successfully.');
+        return $this->successResponse($request, 'Customer created successfully.', route('customers.index'));
     }
 
     public function edit(Customer $customer)
@@ -52,13 +53,28 @@ class CustomerController extends Controller
         return view('customers.show', compact('customer'));
     }
 
+    public function lookup(Customer $customer)
+    {
+        return response()->json([
+            'success' => true,
+            'customer' => [
+                'id' => $customer->id,
+                'name' => $customer->name,
+                'phone' => $customer->phone,
+                'email' => $customer->email,
+                'gst_number' => $customer->gst_number,
+                'address' => $customer->address,
+                'current_balance' => (float) $customer->current_balance,
+                'status' => $customer->status,
+            ],
+        ]);
+    }
+
     public function update(Request $request, Customer $customer)
     {
         $customer->update($this->validatedData($request, $customer));
 
-        return redirect()
-            ->route('customers.index')
-            ->with('success', 'Customer updated successfully.');
+        return $this->successResponse($request, 'Customer updated successfully.', route('customers.index'));
     }
 
     public function destroy(Request $request, Customer $customer)
@@ -66,14 +82,16 @@ class CustomerController extends Controller
         $this->authorizeDelete($request);
 
         if ($customer->ledgers()->exists()) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return $this->errorResponse($request, 'Cannot delete customer with ledger transactions.', 409);
+            }
+
             return back()->with('error', 'Cannot delete customer with ledger transactions.');
         }
 
         $customer->delete();
 
-        return redirect()
-            ->route('customers.index')
-            ->with('success', 'Customer deleted successfully.');
+        return $this->successResponse($request, 'Customer deleted successfully.', route('customers.index'));
     }
 
     private function validatedData(Request $request, ?Customer $customer = null): array

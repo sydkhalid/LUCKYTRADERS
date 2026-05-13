@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\RespondsToAjax;
 use App\Http\Requests\Loans\StoreLoanTransactionRequest;
 use App\Models\Loan;
 use App\Services\LoanPostingService;
 
 class LoanTransactionController extends Controller
 {
+    use RespondsToAjax;
+
     public function index(Loan $loan)
     {
         $transactions = $loan->transactions()
@@ -35,8 +38,6 @@ class LoanTransactionController extends Controller
     {
         $postingService->recordTransaction($loan, $request->validated());
 
-        return redirect()
-            ->route('loans.show', $loan)
-            ->with('success', 'Loan transaction saved successfully.');
+        return $this->successResponse($request, 'Loan transaction saved successfully.', route('loans.show', $loan));
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\RespondsToAjax;
 use App\Http\Requests\StockAdjustments\StoreStockAdjustmentRequest;
 use App\Models\Product;
 use App\Models\StockAdjustment;
@@ -11,6 +12,8 @@ use Illuminate\Http\Request;
 
 class StockAdjustmentController extends Controller
 {
+    use RespondsToAjax;
+
     public function index()
     {
         $adjustments = StockAdjustment::with('product')
@@ -37,9 +40,7 @@ class StockAdjustmentController extends Controller
     {
         $adjustment = $stockAdjustmentService->recordAdjustment($request->validated());
 
-        return redirect()
-            ->route('stock-adjustments.show', $adjustment)
-            ->with('success', 'Stock adjustment '.$adjustment->adjustment_no.' saved successfully.');
+        return $this->successResponse($request, 'Stock adjustment '.$adjustment->adjustment_no.' saved successfully.', route('stock-adjustments.show', $adjustment));
     }
 
     public function show(StockAdjustment $stockAdjustment)

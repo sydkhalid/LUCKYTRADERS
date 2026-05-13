@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\RespondsToAjax;
 use App\Http\Requests\Expenses\StoreExpenseRequest;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
@@ -12,6 +13,8 @@ use Illuminate\Support\Facades\Schema;
 
 class ExpenseController extends Controller
 {
+    use RespondsToAjax;
+
     public function index()
     {
         $expenses = Expense::with('category')
@@ -45,9 +48,7 @@ class ExpenseController extends Controller
     {
         $expense = $postingService->recordExpense($request->validated());
 
-        return redirect()
-            ->route('expenses.index')
-            ->with('success', 'Expense '.$expense->expense_no.' saved successfully.');
+        return $this->successResponse($request, 'Expense '.$expense->expense_no.' saved successfully.', route('expenses.index'));
     }
 
     public function show(Expense $expense)

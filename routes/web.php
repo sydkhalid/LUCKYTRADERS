@@ -9,6 +9,7 @@ use App\Http\Controllers\CustomerReceiptController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseCategoryController;
 use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\ErpDataTableController;
 use App\Http\Controllers\GlobalSearchController;
 use App\Http\Controllers\GSTReportController;
 use App\Http\Controllers\LedgerController;
@@ -38,11 +39,22 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth', 'throttle:erp'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->middleware('permission:view_dashboard');
     Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('permission:view_dashboard')->name('dashboard');
+    Route::get('/dashboard/charts', [DashboardController::class, 'chartData'])->middleware('permission:view_dashboard')->name('dashboard.charts');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('/api/global-search', [GlobalSearchController::class, 'search'])->name('global-search.search');
+    Route::get('/erp/datatables/{module}', ErpDataTableController::class)->name('erp.datatables');
+    Route::get('/api/products/{product}/lookup', [ProductController::class, 'lookup'])
+        ->middleware('permission:manage_sales|manage_purchases|manage_products|manage_stock_adjustments')
+        ->name('products.lookup');
+    Route::get('/api/customers/{customer}/lookup', [CustomerController::class, 'lookup'])
+        ->middleware('permission:manage_sales|manage_receipts|manage_customers')
+        ->name('customers.lookup');
+    Route::get('/api/suppliers/{supplier}/lookup', [SupplierController::class, 'lookup'])
+        ->middleware('permission:manage_purchases|manage_payments|manage_suppliers')
+        ->name('suppliers.lookup');
 
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::get('/notifications/dropdown', [NotificationController::class, 'dropdown'])->name('notifications.dropdown');

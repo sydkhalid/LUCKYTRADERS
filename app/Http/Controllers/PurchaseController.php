@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\RespondsToAjax;
 use App\Models\Cashbook;
 use App\Models\Ledger;
 use App\Models\Payment;
@@ -17,6 +18,8 @@ use Illuminate\Validation\ValidationException;
 
 class PurchaseController extends Controller
 {
+    use RespondsToAjax;
+
     public function index()
     {
         $purchases = Purchase::with('supplier')
@@ -60,9 +63,7 @@ class PurchaseController extends Controller
             return $purchase;
         });
 
-        return redirect()
-            ->route('purchases.index')
-            ->with('success', 'Purchase '.$purchase->purchase_no.' created successfully.');
+        return $this->successResponse($request, 'Purchase '.$purchase->purchase_no.' created successfully.', route('purchases.index'));
     }
 
     public function show(Purchase $purchase)
@@ -124,9 +125,7 @@ class PurchaseController extends Controller
             $this->postSupplierAccounting($purchase);
         });
 
-        return redirect()
-            ->route('purchases.index')
-            ->with('success', 'Purchase '.$purchase->purchase_no.' updated successfully.');
+        return $this->successResponse($request, 'Purchase '.$purchase->purchase_no.' updated successfully.', route('purchases.index'));
     }
 
     public function destroy(Request $request, Purchase $purchase)
@@ -134,6 +133,10 @@ class PurchaseController extends Controller
         $this->authorizePermission($request, 'delete_records');
 
         if ($this->hasExternalSupplierPayments($purchase)) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return $this->errorResponse($request, 'Cannot delete purchase while supplier payments are linked to it.', 409);
+            }
+
             return back()->with('error', 'Cannot delete purchase while supplier payments are linked to it.');
         }
 
@@ -158,9 +161,7 @@ class PurchaseController extends Controller
             $purchase->delete();
         });
 
-        return redirect()
-            ->route('purchases.index')
-            ->with('success', 'Purchase deleted successfully.');
+        return $this->successResponse($request, 'Purchase deleted successfully.', route('purchases.index'));
     }
 
     private function formData(): array

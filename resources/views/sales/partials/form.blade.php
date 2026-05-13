@@ -37,16 +37,18 @@
     </div>
 @endif
 
-<form method="POST" action="{{ $action }}" id="saleForm">
+<form method="POST" action="{{ $action }}" id="saleForm" data-ajax-form>
     @csrf
     @if ($method !== 'POST')
         @method($method)
     @endif
 
+    <x-erp.ajax-errors class="mb-5" />
+
     <div class="grid grid-cols-1 gap-5 md:grid-cols-4">
         <div>
-            <label class="mb-1 block text-sm font-medium text-gray-700">Customer</label>
-            <select name="customer_id" class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
+            <label class="erp-required mb-1 block text-sm font-medium text-gray-700">Customer</label>
+            <select name="customer_id" data-searchable data-placeholder="Search customer" class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
                 <option value="">Select customer</option>
                 @foreach ($customers as $customer)
                     <option value="{{ $customer->id }}" @selected(old('customer_id', $sale->customer_id ?? '') == $customer->id)>{{ $customer->name }}</option>
@@ -55,21 +57,21 @@
         </div>
 
         <div>
-            <label class="mb-1 block text-sm font-medium text-gray-700">Sale Date</label>
+            <label class="erp-required mb-1 block text-sm font-medium text-gray-700">Sale Date</label>
             <input type="date" name="sale_date" value="{{ old('sale_date', optional($sale?->sale_date)->toDateString() ?? now()->toDateString()) }}" class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
         </div>
 
         <div>
-            <label class="mb-1 block text-sm font-medium text-gray-700">Bill Type</label>
-            <select name="bill_type" id="billType" class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
+            <label class="erp-required mb-1 block text-sm font-medium text-gray-700">Bill Type</label>
+            <select name="bill_type" id="billType" data-searchable class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
                 <option value="gst" @selected(old('bill_type', $sale->bill_type ?? 'gst') === 'gst')>GST Invoice</option>
                 <option value="non_gst" @selected(old('bill_type', $sale->bill_type ?? 'gst') === 'non_gst')>Normal / Non-GST</option>
             </select>
         </div>
 
         <div>
-            <label class="mb-1 block text-sm font-medium text-gray-700">Payment Mode</label>
-            <select name="payment_mode" id="paymentMode" class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
+            <label class="erp-required mb-1 block text-sm font-medium text-gray-700">Payment Mode</label>
+            <select name="payment_mode" id="paymentMode" data-searchable class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
                 <option value="credit" @selected(old('payment_mode', $sale->payment_mode ?? 'credit') === 'credit')>Credit</option>
                 <option value="cash" @selected(old('payment_mode', $sale->payment_mode ?? 'credit') === 'cash')>Cash</option>
                 <option value="bank" @selected(old('payment_mode', $sale->payment_mode ?? 'credit') === 'bank')>Bank</option>
@@ -181,7 +183,7 @@
         tr.className = 'sale-row';
         tr.innerHTML = `
             <td class="px-3 py-3">
-                <select name="items[${index}][product_id]" class="product-select w-64 rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
+                <select name="items[${index}][product_id]" data-searchable data-placeholder="Search product" class="product-select w-64 rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
                     ${productOptions(data.product_id)}
                 </select>
             </td>
@@ -210,6 +212,7 @@
         bindRow(tr);
         updateProductMeta(tr);
         calculateTotals();
+        document.dispatchEvent(new Event('erp:refresh-selects'));
     }
 
     function bindRow(row) {

@@ -3,13 +3,15 @@
 @section('title', 'Customers')
 
 @section('content')
-    <div class="mb-5 flex items-center justify-between">
-        <div>
-            <h2 class="text-lg font-semibold text-gray-900">Customers</h2>
-            <p class="text-sm text-gray-500">GST, contact details, and opening balances for billing.</p>
-        </div>
-        <a href="{{ route('customers.create') }}" class="rounded bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">Add Customer</a>
-    </div>
+    <x-erp.page-header
+        title="Customers"
+        description="GST, contact details, and opening balances for billing."
+        kicker="Receivables"
+    >
+        <x-slot:actions>
+            <a href="{{ route('customers.create') }}" class="erp-primary-button">Add Customer</a>
+        </x-slot:actions>
+    </x-erp.page-header>
 
     <form method="GET" action="{{ route('customers.index') }}" class="mb-5 flex flex-wrap gap-3 rounded bg-white p-4 shadow">
         <input type="search" name="search" value="{{ $search }}" placeholder="Search customer, phone, email, GST number, or status" class="min-w-0 flex-1 rounded border-gray-300 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500">
@@ -20,15 +22,21 @@
     </form>
 
     <div class="overflow-hidden rounded bg-white shadow">
-        <table class="min-w-full divide-y divide-gray-200 text-sm">
+        <table
+            class="min-w-full divide-y divide-gray-200 text-sm"
+            data-erp-datatable
+            data-ajax-url="{{ route('erp.datatables', 'customers') }}"
+            data-search-placeholder="Search customer, phone, GST..."
+            data-empty="No customers found."
+        >
             <thead class="bg-slate-100 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">
                 <tr>
-                    <th class="px-4 py-3">Name</th>
-                    <th class="px-4 py-3">Phone</th>
-                    <th class="px-4 py-3">GST Number</th>
-                    <th class="px-4 py-3 text-right">Opening Balance</th>
-                    <th class="px-4 py-3">Status</th>
-                    <th class="px-4 py-3 text-right">Action</th>
+                    <th class="px-4 py-3" data-column="name">Name</th>
+                    <th class="px-4 py-3" data-column="phone">Phone</th>
+                    <th class="px-4 py-3" data-column="gst_number">GST Number</th>
+                    <th class="px-4 py-3 text-right" data-column="opening_balance">Opening Balance</th>
+                    <th class="px-4 py-3" data-column="status">Status</th>
+                    <th class="px-4 py-3 text-right" data-column="actions" data-orderable="false" data-searchable="false">Action</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -44,16 +52,14 @@
                             Rs. {{ number_format((float) $customer->opening_balance, 2) }} {{ ucfirst($customer->balance_type) }}
                         </td>
                         <td class="px-4 py-3">
-                            <span class="rounded px-2 py-1 text-xs font-semibold {{ $customer->status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600' }}">
-                                {{ ucfirst($customer->status) }}
-                            </span>
+                            <x-erp.status-badge :value="ucfirst($customer->status)" />
                         </td>
                         <td class="px-4 py-3">
                             <div class="flex justify-end gap-3">
                                 <a href="{{ route('customers.show', $customer) }}" class="font-semibold text-slate-700 hover:text-slate-900">View</a>
                                 <a href="{{ route('customers.edit', $customer) }}" class="font-semibold text-slate-700 hover:text-slate-900">Edit</a>
                                 @can('delete_records')
-                                    <form method="POST" action="{{ route('customers.destroy', $customer) }}" onsubmit="return confirm('Delete this customer?')">
+                                    <form method="POST" action="{{ route('customers.destroy', $customer) }}" data-confirm-delete data-confirm-title="Delete this customer?">
                                         @csrf
                                         @method('DELETE')
                                         <button class="font-semibold text-red-600 hover:text-red-800">Delete</button>

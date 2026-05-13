@@ -3,13 +3,15 @@
 @section('title', 'Products')
 
 @section('content')
-    <div class="mb-5 flex items-center justify-between">
-        <div>
-            <h2 class="text-lg font-semibold text-gray-900">Products</h2>
-            <p class="text-sm text-gray-500">Steel items, rates, GST, HSN, and opening stock.</p>
-        </div>
-        <a href="{{ route('products.create') }}" class="rounded bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">Add Product</a>
-    </div>
+    <x-erp.page-header
+        title="Products"
+        description="Steel items, rates, GST, HSN, and opening stock."
+        kicker="Inventory Master"
+    >
+        <x-slot:actions>
+            <a href="{{ route('products.create') }}" class="erp-primary-button">Add Product</a>
+        </x-slot:actions>
+    </x-erp.page-header>
 
     <form method="GET" action="{{ route('products.index') }}" class="mb-5 flex flex-wrap gap-3 rounded bg-white p-4 shadow">
         <input type="search" name="search" value="{{ $search }}" placeholder="Search product, code, category, HSN, size, or thickness" class="min-w-0 flex-1 rounded border-gray-300 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500">
@@ -20,17 +22,23 @@
     </form>
 
     <div class="overflow-x-auto rounded bg-white shadow">
-        <table class="min-w-full divide-y divide-gray-200 text-sm">
+        <table
+            class="min-w-full divide-y divide-gray-200 text-sm"
+            data-erp-datatable
+            data-ajax-url="{{ route('erp.datatables', 'products') }}"
+            data-search-placeholder="Search product, code, category, HSN..."
+            data-empty="No products found."
+        >
             <thead class="bg-slate-100 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">
                 <tr>
-                    <th class="px-4 py-3">Code</th>
-                    <th class="px-4 py-3">Product</th>
-                    <th class="px-4 py-3">Category</th>
-                    <th class="px-4 py-3">Size</th>
-                    <th class="px-4 py-3 text-right">Stock</th>
-                    <th class="px-4 py-3 text-right">Sell Rate</th>
-                    <th class="px-4 py-3">Status</th>
-                    <th class="px-4 py-3 text-right">Action</th>
+                    <th class="px-4 py-3" data-column="code">Code</th>
+                    <th class="px-4 py-3" data-column="name">Product</th>
+                    <th class="px-4 py-3" data-column="category" data-orderable="false" data-searchable="false">Category</th>
+                    <th class="px-4 py-3" data-column="size">Size</th>
+                    <th class="px-4 py-3 text-right" data-column="current_stock">Stock</th>
+                    <th class="px-4 py-3 text-right" data-column="selling_price">Sell Rate</th>
+                    <th class="px-4 py-3" data-column="status">Status</th>
+                    <th class="px-4 py-3 text-right" data-column="actions" data-orderable="false" data-searchable="false">Action</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -43,9 +51,7 @@
                         <td class="px-4 py-3 text-right text-gray-900">{{ number_format((float) $product->current_stock, 3) }} {{ $product->unit }}</td>
                         <td class="px-4 py-3 text-right text-gray-900">Rs. {{ number_format((float) $product->selling_price, 2) }}</td>
                         <td class="px-4 py-3">
-                            <span class="rounded px-2 py-1 text-xs font-semibold {{ $product->status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600' }}">
-                                {{ ucfirst($product->status) }}
-                            </span>
+                            <x-erp.status-badge :value="ucfirst($product->status)" />
                         </td>
                         <td class="px-4 py-3">
                             <div class="flex justify-end gap-3">
@@ -53,7 +59,7 @@
                                 <a href="{{ route('products.edit', $product) }}" class="font-semibold text-slate-700 hover:text-slate-900">Edit</a>
                                 <a href="{{ route('stock-adjustments.products.history', $product) }}" class="font-semibold text-slate-700 hover:text-slate-900">History</a>
                                 @can('delete_records')
-                                    <form method="POST" action="{{ route('products.destroy', $product) }}" onsubmit="return confirm('Delete this product?')">
+                                    <form method="POST" action="{{ route('products.destroy', $product) }}" data-confirm-delete data-confirm-title="Delete this product?">
                                         @csrf
                                         @method('DELETE')
                                         <button class="font-semibold text-red-600 hover:text-red-800">Delete</button>

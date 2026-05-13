@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\RespondsToAjax;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class SupplierController extends Controller
 {
+    use RespondsToAjax;
+
     public function index(Request $request)
     {
         $search = trim((string) $request->query('search'));
@@ -37,9 +40,7 @@ class SupplierController extends Controller
     {
         Supplier::create($this->validatedData($request));
 
-        return redirect()
-            ->route('suppliers.index')
-            ->with('success', 'Supplier created successfully.');
+        return $this->successResponse($request, 'Supplier created successfully.', route('suppliers.index'));
     }
 
     public function edit(Supplier $supplier)
@@ -52,13 +53,28 @@ class SupplierController extends Controller
         return view('suppliers.show', compact('supplier'));
     }
 
+    public function lookup(Supplier $supplier)
+    {
+        return response()->json([
+            'success' => true,
+            'supplier' => [
+                'id' => $supplier->id,
+                'name' => $supplier->name,
+                'phone' => $supplier->phone,
+                'email' => $supplier->email,
+                'gst_number' => $supplier->gst_number,
+                'address' => $supplier->address,
+                'current_balance' => (float) $supplier->current_balance,
+                'status' => $supplier->status,
+            ],
+        ]);
+    }
+
     public function update(Request $request, Supplier $supplier)
     {
         $supplier->update($this->validatedData($request, $supplier));
 
-        return redirect()
-            ->route('suppliers.index')
-            ->with('success', 'Supplier updated successfully.');
+        return $this->successResponse($request, 'Supplier updated successfully.', route('suppliers.index'));
     }
 
     public function destroy(Request $request, Supplier $supplier)
@@ -66,14 +82,16 @@ class SupplierController extends Controller
         $this->authorizeDelete($request);
 
         if ($supplier->ledgers()->exists()) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return $this->errorResponse($request, 'Cannot delete supplier with ledger transactions.', 409);
+            }
+
             return back()->with('error', 'Cannot delete supplier with ledger transactions.');
         }
 
         $supplier->delete();
 
-        return redirect()
-            ->route('suppliers.index')
-            ->with('success', 'Supplier deleted successfully.');
+        return $this->successResponse($request, 'Supplier deleted successfully.', route('suppliers.index'));
     }
 
     private function validatedData(Request $request, ?Supplier $supplier = null): array

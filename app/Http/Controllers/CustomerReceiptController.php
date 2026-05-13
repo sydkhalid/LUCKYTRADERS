@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\RespondsToAjax;
 use App\Http\Requests\Payments\StoreCustomerReceiptRequest;
 use App\Models\Customer;
 use App\Models\Payment;
@@ -10,6 +11,8 @@ use App\Services\PaymentPostingService;
 
 class CustomerReceiptController extends Controller
 {
+    use RespondsToAjax;
+
     public function index()
     {
         $payments = Payment::where('transaction_type', 'receipt')
@@ -57,9 +60,7 @@ class CustomerReceiptController extends Controller
 
         $payment = $postingService->recordCustomerReceipt($customer, $request->validated());
 
-        return redirect()
-            ->route('receipts.index')
-            ->with('success', 'Customer receipt '.$payment->payment_no.' saved successfully.');
+        return $this->successResponse($request, 'Customer receipt '.$payment->payment_no.' saved successfully.', route('receipts.index'));
     }
 
     private function reference(Payment $payment): ?Sale

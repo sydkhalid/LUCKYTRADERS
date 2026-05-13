@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\RespondsToAjax;
 use App\Http\Requests\Partners\StorePartnerTransactionRequest;
 use App\Models\Partner;
 use App\Models\PartnerTransaction;
@@ -10,6 +11,8 @@ use Illuminate\Http\Request;
 
 class PartnerTransactionController extends Controller
 {
+    use RespondsToAjax;
+
     public function index(Partner $partner)
     {
         $transactions = $partner->transactions()
@@ -39,8 +42,6 @@ class PartnerTransactionController extends Controller
     {
         $postingService->recordTransaction($partner, $request->validated());
 
-        return redirect()
-            ->route('partners.show', $partner)
-            ->with('success', 'Partner transaction saved successfully.');
+        return $this->successResponse($request, 'Partner transaction saved successfully.', route('partners.show', $partner));
     }
 }

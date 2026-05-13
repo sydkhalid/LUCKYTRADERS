@@ -171,6 +171,156 @@
         background: #ffffff;
         box-shadow: 0 1px 2px 0 rgb(226 232 240 / 0.7);
     }
+
+    .erp-page-header {
+        @apply mb-5 flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between;
+    }
+
+    .erp-page-kicker {
+        @apply text-xs font-black uppercase tracking-[0.18em] text-cyan-700;
+    }
+
+    .erp-primary-button {
+        @apply inline-flex items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-black text-white shadow-sm hover:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-slate-300;
+    }
+
+    .erp-secondary-button {
+        @apply inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-black text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-200;
+    }
+
+    .erp-danger-button {
+        @apply inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-black text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-200;
+    }
+
+    .erp-form-card {
+        @apply rounded-2xl border border-slate-200 bg-white p-5 shadow-sm;
+    }
+
+    .erp-form-section-title {
+        @apply mb-4 border-b border-slate-100 pb-3 text-sm font-black uppercase tracking-[0.16em] text-slate-600;
+    }
+
+    .erp-required::after {
+        content: ' *';
+        color: #dc2626;
+        font-weight: 900;
+    }
+
+    .erp-sticky-summary {
+        @apply rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-sm lg:sticky lg:top-28;
+    }
+
+    .erp-badge {
+        @apply inline-flex items-center rounded-full px-2.5 py-1 text-xs font-black uppercase tracking-wide;
+    }
+
+    .erp-badge-success {
+        @apply bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200;
+    }
+
+    .erp-badge-warning {
+        @apply bg-amber-100 text-amber-700 ring-1 ring-amber-200;
+    }
+
+    .erp-badge-danger {
+        @apply bg-red-100 text-red-700 ring-1 ring-red-200;
+    }
+
+    .erp-badge-neutral {
+        @apply bg-slate-100 text-slate-700 ring-1 ring-slate-200;
+    }
+
+    .erp-row-actions {
+        @apply flex flex-wrap items-center justify-end gap-3;
+    }
+
+    .erp-action-link {
+        @apply text-xs font-black uppercase tracking-wide text-slate-600 hover:text-slate-950;
+    }
+
+    .erp-action-danger {
+        @apply text-xs font-black uppercase tracking-wide text-red-600 hover:text-red-800;
+    }
+
+    .erp-spinner {
+        @apply inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent;
+    }
+
+    .is-loading {
+        @apply inline-flex items-center justify-center gap-2;
+    }
+
+    .erp-chart-skeleton {
+        @apply flex h-full min-h-64 items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 text-sm font-semibold text-slate-500;
+        background-image: linear-gradient(90deg, rgb(248 250 252) 0, rgb(241 245 249) 45%, rgb(248 250 252) 90%);
+        background-size: 200% 100%;
+        animation: erpSkeleton 1.3s ease-in-out infinite;
+    }
+
+    .erp-table-loading {
+        @apply rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-500 shadow-sm;
+    }
+
+    .erp-content .dataTables_wrapper,
+    .erp-content .dt-container {
+        @apply rounded-2xl border border-slate-200 bg-white p-4 shadow-sm;
+    }
+
+    .erp-dt-top,
+    .erp-dt-bottom,
+    .dt-layout-row {
+        @apply flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between;
+    }
+
+    .erp-content .dt-buttons,
+    .erp-content .dt-search,
+    .erp-content .dt-length {
+        @apply flex flex-wrap items-center gap-2;
+    }
+
+    .erp-content .dt-button,
+    .erp-content button.dt-button {
+        @apply rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-black uppercase tracking-wide text-slate-700 shadow-sm hover:bg-slate-50;
+        background-image: none;
+    }
+
+    .erp-content .dt-search input,
+    .erp-content .dt-length select {
+        @apply ml-0;
+    }
+
+    .erp-content .select2-container--default .select2-selection--single,
+    .erp-content .select2-container--default .select2-selection--multiple {
+        min-height: 2.75rem;
+        border-color: #cbd5e1;
+        border-radius: 0.75rem;
+        box-shadow: 0 1px 2px 0 rgb(15 23 42 / 0.05);
+    }
+
+    .erp-content .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 2.7rem;
+        color: #0f172a;
+        padding-left: 0.85rem;
+    }
+
+    .erp-content .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 2.7rem;
+        right: 0.5rem;
+    }
+
+    .swal2-popup {
+        border-radius: 1rem;
+    }
+
+    .swal2-confirm.swal2-styled {
+        border-radius: 0.75rem;
+        font-weight: 800;
+    }
+
+    .swal2-cancel.swal2-styled {
+        border-radius: 0.75rem;
+        font-weight: 800;
+    }
 }
 
 @layer utilities {
@@ -182,6 +332,15 @@
         to {
             opacity: 1;
             transform: translateY(0);
+        }
+    }
+
+    @keyframes erpSkeleton {
+        from {
+            background-position: 200% 0;
+        }
+        to {
+            background-position: -200% 0;
         }
     }
 }

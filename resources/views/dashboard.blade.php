@@ -24,7 +24,7 @@
         ];
     @endphp
 
-    <div class="mb-6 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-200/70 lg:p-6">
+    <div data-dashboard-charts="{{ route('dashboard.charts') }}" class="mb-6 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-200/70 lg:p-6">
         <div class="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
             <div class="max-w-2xl">
                 <p class="text-xs font-black uppercase tracking-[0.22em] text-cyan-700">Live Business Summary</p>
@@ -138,6 +138,50 @@
                     <div class="erp-empty-state">No product sales for selected period.</div>
                 @else
                     <canvas id="topProductsChart"></canvas>
+                @endif
+            </div>
+        </div>
+
+        <div class="erp-panel">
+            <h3 class="mb-4 text-sm font-black uppercase tracking-[0.16em] text-slate-600">Purchase vs Sales</h3>
+            <div class="h-72">
+                @if ($chartEmpty($charts['sales_vs_purchases']))
+                    <div class="erp-empty-state">No purchase or sales comparison for selected period.</div>
+                @else
+                    <canvas id="purchaseVsSalesChart"></canvas>
+                @endif
+            </div>
+        </div>
+
+        <div class="erp-panel">
+            <h3 class="mb-4 text-sm font-black uppercase tracking-[0.16em] text-slate-600">Expense Category</h3>
+            <div class="h-72">
+                @if ($chartEmpty($charts['expense_categories']))
+                    <div class="erp-empty-state">No expense category data for selected period.</div>
+                @else
+                    <canvas id="expenseCategoryChart"></canvas>
+                @endif
+            </div>
+        </div>
+
+        <div class="erp-panel">
+            <h3 class="mb-4 text-sm font-black uppercase tracking-[0.16em] text-slate-600">Stock Value</h3>
+            <div class="h-72">
+                @if ($chartEmpty($charts['stock_value']))
+                    <div class="erp-empty-state">No stock value data available.</div>
+                @else
+                    <canvas id="stockValueChart"></canvas>
+                @endif
+            </div>
+        </div>
+
+        <div class="erp-panel">
+            <h3 class="mb-4 text-sm font-black uppercase tracking-[0.16em] text-slate-600">Pending Payments</h3>
+            <div class="h-72">
+                @if ($chartEmpty($charts['pending_payments']))
+                    <div class="erp-empty-state">No pending payment data available.</div>
+                @else
+                    <canvas id="pendingPaymentsChart"></canvas>
                 @endif
             </div>
         </div>
@@ -323,7 +367,8 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const charts = @json($charts);
+            let charts = @json($charts);
+            const renderedCharts = {};
             const commonOptions = {
                 responsive: true,
                 maintainAspectRatio: false,
@@ -342,10 +387,17 @@
                     return;
                 }
 
-                new window.Chart(element, config);
+                if (renderedCharts[id]) {
+                    renderedCharts[id].destroy();
+                }
+
+                renderedCharts[id] = new window.Chart(element, config);
             }
 
-            renderChart('monthlySalesChart', {
+            function renderDashboardCharts(nextCharts) {
+                charts = nextCharts;
+
+                renderChart('monthlySalesChart', {
                 type: 'line',
                 data: {
                     labels: charts.monthly_sales.labels,
@@ -361,9 +413,9 @@
                     }]
                 },
                 options: commonOptions
-            });
+                });
 
-            renderChart('monthlyPurchaseChart', {
+                renderChart('monthlyPurchaseChart', {
                 type: 'line',
                 data: {
                     labels: charts.monthly_purchases.labels,
@@ -379,9 +431,9 @@
                     }]
                 },
                 options: commonOptions
-            });
+                });
 
-            renderChart('gstSplitChart', {
+                renderChart('gstSplitChart', {
                 type: 'doughnut',
                 data: {
                     labels: charts.gst_split.labels,
@@ -397,9 +449,9 @@
                     cutout: '68%',
                     plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, color: '#475569', font: { weight: '600' } } } }
                 }
-            });
+                });
 
-            renderChart('cashFlowChart', {
+                renderChart('cashFlowChart', {
                 type: 'bar',
                 data: {
                     labels: charts.cash_flow.labels,
@@ -411,9 +463,9 @@
                     }]
                 },
                 options: commonOptions
-            });
+                });
 
-            renderChart('topProductsChart', {
+                renderChart('topProductsChart', {
                 type: 'bar',
                 data: {
                     labels: charts.top_products.labels,
@@ -428,6 +480,80 @@
                     ...commonOptions,
                     indexAxis: 'y'
                 }
+                });
+
+                renderChart('purchaseVsSalesChart', {
+                    type: 'bar',
+                    data: {
+                        labels: charts.sales_vs_purchases.labels,
+                        datasets: [
+                            {
+                                label: 'Sales',
+                                data: charts.sales_vs_purchases.sales,
+                                backgroundColor: '#059669',
+                                borderRadius: 10
+                            },
+                            {
+                                label: 'Purchases',
+                                data: charts.sales_vs_purchases.purchases,
+                                backgroundColor: '#e11d48',
+                                borderRadius: 10
+                            }
+                        ]
+                    },
+                    options: commonOptions
+                });
+
+                renderChart('expenseCategoryChart', {
+                    type: 'doughnut',
+                    data: {
+                        labels: charts.expense_categories.labels,
+                        datasets: [{
+                            data: charts.expense_categories.data,
+                            backgroundColor: ['#0f766e', '#0891b2', '#6366f1', '#f97316', '#e11d48', '#84cc16', '#a855f7', '#64748b'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '62%',
+                        plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, color: '#475569', font: { weight: '600' } } } }
+                    }
+                });
+
+                renderChart('stockValueChart', {
+                    type: 'bar',
+                    data: {
+                        labels: charts.stock_value.labels,
+                        datasets: [{
+                            label: 'Stock Value',
+                            data: charts.stock_value.data,
+                            backgroundColor: '#0891b2',
+                            borderRadius: 10
+                        }]
+                    },
+                    options: { ...commonOptions, indexAxis: 'y' }
+                });
+
+                renderChart('pendingPaymentsChart', {
+                    type: 'bar',
+                    data: {
+                        labels: charts.pending_payments.labels,
+                        datasets: [{
+                            label: 'Pending',
+                            data: charts.pending_payments.data,
+                            backgroundColor: ['#f59e0b', '#ef4444', '#6366f1'],
+                            borderRadius: 10
+                        }]
+                    },
+                    options: commonOptions
+                });
+            }
+
+            renderDashboardCharts(charts);
+            window.addEventListener('erp:dashboard-charts', function (event) {
+                renderDashboardCharts(event.detail);
             });
         });
     </script>
