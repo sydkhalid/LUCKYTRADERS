@@ -309,6 +309,10 @@ function initializeDataTables() {
             options.ajax = {
                 url: ajaxUrl,
                 data(data) {
+                    new URLSearchParams(window.location.search).forEach((value, key) => {
+                        data[key] = value;
+                    });
+
                     if (!filterSelector) {
                         return data;
                     }
@@ -378,7 +382,22 @@ function initializeDashboardCharts() {
 
 window.ErpToast = { toast, modal };
 
+function initializePageLoadingOverlay() {
+    if (!document.querySelector('[data-page-loading-overlay]')) {
+        const overlay = document.createElement('div');
+        overlay.dataset.pageLoadingOverlay = 'true';
+        overlay.className = 'erp-page-loading-overlay';
+        overlay.innerHTML = '<div class="erp-page-loading-card"><span class="erp-spinner"></span><span>Loading...</span></div>';
+        document.body.appendChild(overlay);
+    }
+
+    window.addEventListener('beforeunload', () => {
+        document.body.classList.add('erp-page-loading');
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+    initializePageLoadingOverlay();
     initializeFlashMessages();
     initializeAjaxForms();
     initializeConfirmations();

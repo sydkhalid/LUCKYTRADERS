@@ -22,7 +22,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('expense-categories.update', $expenseCategory) }}" class="rounded bg-white p-6 shadow">
+        <form method="POST" action="{{ route('expense-categories.update', $expenseCategory) }}" class="rounded bg-white p-6 shadow" data-ajax-form>
             @csrf
             @method('PUT')
 

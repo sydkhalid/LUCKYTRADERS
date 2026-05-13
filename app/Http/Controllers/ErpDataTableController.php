@@ -158,6 +158,8 @@ class ErpDataTableController extends Controller
             ->addColumn('customer', fn (Sale $sale) => $sale->customer?->name ?: '-')
             ->editColumn('sale_date', fn (Sale $sale) => $this->date($sale->sale_date))
             ->editColumn('bill_type', fn (Sale $sale) => $this->badge($sale->bill_type === 'gst' ? 'GST' : 'Non-GST'))
+            ->editColumn('subtotal', fn (Sale $sale) => $this->money($sale->subtotal))
+            ->editColumn('gst_amount', fn (Sale $sale) => $this->money($sale->gst_amount))
             ->editColumn('total_amount', fn (Sale $sale) => $this->money($sale->total_amount))
             ->editColumn('paid_amount', fn (Sale $sale) => $this->money($sale->paid_amount))
             ->editColumn('balance_amount', fn (Sale $sale) => $this->money($sale->balance_amount))
@@ -191,6 +193,8 @@ class ErpDataTableController extends Controller
             ->addColumn('supplier', fn (Purchase $purchase) => $purchase->supplier?->name ?: '-')
             ->editColumn('purchase_date', fn (Purchase $purchase) => $this->date($purchase->purchase_date))
             ->editColumn('bill_type', fn (Purchase $purchase) => $this->badge($purchase->bill_type === 'gst' ? 'GST' : 'Non-GST'))
+            ->editColumn('subtotal', fn (Purchase $purchase) => $this->money($purchase->subtotal))
+            ->editColumn('gst_amount', fn (Purchase $purchase) => $this->money($purchase->gst_amount))
             ->editColumn('total_amount', fn (Purchase $purchase) => $this->money($purchase->total_amount))
             ->editColumn('paid_amount', fn (Purchase $purchase) => $this->money($purchase->paid_amount))
             ->editColumn('balance_amount', fn (Purchase $purchase) => $this->money($purchase->balance_amount))
@@ -251,12 +255,15 @@ class ErpDataTableController extends Controller
 
         return DataTables::eloquent($query)
             ->addColumn('party', fn (Payment $payment) => $this->partyName($payment))
+            ->addColumn('reference', fn (Payment $payment) => $payment->reference_type
+                ? ucfirst(str_replace('_', ' ', $payment->reference_type)).($payment->reference_id ? ' #'.$payment->reference_id : '')
+                : '-')
             ->editColumn('payment_date', fn (Payment $payment) => $this->date($payment->payment_date))
             ->editColumn('transaction_type', fn (Payment $payment) => $this->badge($payment->transaction_type))
             ->editColumn('payment_mode', fn (Payment $payment) => $this->badge($payment->payment_mode))
             ->editColumn('amount', fn (Payment $payment) => $this->money($payment->amount))
             ->addColumn('actions', fn (Payment $payment) => $this->actions([
-                ['View', route('payments.show', $payment)],
+                ['View', $this->paymentShowRoute($payment, $transactionType, $partyType)],
                 ['PDF', route('payments.pdf', $payment)],
             ]))
             ->rawColumns(['transaction_type', 'payment_mode', 'actions'])
@@ -295,7 +302,8 @@ class ErpDataTableController extends Controller
 
         return DataTables::eloquent($query)
             ->editColumn('current_investment', fn (Partner $partner) => $this->money($partner->current_investment))
-            ->editColumn('profit_share_percentage', fn (Partner $partner) => number_format((float) $partner->profit_share_percentage, 2).'%')
+            ->editColumn('opening_investment', fn (Partner $partner) => $this->money($partner->opening_investment))
+            ->editColumn('share_percentage', fn (Partner $partner) => number_format((float) $partner->share_percentage, 2).'%')
             ->editColumn('status', fn (Partner $partner) => $this->badge($partner->status))
             ->addColumn('actions', fn (Partner $partner) => $this->actions([
                 ['View', route('partners.show', $partner)],
@@ -336,7 +344,9 @@ class ErpDataTableController extends Controller
     {
         $this->authorizeAny($request, 'manage_expenses');
 
-        $query = ExpenseCategory::query()->latest();
+        $query = ExpenseCategory::query()
+            ->withCount('expenses')
+            ->latest();
         $this->applyStatusFilter($query, $request);
 
         return DataTables::eloquent($query)
@@ -365,6 +375,7 @@ class ErpDataTableController extends Controller
             ->addColumn('product', fn (StockAdjustment $adjustment) => $adjustment->product?->name ?: '-')
             ->editColumn('adjustment_date', fn (StockAdjustment $adjustment) => $this->date($adjustment->adjustment_date))
             ->editColumn('adjustment_type', fn (StockAdjustment $adjustment) => $this->badge($adjustment->typeLabel()))
+            ->editColumn('reason', fn (StockAdjustment $adjustment) => $adjustment->reasonLabel())
             ->editColumn('quantity', fn (StockAdjustment $adjustment) => $this->quantity($adjustment->quantity))
             ->addColumn('actions', fn (StockAdjustment $adjustment) => $this->actions([
                 ['View', route('stock-adjustments.show', $adjustment)],
@@ -390,8 +401,11 @@ class ErpDataTableController extends Controller
             ->addColumn('sale', fn (SalesReturn $return) => $return->sale?->sale_no ?: '-')
             ->addColumn('customer', fn (SalesReturn $return) => $return->customer?->name ?: '-')
             ->editColumn('return_date', fn (SalesReturn $return) => $this->date($return->return_date))
+            ->editColumn('subtotal', fn (SalesReturn $return) => $this->money($return->subtotal))
+            ->editColumn('gst_amount', fn (SalesReturn $return) => $this->money($return->gst_amount))
             ->editColumn('total_amount', fn (SalesReturn $return) => $this->money($return->total_amount))
             ->editColumn('refund_amount', fn (SalesReturn $return) => $this->money($return->refund_amount))
+            ->editColumn('adjustment_amount', fn (SalesReturn $return) => $this->money($return->adjustment_amount))
             ->addColumn('actions', fn (SalesReturn $return) => $this->actions([
                 ['View', route('sales-returns.show', $return)],
                 ['Print', route('sales-returns.print', $return)],
@@ -417,8 +431,11 @@ class ErpDataTableController extends Controller
             ->addColumn('purchase', fn (PurchaseReturn $return) => $return->purchase?->purchase_no ?: '-')
             ->addColumn('supplier', fn (PurchaseReturn $return) => $return->supplier?->name ?: '-')
             ->editColumn('return_date', fn (PurchaseReturn $return) => $this->date($return->return_date))
+            ->editColumn('subtotal', fn (PurchaseReturn $return) => $this->money($return->subtotal))
+            ->editColumn('gst_amount', fn (PurchaseReturn $return) => $this->money($return->gst_amount))
             ->editColumn('total_amount', fn (PurchaseReturn $return) => $this->money($return->total_amount))
             ->editColumn('refund_amount', fn (PurchaseReturn $return) => $this->money($return->refund_amount))
+            ->editColumn('adjustment_amount', fn (PurchaseReturn $return) => $this->money($return->adjustment_amount))
             ->addColumn('actions', fn (PurchaseReturn $return) => $this->actions([
                 ['View', route('purchase-returns.show', $return)],
                 ['Print', route('purchase-returns.print', $return)],
@@ -431,16 +448,19 @@ class ErpDataTableController extends Controller
     {
         $this->authorizeAny($request, 'manage_users');
 
-        $query = User::query()->latest();
-        $this->applyStatusFilter($query, $request);
+        $query = User::query()
+            ->with('roles')
+            ->latest();
+        $query->when($request->filled('status'), fn (Builder $query) => $query->where('role', $request->input('status')));
 
         return DataTables::eloquent($query)
-            ->editColumn('role', fn (User $user) => $this->badge($user->role ?: 'User'))
+            ->editColumn('role', fn (User $user) => $this->badge($user->primaryRoleName()))
+            ->editColumn('is_admin', fn (User $user) => $user->is_admin ? $this->badge('Active') : $this->badge('Inactive'))
             ->editColumn('created_at', fn (User $user) => $this->date($user->created_at))
             ->addColumn('actions', fn (User $user) => $this->actions([
                 ['Edit', route('users.edit', $user)],
             ]))
-            ->rawColumns(['role', 'actions'])
+            ->rawColumns(['role', 'is_admin', 'actions'])
             ->toJson();
     }
 
@@ -453,6 +473,7 @@ class ErpDataTableController extends Controller
             ->latest();
 
         $this->applyDateFilter($query, $request, 'created_at');
+        $query->when($request->filled('user_id'), fn (Builder $query) => $query->where('causer_id', $request->input('user_id')));
         $query->when($request->filled('module'), fn (Builder $query) => $query->where('log_name', $request->input('module')));
         $query->when($request->filled('action'), fn (Builder $query) => $query->where('event', $request->input('action')));
 
@@ -504,6 +525,15 @@ class ErpDataTableController extends Controller
             'customer' => Customer::whereKey($payment->party_id)->value('name') ?: '-',
             'supplier' => Supplier::whereKey($payment->party_id)->value('name') ?: '-',
             default => '-',
+        };
+    }
+
+    private function paymentShowRoute(Payment $payment, ?string $transactionType, ?string $partyType): string
+    {
+        return match (true) {
+            $transactionType === 'receipt' && $partyType === 'customer' => route('receipts.show', $payment),
+            $transactionType === 'payment' && $partyType === 'supplier' => route('supplier-payments.show', $payment),
+            default => route('payments.show', $payment),
         };
     }
 

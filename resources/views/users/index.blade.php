@@ -3,63 +3,66 @@
 @section('title', 'Users & Roles')
 
 @section('content')
-    <div class="mb-5 flex items-center justify-between">
+    <x-erp.page-header
+        title="Users & Roles"
+        description="Create staff users and assign ERP access by role."
+        kicker="Access Control"
+    >
+        <x-slot:actions>
+            <a href="{{ route('users.create') }}" class="erp-primary-button">Create User</a>
+        </x-slot:actions>
+    </x-erp.page-header>
+
+    <form id="userFilters" class="mb-5 grid grid-cols-1 gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-3">
         <div>
-            <h2 class="text-lg font-semibold text-gray-900">Users & Roles</h2>
-            <p class="text-sm text-gray-500">Create staff users and assign ERP access by role.</p>
+            <label class="mb-1 block text-xs font-black uppercase tracking-wide text-slate-500">Role</label>
+            <select name="status" data-searchable class="w-full">
+                <option value="">All Users</option>
+                <option value="Super Admin">Super Admin</option>
+                <option value="Admin">Admin</option>
+                <option value="Staff">Staff</option>
+            </select>
         </div>
-        <a href="{{ route('users.create') }}" class="rounded bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">Create User</a>
-    </div>
+        <div class="flex items-end">
+            <button class="erp-primary-button w-full">Apply</button>
+        </div>
+        <div class="flex items-end">
+            <button type="button" data-reset-filters class="erp-secondary-button w-full">Reset</button>
+        </div>
+    </form>
 
-    <div class="mb-6 overflow-hidden rounded bg-white shadow">
-        <table class="min-w-full divide-y divide-gray-200 text-sm">
-            <thead class="bg-slate-100 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">
-                <tr>
-                    <th class="px-4 py-3">Name</th>
-                    <th class="px-4 py-3">Email</th>
-                    <th class="px-4 py-3">Role</th>
-                    <th class="px-4 py-3">Admin</th>
-                    <th class="px-4 py-3 text-right">Action</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-                @forelse ($users as $user)
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3 font-medium text-gray-900">{{ $user->name }}</td>
-                        <td class="px-4 py-3 text-gray-700">{{ $user->email }}</td>
-                        <td class="px-4 py-3">
-                            <span class="rounded bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700">{{ $user->primaryRoleName() }}</span>
-                        </td>
-                        <td class="px-4 py-3 text-gray-700">{{ $user->is_admin ? 'Yes' : 'No' }}</td>
-                        <td class="px-4 py-3 text-right">
-                            <a href="{{ route('users.edit', $user) }}" class="font-semibold text-slate-700 hover:text-slate-900">Edit</a>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="5" class="px-4 py-8 text-center text-gray-500">No staff users found.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+    <x-erp.datatable
+        id="usersTable"
+        :ajax-url="route('erp.datatables', 'users')"
+        filter-form="#userFilters"
+        search-placeholder="Search user, email, role..."
+        empty="No staff users found."
+    >
+        <thead>
+            <tr>
+                <th class="px-4 py-3" data-column="name">Name</th>
+                <th class="px-4 py-3" data-column="email">Email</th>
+                <th class="px-4 py-3" data-column="role">Role</th>
+                <th class="px-4 py-3" data-column="is_admin">Admin</th>
+                <th class="px-4 py-3" data-column="created_at">Created</th>
+                <th class="px-4 py-3 text-right" data-column="actions" data-orderable="false" data-searchable="false">Action</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </x-erp.datatable>
 
-    <div class="mb-5">
-        {{ $users->links() }}
-    </div>
-
-    <div class="rounded bg-white p-5 shadow">
-        <h3 class="mb-4 text-base font-semibold text-gray-900">Role Permission Matrix</h3>
+    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <h3 class="mb-4 text-base font-black text-slate-950">Role Permission Matrix</h3>
         <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             @foreach ($roles as $role)
-                <div class="rounded border border-gray-200 p-4">
-                    <div class="mb-3 flex items-center justify-between">
-                        <h4 class="font-semibold text-gray-900">{{ $role->name }}</h4>
-                        <span class="rounded bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-600">{{ $role->permissions->count() }} permissions</span>
+                <div class="rounded-xl border border-slate-200 p-4">
+                    <div class="mb-3 flex items-center justify-between gap-3">
+                        <h4 class="font-black text-slate-950">{{ $role->name }}</h4>
+                        <span class="erp-badge erp-badge-neutral">{{ $role->permissions->count() }} permissions</span>
                     </div>
                     <div class="flex flex-wrap gap-2">
                         @foreach ($role->permissions->sortBy('name') as $permission)
-                            <span class="rounded bg-slate-50 px-2 py-1 text-xs font-medium text-slate-700">{{ str_replace('_', ' ', $permission->name) }}</span>
+                            <span class="rounded-lg bg-slate-50 px-2 py-1 text-xs font-semibold text-slate-700">{{ str_replace('_', ' ', $permission->name) }}</span>
                         @endforeach
                     </div>
                 </div>

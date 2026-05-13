@@ -22,7 +22,7 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('settings.bank.update') }}" class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+    <form method="POST" action="{{ route('settings.bank.update') }}" class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm" data-ajax-form>
         @csrf
         @method('PATCH')
 

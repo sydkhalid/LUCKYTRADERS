@@ -3,76 +3,80 @@
 @section('title', 'Expenses')
 
 @section('content')
-    <div class="mb-5 flex items-center justify-between">
-        <div>
-            <h2 class="text-lg font-semibold text-gray-900">Expense Management</h2>
-            <p class="text-sm text-gray-500">Record every business expense with cashbook, bankbook, and ledger posting.</p>
-        </div>
-        <div class="flex gap-2">
-            <a href="{{ route('expense-categories.index') }}" class="rounded border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Categories</a>
-            <a href="{{ route('expenses.report') }}" class="rounded border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Report</a>
-            <a href="{{ route('expenses.profit-loss') }}" class="rounded border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Profit & Loss</a>
-            <a href="{{ route('expenses.create') }}" class="rounded bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">Create Expense</a>
-        </div>
-    </div>
+    <x-erp.page-header
+        title="Expense Management"
+        description="Record every business expense with cashbook, bankbook, and ledger posting."
+        kicker="Operating Cost"
+    >
+        <x-slot:actions>
+            <a href="{{ route('expense-categories.index') }}" class="erp-secondary-button">Categories</a>
+            <a href="{{ route('expenses.report') }}" class="erp-secondary-button">Report</a>
+            <a href="{{ route('expenses.profit-loss') }}" class="erp-secondary-button">Profit & Loss</a>
+            <a href="{{ route('expenses.create') }}" class="erp-primary-button">Create Expense</a>
+        </x-slot:actions>
+    </x-erp.page-header>
 
     <div class="mb-5 grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div class="rounded bg-white p-5 shadow">
-            <p class="text-sm text-gray-500">Today Expenses</p>
-            <h3 class="mt-1 text-2xl font-bold text-red-700">Rs. {{ number_format((float) $todayTotal, 2) }}</h3>
+        <div class="erp-summary-card">
+            <p class="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Today Expenses</p>
+            <h3 class="mt-2 text-2xl font-black text-red-700">Rs. {{ number_format((float) $todayTotal, 2) }}</h3>
         </div>
-        <div class="rounded bg-white p-5 shadow">
-            <p class="text-sm text-gray-500">This Month</p>
-            <h3 class="mt-1 text-2xl font-bold text-red-700">Rs. {{ number_format((float) $monthTotal, 2) }}</h3>
+        <div class="erp-summary-card">
+            <p class="text-xs font-black uppercase tracking-[0.16em] text-slate-500">This Month</p>
+            <h3 class="mt-2 text-2xl font-black text-red-700">Rs. {{ number_format((float) $monthTotal, 2) }}</h3>
         </div>
-        <div class="rounded bg-white p-5 shadow">
-            <p class="text-sm text-gray-500">Total Expenses</p>
-            <h3 class="mt-1 text-2xl font-bold text-gray-900">Rs. {{ number_format((float) $overallTotal, 2) }}</h3>
+        <div class="erp-summary-card">
+            <p class="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Total Expenses</p>
+            <h3 class="mt-2 text-2xl font-black text-slate-950">Rs. {{ number_format((float) $overallTotal, 2) }}</h3>
         </div>
     </div>
 
-    <div class="overflow-hidden rounded bg-white shadow">
-        <table class="min-w-full divide-y divide-gray-200 text-sm">
-            <thead class="bg-slate-100 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">
-                <tr>
-                    <th class="px-4 py-3">Expense No</th>
-                    <th class="px-4 py-3">Date</th>
-                    <th class="px-4 py-3">Category</th>
-                    <th class="px-4 py-3">Paid To</th>
-                    <th class="px-4 py-3">Mode</th>
-                    <th class="px-4 py-3 text-right">Amount</th>
-                    <th class="px-4 py-3">Notes</th>
-                    <th class="px-4 py-3 text-right">Action</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-                @forelse ($expenses as $expense)
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3 font-medium text-gray-900">{{ $expense->expense_no }}</td>
-                        <td class="px-4 py-3 text-gray-700">{{ $expense->expense_date?->format('d M Y') }}</td>
-                        <td class="px-4 py-3 text-gray-700">{{ $expense->category?->name ?? '-' }}</td>
-                        <td class="px-4 py-3 text-gray-700">{{ $expense->paid_to ?: '-' }}</td>
-                        <td class="px-4 py-3 text-gray-700">{{ strtoupper($expense->payment_mode) }}</td>
-                        <td class="px-4 py-3 text-right font-semibold text-gray-900">Rs. {{ number_format((float) $expense->amount, 2) }}</td>
-                        <td class="px-4 py-3 text-gray-600">{{ $expense->notes ?: '-' }}</td>
-                        <td class="px-4 py-3 text-right">
-                            <div class="flex justify-end gap-3">
-                                <a href="{{ route('expenses.show', $expense) }}" class="font-semibold text-slate-700 hover:text-slate-900">View</a>
-                                <a href="{{ route('expenses.pdf', $expense) }}" target="_blank" class="font-semibold text-slate-700 hover:text-slate-900">Voucher</a>
-                                <a href="{{ route('expenses.pdf', ['expense' => $expense, 'download' => 1]) }}" class="font-semibold text-slate-700 hover:text-slate-900">Download</a>
-                            </div>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="8" class="px-4 py-8 text-center text-gray-500">No expenses recorded yet.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+    <form id="expenseFilters" class="mb-5 grid grid-cols-1 gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-5">
+        <div>
+            <label class="mb-1 block text-xs font-black uppercase tracking-wide text-slate-500">From</label>
+            <input type="date" name="from_date" class="w-full">
+        </div>
+        <div>
+            <label class="mb-1 block text-xs font-black uppercase tracking-wide text-slate-500">To</label>
+            <input type="date" name="to_date" class="w-full">
+        </div>
+        <div>
+            <label class="mb-1 block text-xs font-black uppercase tracking-wide text-slate-500">Mode</label>
+            <select name="payment_mode" data-searchable class="w-full">
+                <option value="">All Modes</option>
+                <option value="cash">Cash</option>
+                <option value="bank">Bank</option>
+                <option value="upi">UPI</option>
+                <option value="cheque">Cheque</option>
+            </select>
+        </div>
+        <div class="flex items-end">
+            <button class="erp-primary-button w-full">Apply</button>
+        </div>
+        <div class="flex items-end">
+            <button type="button" data-reset-filters class="erp-secondary-button w-full">Reset</button>
+        </div>
+    </form>
 
-    <div class="mt-5">
-        {{ $expenses->links() }}
-    </div>
+    <x-erp.datatable
+        id="expensesTable"
+        :ajax-url="route('erp.datatables', 'expenses')"
+        filter-form="#expenseFilters"
+        search-placeholder="Search expense, category, paid to..."
+        empty="No expenses recorded yet."
+    >
+        <thead>
+            <tr>
+                <th class="px-4 py-3" data-column="expense_no">Expense No</th>
+                <th class="px-4 py-3" data-column="expense_date">Date</th>
+                <th class="px-4 py-3" data-column="category" data-orderable="false" data-searchable="false">Category</th>
+                <th class="px-4 py-3" data-column="paid_to">Paid To</th>
+                <th class="px-4 py-3" data-column="payment_mode">Mode</th>
+                <th class="px-4 py-3 text-right" data-column="amount">Amount</th>
+                <th class="px-4 py-3" data-column="notes">Notes</th>
+                <th class="px-4 py-3 text-right" data-column="actions" data-orderable="false" data-searchable="false">Action</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </x-erp.datatable>
 @endsection

@@ -44,7 +44,7 @@
     </div>
 @endif
 
-<form method="POST" action="{{ $action }}" id="quotationForm">
+<form method="POST" action="{{ $action }}" id="quotationForm" data-ajax-form>
     @csrf
     @if ($method !== 'POST')
         @method($method)

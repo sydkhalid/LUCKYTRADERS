@@ -22,7 +22,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('loans.store') }}" class="rounded bg-white p-6 shadow" id="loanForm">
+        <form method="POST" action="{{ route('loans.store') }}" class="rounded bg-white p-6 shadow" id="loanForm" data-ajax-form>
             @csrf
 
             <div class="grid grid-cols-1 gap-5 md:grid-cols-2">

@@ -21,7 +21,7 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('quotations.convert.store', $quotation) }}" class="rounded bg-white p-6 shadow">
+    <form method="POST" action="{{ route('quotations.convert.store', $quotation) }}" class="rounded bg-white p-6 shadow" data-ajax-form>
         @csrf
 
         <div class="grid grid-cols-1 gap-5 md:grid-cols-3">

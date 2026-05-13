@@ -3,68 +3,49 @@
 @section('title', 'Product Categories')
 
 @section('content')
-    <div class="mb-5 flex items-center justify-between">
-        <div>
-            <h2 class="text-lg font-semibold text-gray-900">Product Categories</h2>
-            <p class="text-sm text-gray-500">Steel product groups used for stock, purchase, and billing.</p>
-        </div>
-        <a href="{{ route('product-categories.create') }}" class="rounded bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">Add Category</a>
-    </div>
+    <x-erp.page-header
+        title="Product Categories"
+        description="Steel product groups used for stock, purchase, and billing."
+        kicker="Inventory Master"
+    >
+        <x-slot:actions>
+            <a href="{{ route('product-categories.create') }}" class="erp-primary-button">Add Category</a>
+        </x-slot:actions>
+    </x-erp.page-header>
 
-    <form method="GET" action="{{ route('product-categories.index') }}" class="mb-5 flex flex-wrap gap-3 rounded bg-white p-4 shadow">
-        <input type="search" name="search" value="{{ $search }}" placeholder="Search category, description, or status" class="min-w-0 flex-1 rounded border-gray-300 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500">
-        <button class="rounded bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">Search</button>
-        @if ($search !== '')
-            <a href="{{ route('product-categories.index') }}" class="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Clear</a>
-        @endif
+    <form id="productCategoryFilters" class="mb-5 grid grid-cols-1 gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-3">
+        <div>
+            <label class="mb-1 block text-xs font-black uppercase tracking-wide text-slate-500">Status</label>
+            <select name="status" data-searchable class="w-full">
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+            </select>
+        </div>
+        <div class="flex items-end">
+            <button class="erp-primary-button w-full">Apply</button>
+        </div>
+        <div class="flex items-end">
+            <button type="button" data-reset-filters class="erp-secondary-button w-full">Reset</button>
+        </div>
     </form>
 
-    <div class="overflow-hidden rounded bg-white shadow">
-        <table class="min-w-full divide-y divide-gray-200 text-sm">
-            <thead class="bg-slate-100 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">
-                <tr>
-                    <th class="px-4 py-3">Name</th>
-                    <th class="px-4 py-3">Description</th>
-                    <th class="px-4 py-3 text-right">Products</th>
-                    <th class="px-4 py-3">Status</th>
-                    <th class="px-4 py-3 text-right">Action</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-                @forelse ($categories as $category)
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3 font-medium text-gray-900">{{ $category->name }}</td>
-                        <td class="px-4 py-3 text-gray-600">{{ $category->description ?: '-' }}</td>
-                        <td class="px-4 py-3 text-right text-gray-700">{{ $category->products_count }}</td>
-                        <td class="px-4 py-3">
-                            <span class="rounded px-2 py-1 text-xs font-semibold {{ $category->status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600' }}">
-                                {{ ucfirst($category->status) }}
-                            </span>
-                        </td>
-                        <td class="px-4 py-3">
-                            <div class="flex justify-end gap-3">
-                                <a href="{{ route('product-categories.show', $category) }}" class="font-semibold text-slate-700 hover:text-slate-900">View</a>
-                                <a href="{{ route('product-categories.edit', $category) }}" class="font-semibold text-slate-700 hover:text-slate-900">Edit</a>
-                                @can('delete_records')
-                                    <form method="POST" action="{{ route('product-categories.destroy', $category) }}" onsubmit="return confirm('Delete this category?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="font-semibold text-red-600 hover:text-red-800">Delete</button>
-                                    </form>
-                                @endcan
-                            </div>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="5" class="px-4 py-8 text-center text-gray-500">No categories found.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    <div class="mt-5">
-        {{ $categories->withQueryString()->links() }}
-    </div>
+    <x-erp.datatable
+        id="productCategoriesTable"
+        :ajax-url="route('erp.datatables', 'product-categories')"
+        filter-form="#productCategoryFilters"
+        search-placeholder="Search category, description, or status..."
+        empty="No categories found."
+    >
+        <thead>
+            <tr>
+                <th class="px-4 py-3" data-column="name">Name</th>
+                <th class="px-4 py-3" data-column="description">Description</th>
+                <th class="px-4 py-3 text-right" data-column="products_count" data-searchable="false">Products</th>
+                <th class="px-4 py-3" data-column="status">Status</th>
+                <th class="px-4 py-3 text-right" data-column="actions" data-orderable="false" data-searchable="false">Action</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </x-erp.datatable>
 @endsection

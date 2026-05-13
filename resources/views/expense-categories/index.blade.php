@@ -3,60 +3,50 @@
 @section('title', 'Expense Categories')
 
 @section('content')
-    <div class="mb-5 flex items-center justify-between">
+    <x-erp.page-header
+        title="Expense Categories"
+        description="Maintain reusable heads for rent, salary, transport, fuel, and other business expenses."
+        kicker="Expense Master"
+    >
+        <x-slot:actions>
+            <a href="{{ route('expenses.index') }}" class="erp-secondary-button">Expenses</a>
+            <a href="{{ route('expense-categories.create') }}" class="erp-primary-button">Create Category</a>
+        </x-slot:actions>
+    </x-erp.page-header>
+
+    <form id="expenseCategoryFilters" class="mb-5 grid grid-cols-1 gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-3">
         <div>
-            <h2 class="text-lg font-semibold text-gray-900">Expense Categories</h2>
-            <p class="text-sm text-gray-500">Maintain reusable heads for rent, salary, transport, fuel, and other business expenses.</p>
+            <label class="mb-1 block text-xs font-black uppercase tracking-wide text-slate-500">Status</label>
+            <select name="status" data-searchable class="w-full">
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+            </select>
         </div>
-        <div class="flex gap-2">
-            <a href="{{ route('expenses.index') }}" class="rounded border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Expenses</a>
-            <a href="{{ route('expense-categories.create') }}" class="rounded bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">Create Category</a>
+        <div class="flex items-end">
+            <button class="erp-primary-button w-full">Apply</button>
         </div>
-    </div>
+        <div class="flex items-end">
+            <button type="button" data-reset-filters class="erp-secondary-button w-full">Reset</button>
+        </div>
+    </form>
 
-    <div class="overflow-hidden rounded bg-white shadow">
-        <table class="min-w-full divide-y divide-gray-200 text-sm">
-            <thead class="bg-slate-100 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">
-                <tr>
-                    <th class="px-4 py-3">Name</th>
-                    <th class="px-4 py-3">Description</th>
-                    <th class="px-4 py-3 text-right">Expenses</th>
-                    <th class="px-4 py-3">Status</th>
-                    <th class="px-4 py-3 text-right">Action</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-                @forelse ($categories as $category)
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3 font-medium text-gray-900">{{ $category->name }}</td>
-                        <td class="px-4 py-3 text-gray-600">{{ $category->description ?: '-' }}</td>
-                        <td class="px-4 py-3 text-right font-semibold text-gray-900">{{ $category->expenses_count }}</td>
-                        <td class="px-4 py-3">
-                            <span class="rounded px-2 py-1 text-xs font-semibold {{ $category->status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600' }}">
-                                {{ ucfirst($category->status) }}
-                            </span>
-                        </td>
-                        <td class="px-4 py-3 text-right">
-                            <div class="flex justify-end gap-3">
-                                <a href="{{ route('expense-categories.edit', $category) }}" class="font-semibold text-slate-700 hover:text-slate-900">Edit</a>
-                                <form method="POST" action="{{ route('expense-categories.destroy', $category) }}" onsubmit="return confirm('Delete this expense category?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="font-semibold text-red-700 hover:text-red-900">Delete</button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="5" class="px-4 py-8 text-center text-gray-500">No expense categories found.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    <div class="mt-5">
-        {{ $categories->links() }}
-    </div>
+    <x-erp.datatable
+        id="expenseCategoriesTable"
+        :ajax-url="route('erp.datatables', 'expense-categories')"
+        filter-form="#expenseCategoryFilters"
+        search-placeholder="Search expense category..."
+        empty="No expense categories found."
+    >
+        <thead>
+            <tr>
+                <th class="px-4 py-3" data-column="name">Name</th>
+                <th class="px-4 py-3" data-column="description">Description</th>
+                <th class="px-4 py-3 text-right" data-column="expenses_count" data-searchable="false">Expenses</th>
+                <th class="px-4 py-3" data-column="status">Status</th>
+                <th class="px-4 py-3 text-right" data-column="actions" data-orderable="false" data-searchable="false">Action</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </x-erp.datatable>
 @endsection

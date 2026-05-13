@@ -22,7 +22,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('partners.transactions.store', $partner) }}" class="rounded bg-white p-6 shadow">
+        <form method="POST" action="{{ route('partners.transactions.store', $partner) }}" class="rounded bg-white p-6 shadow" data-ajax-form>
             @csrf
             <input type="hidden" name="transaction_type" value="{{ old('transaction_type', $transactionType) }}">
             @if ($transactionType === 'profit_share')

@@ -8,7 +8,7 @@
     </div>
 @endif
 
-<form method="POST" action="{{ $action }}">
+<form method="POST" action="{{ $action }}" data-ajax-form>
     @csrf
     @if ($method !== 'POST')
         @method($method)

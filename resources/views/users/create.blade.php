@@ -11,7 +11,7 @@
         <a href="{{ route('users.index') }}" class="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Back</a>
     </div>
 
-    <form method="POST" action="{{ route('users.store') }}" class="rounded bg-white p-6 shadow">
+    <form method="POST" action="{{ route('users.store') }}" class="rounded bg-white p-6 shadow" data-ajax-form>
         @csrf
 
         @include('users.partials.form', ['user' => null])
