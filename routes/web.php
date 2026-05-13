@@ -123,10 +123,11 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('permission:manage_expenses')->group(function () {
         Route::get('/expenses/{expense}/pdf', [DocumentPdfController::class, 'expense'])->name('expenses.pdf');
-        Route::resource('expense-categories', ExpenseCategoryController::class)->only(['index', 'create', 'store']);
+        Route::resource('expense-categories', ExpenseCategoryController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+        Route::get('/expenses/profit-loss', [ExpenseController::class, 'profitLoss'])->name('expenses.profit-loss');
         Route::get('/expenses/report', [ExpenseController::class, 'report'])->name('expenses.report');
         Route::get('/expenses/category-report', [ExpenseController::class, 'categoryReport'])->name('expenses.category-report');
-        Route::resource('expenses', ExpenseController::class)->only(['index', 'create', 'store']);
+        Route::resource('expenses', ExpenseController::class)->only(['index', 'create', 'store', 'show']);
     });
 
     Route::middleware('permission:manage_loans')->group(function () {

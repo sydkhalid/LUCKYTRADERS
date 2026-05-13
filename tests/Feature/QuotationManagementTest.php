@@ -56,6 +56,24 @@ class QuotationManagementTest extends TestCase
         $this->assertSame(0, StockMovement::count());
     }
 
+    public function test_quotation_does_not_enter_gst_reports_before_conversion(): void
+    {
+        [$customer, $product] = $this->seedCustomerAndProduct();
+        $quotation = $this->createQuotation($customer, $product, 'accepted');
+
+        $this->assertSame(36.0, (float) $quotation->gst_amount);
+
+        $response = $this->actingAs(User::factory()->create())->get(route('gst-reports.sales', [
+            'from_date' => '2026-05-01',
+            'to_date' => '2026-05-31',
+        ]));
+
+        $response->assertOk();
+        $response->assertSee('No GST sales found.');
+        $response->assertDontSee('Rs. 36.00');
+        $this->assertSame(0, Sale::count());
+    }
+
     public function test_quotation_can_be_updated_and_marked_accepted(): void
     {
         [$customer, $product] = $this->seedCustomerAndProduct();
@@ -128,6 +146,29 @@ class QuotationManagementTest extends TestCase
         $this->assertSame(236.0, (float) $customer->fresh()->current_balance);
     }
 
+    public function test_quotation_conversion_requires_available_stock(): void
+    {
+        [$customer, $product] = $this->seedCustomerAndProduct();
+        $quotation = $this->createQuotation($customer, $product, 'accepted');
+        $product->forceFill(['current_stock' => 1])->save();
+
+        $response = $this
+            ->actingAs(User::factory()->create())
+            ->from(route('quotations.convert', $quotation))
+            ->post(route('quotations.convert.store', $quotation), [
+                'sale_date' => '2026-05-15',
+                'bill_type' => 'gst',
+            ]);
+
+        $response->assertRedirect(route('quotations.convert', $quotation));
+        $response->assertSessionHasErrors('items');
+        $this->assertSame('accepted', $quotation->fresh()->status);
+        $this->assertSame(0, Sale::count());
+        $this->assertSame(1.0, (float) $product->fresh()->current_stock);
+        $this->assertSame(0, StockMovement::count());
+        $this->assertSame(0, Ledger::count());
+    }
+
     public function test_accepted_quotation_converts_to_non_gst_sale_with_zero_gst(): void
     {
         [$customer, $product] = $this->seedCustomerAndProduct();
@@ -166,6 +207,47 @@ class QuotationManagementTest extends TestCase
         $this->assertSame('draft', $quotation->fresh()->status);
         $this->assertSame(0, Sale::count());
         $this->assertSame(10.0, (float) $product->fresh()->current_stock);
+    }
+
+    public function test_converted_quotation_cannot_be_edited(): void
+    {
+        [$customer, $product] = $this->seedCustomerAndProduct();
+        $quotation = $this->createQuotation($customer, $product, 'accepted');
+
+        $this->actingAs(User::factory()->create())->post(route('quotations.convert.store', $quotation), [
+            'sale_date' => '2026-05-15',
+            'bill_type' => 'gst',
+        ]);
+
+        $response = $this
+            ->actingAs(User::factory()->create())
+            ->get(route('quotations.edit', $quotation->fresh()));
+
+        $response->assertRedirect(route('quotations.show', $quotation));
+
+        $this
+            ->actingAs(User::factory()->create())
+            ->from(route('quotations.show', $quotation))
+            ->put(route('quotations.update', $quotation), [
+                'customer_id' => $customer->id,
+                'quotation_date' => '2026-05-16',
+                'valid_until' => '2026-05-20',
+                'status' => 'accepted',
+                'items' => [
+                    [
+                        'product_id' => $product->id,
+                        'quantity' => 1,
+                        'unit' => 'Kg',
+                        'rate' => 150,
+                        'gst_percentage' => 18,
+                    ],
+                ],
+            ])
+            ->assertSessionHasErrors('status');
+
+        $quotation->refresh();
+        $this->assertSame('converted', $quotation->status);
+        $this->assertSame(200.0, (float) $quotation->subtotal);
     }
 
     public function test_quotation_pages_render(): void

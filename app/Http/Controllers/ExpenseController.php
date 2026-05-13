@@ -8,6 +8,7 @@ use App\Models\ExpenseCategory;
 use App\Services\ExpensePostingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class ExpenseController extends Controller
 {
@@ -43,6 +44,22 @@ class ExpenseController extends Controller
             ->with('success', 'Expense '.$expense->expense_no.' saved successfully.');
     }
 
+    public function show(Expense $expense)
+    {
+        $expense->load('category');
+        $ledger = DB::table('ledgers')
+            ->where('party_type', 'expense')
+            ->where('reference_type', 'expense')
+            ->where('reference_id', $expense->id)
+            ->first();
+        $cashbook = DB::table('cashbooks')
+            ->where('reference_type', 'expense')
+            ->where('reference_id', $expense->id)
+            ->first();
+
+        return view('expenses.show', compact('expense', 'ledger', 'cashbook'));
+    }
+
     public function report(Request $request)
     {
         $filters = $this->filters($request);
@@ -73,6 +90,24 @@ class ExpenseController extends Controller
         return view('expenses.category-report', compact('rows', 'filters', 'totalAmount'));
     }
 
+    public function profitLoss(Request $request)
+    {
+        $filters = $this->filters($request);
+        $expenseTotal = (clone $this->filteredExpenses($filters))->sum('amount');
+        $grossProfit = $this->grossProfit($filters);
+        $netProfit = $grossProfit - $expenseTotal;
+
+        $categoryRows = $this->filteredExpenses($filters)
+            ->join('expense_categories', 'expenses.expense_category_id', '=', 'expense_categories.id')
+            ->select('expense_categories.name')
+            ->selectRaw('SUM(expenses.amount) as total_amount')
+            ->groupBy('expense_categories.name')
+            ->orderByDesc(DB::raw('SUM(expenses.amount)'))
+            ->get();
+
+        return view('expenses.profit-loss', compact('filters', 'grossProfit', 'expenseTotal', 'netProfit', 'categoryRows'));
+    }
+
     private function filters(Request $request): array
     {
         $validated = $request->validate([
@@ -91,5 +126,18 @@ class ExpenseController extends Controller
         return Expense::query()
             ->whereDate('expense_date', '>=', $filters['from_date'])
             ->whereDate('expense_date', '<=', $filters['to_date']);
+    }
+
+    private function grossProfit(array $filters): float
+    {
+        if (! Schema::hasTable('sale_items') || ! Schema::hasTable('sales')) {
+            return 0;
+        }
+
+        return (float) DB::table('sale_items')
+            ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
+            ->whereDate('sales.sale_date', '>=', $filters['from_date'])
+            ->whereDate('sales.sale_date', '<=', $filters['to_date'])
+            ->sum('sale_items.profit_amount');
     }
 }

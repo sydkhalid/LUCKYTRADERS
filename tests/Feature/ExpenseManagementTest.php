@@ -35,6 +35,35 @@ class ExpenseManagementTest extends TestCase
         ]);
     }
 
+    public function test_expense_category_can_be_updated_and_soft_deleted(): void
+    {
+        $category = $this->category('Repair');
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get(route('expense-categories.edit', $category))
+            ->assertOk()
+            ->assertSee('Edit Expense Category')
+            ->assertSee('Repair');
+
+        $response = $this->actingAs($user)->put(route('expense-categories.update', $category), [
+            'name' => 'Repair & Maintenance',
+            'description' => 'Machine and shop repair',
+            'status' => 'inactive',
+        ]);
+
+        $response->assertRedirect(route('expense-categories.index'));
+
+        $category->refresh();
+        $this->assertSame('Repair & Maintenance', $category->name);
+        $this->assertSame('inactive', $category->status);
+
+        $this->actingAs($user)->delete(route('expense-categories.destroy', $category))
+            ->assertRedirect(route('expense-categories.index'));
+
+        $this->assertSoftDeleted('expense_categories', ['id' => $category->id]);
+    }
+
     public function test_cash_expense_posts_cash_out_and_expense_ledger_debit(): void
     {
         $category = $this->category('Rent');
@@ -71,6 +100,19 @@ class ExpenseManagementTest extends TestCase
         $this->assertSame(1250.0, (float) $ledger->balance);
     }
 
+    public function test_expense_show_page_displays_posted_cashbook_and_ledger_details(): void
+    {
+        $expense = $this->createExpense($this->category('Electricity'), '2026-05-13', 750, 'cheque', 'TNEB');
+
+        $response = $this->actingAs(User::factory()->create())->get(route('expenses.show', $expense));
+
+        $response->assertOk();
+        $response->assertSee($expense->expense_no);
+        $response->assertSee('Electricity');
+        $response->assertSee('Bankbook Out');
+        $response->assertSee('Rs. 750.00');
+    }
+
     public function test_bank_modes_post_bank_out(): void
     {
         $category = $this->category('Salary');
@@ -103,6 +145,26 @@ class ExpenseManagementTest extends TestCase
 
         $response->assertRedirect(route('expenses.create'));
         $response->assertSessionHasErrors('expense_category_id');
+        $this->assertSame(0, Expense::count());
+        $this->assertSame(0, Cashbook::count());
+        $this->assertSame(0, Ledger::count());
+    }
+
+    public function test_expense_validation_blocks_zero_or_negative_amount(): void
+    {
+        $category = $this->category('Office Expense');
+
+        $response = $this->actingAs(User::factory()->create())
+            ->from(route('expenses.create'))
+            ->post(route('expenses.store'), [
+                'expense_date' => '2026-05-13',
+                'expense_category_id' => $category->id,
+                'amount' => 0,
+                'payment_mode' => 'cash',
+            ]);
+
+        $response->assertRedirect(route('expenses.create'));
+        $response->assertSessionHasErrors('amount');
         $this->assertSame(0, Expense::count());
         $this->assertSame(0, Cashbook::count());
         $this->assertSame(0, Ledger::count());
@@ -158,6 +220,26 @@ class ExpenseManagementTest extends TestCase
         $response->assertOk();
         $response->assertSee('Net Profit');
         $response->assertSee('Rs. 375.00');
+    }
+
+    public function test_profit_loss_report_subtracts_filtered_expenses_from_gross_profit(): void
+    {
+        $this->seedSaleProfit(1000);
+        $this->createExpense($this->category('Fuel'), '2026-05-13', 250, 'cash', 'May Fuel');
+        $this->createExpense($this->category('Old Rent'), '2026-04-30', 900, 'cash', 'April Rent');
+
+        $response = $this->actingAs(User::factory()->create())->get(route('expenses.profit-loss', [
+            'from_date' => '2026-05-01',
+            'to_date' => '2026-05-31',
+        ]));
+
+        $response->assertOk();
+        $response->assertSee('Profit & Loss Report', false);
+        $response->assertSee('Rs. 1,000.00');
+        $response->assertSee('Rs. 250.00');
+        $response->assertSee('Rs. 750.00');
+        $response->assertSee('Fuel');
+        $response->assertDontSee('Old Rent');
     }
 
     private function category(string $name, string $status = 'active'): ExpenseCategory

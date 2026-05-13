@@ -18,7 +18,9 @@ class StoreExpenseRequest extends FormRequest
             'expense_date' => ['required', 'date'],
             'expense_category_id' => [
                 'required',
-                Rule::exists('expense_categories', 'id')->where('status', 'active'),
+                Rule::exists('expense_categories', 'id')
+                    ->where('status', 'active')
+                    ->whereNull('deleted_at'),
             ],
             'amount' => ['required', 'numeric', 'min:0.01'],
             'payment_mode' => ['required', Rule::in(['cash', 'bank', 'upi', 'cheque'])],

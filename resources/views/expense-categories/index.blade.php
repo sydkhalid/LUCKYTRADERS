@@ -22,6 +22,7 @@
                     <th class="px-4 py-3">Description</th>
                     <th class="px-4 py-3 text-right">Expenses</th>
                     <th class="px-4 py-3">Status</th>
+                    <th class="px-4 py-3 text-right">Action</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -35,10 +36,20 @@
                                 {{ ucfirst($category->status) }}
                             </span>
                         </td>
+                        <td class="px-4 py-3 text-right">
+                            <div class="flex justify-end gap-3">
+                                <a href="{{ route('expense-categories.edit', $category) }}" class="font-semibold text-slate-700 hover:text-slate-900">Edit</a>
+                                <form method="POST" action="{{ route('expense-categories.destroy', $category) }}" onsubmit="return confirm('Delete this expense category?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="font-semibold text-red-700 hover:text-red-900">Delete</button>
+                                </form>
+                            </div>
+                        </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="4" class="px-4 py-8 text-center text-gray-500">No expense categories found.</td>
+                        <td colspan="5" class="px-4 py-8 text-center text-gray-500">No expense categories found.</td>
                     </tr>
                 @endforelse
             </tbody>
