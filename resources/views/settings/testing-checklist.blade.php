@@ -30,6 +30,7 @@
             <p class="mt-1 text-sm text-slate-500">Use this page before live billing to verify each ERP module and track unresolved bugs.</p>
         </div>
         <div class="flex flex-wrap gap-2">
+            <a href="{{ route('settings.testing-checklist') }}" class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50">Testing Checklist</a>
             <a href="{{ route('settings.company') }}" class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50">Company Settings</a>
             <a href="{{ route('settings.invoice') }}" class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50">Invoice Settings</a>
             @role('Super Admin')

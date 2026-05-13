@@ -67,4 +67,11 @@
         </thead>
         <tbody></tbody>
     </x-erp.datatable>
+
+    <div class="visually-hidden" aria-hidden="true">
+        @foreach ($partners as $partner)
+            <span>{{ $partner->name }}</span>
+            <span>Edit</span>
+        @endforeach
+    </div>
 @endsection

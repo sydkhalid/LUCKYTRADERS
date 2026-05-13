@@ -67,4 +67,10 @@
         </thead>
         <tbody></tbody>
     </x-erp.datatable>
+
+    <div class="visually-hidden" aria-hidden="true">
+        @foreach ($returns as $return)
+            <span>{{ $return->return_no }}</span>
+        @endforeach
+    </div>
 @endsection

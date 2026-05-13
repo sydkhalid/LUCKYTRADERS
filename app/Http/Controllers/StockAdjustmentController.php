@@ -73,8 +73,8 @@ class StockAdjustmentController extends Controller
         ]);
 
         $query = StockAdjustment::query()
-            ->when($filters['from_date'] ?? null, fn ($query, $date) => $query->where('adjustment_date', '>=', $date))
-            ->when($filters['to_date'] ?? null, fn ($query, $date) => $query->where('adjustment_date', '<=', $date))
+            ->when($filters['from_date'] ?? null, fn ($query, $date) => $query->whereDate('adjustment_date', '>=', $date))
+            ->when($filters['to_date'] ?? null, fn ($query, $date) => $query->whereDate('adjustment_date', '<=', $date))
             ->when($filters['product_id'] ?? null, fn ($query, $productId) => $query->where('product_id', $productId))
             ->when($filters['adjustment_type'] ?? null, fn ($query, $type) => $query->where('adjustment_type', $type))
             ->when($filters['reason'] ?? null, fn ($query, $reason) => $query->where('reason', $reason));
@@ -111,8 +111,8 @@ class StockAdjustmentController extends Controller
         ]);
 
         $query = StockMovement::with('product')
-            ->when($filters['from_date'] ?? null, fn ($query, $date) => $query->where('movement_date', '>=', $date))
-            ->when($filters['to_date'] ?? null, fn ($query, $date) => $query->where('movement_date', '<=', $date))
+            ->when($filters['from_date'] ?? null, fn ($query, $date) => $query->whereDate('movement_date', '>=', $date))
+            ->when($filters['to_date'] ?? null, fn ($query, $date) => $query->whereDate('movement_date', '<=', $date))
             ->when($filters['product_id'] ?? null, fn ($query, $productId) => $query->where('product_id', $productId))
             ->when($filters['movement_type'] ?? null, fn ($query, $movementType) => $query->where('movement_type', $movementType));
 
