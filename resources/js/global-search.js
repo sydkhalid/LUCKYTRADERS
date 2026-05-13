@@ -38,6 +38,8 @@ function renderGroups(panel, groups) {
 }
 
 function initializeGlobalSearch(root) {
+    const toggle = root.querySelector('[data-global-search-toggle]');
+    const box = root.querySelector('[data-global-search-box]');
     const input = root.querySelector('[data-global-search-input]');
     const panel = root.querySelector('[data-global-search-panel]');
     const url = root.dataset.searchUrl;
@@ -46,6 +48,33 @@ function initializeGlobalSearch(root) {
     const hidePanel = () => {
         panel.classList.add('hidden');
         panel.innerHTML = '';
+    };
+
+    const isToggleSearch = Boolean(toggle && box);
+
+    const openSearch = () => {
+        if (!isToggleSearch) {
+            return;
+        }
+
+        root.classList.add('is-open');
+        box.setAttribute('aria-hidden', 'false');
+        toggle.setAttribute('aria-expanded', 'true');
+        input.removeAttribute('tabindex');
+        window.requestAnimationFrame(() => input.focus());
+    };
+
+    const closeSearch = () => {
+        if (!isToggleSearch) {
+            hidePanel();
+            return;
+        }
+
+        hidePanel();
+        root.classList.remove('is-open');
+        box.setAttribute('aria-hidden', 'true');
+        toggle.setAttribute('aria-expanded', 'false');
+        input.setAttribute('tabindex', '-1');
     };
 
     const search = debounce(async () => {
@@ -93,10 +122,21 @@ function initializeGlobalSearch(root) {
         }
     }, 250);
 
+    if (isToggleSearch) {
+        toggle.addEventListener('click', () => {
+            if (root.classList.contains('is-open')) {
+                closeSearch();
+                return;
+            }
+
+            openSearch();
+        });
+    }
+
     input.addEventListener('input', search);
     input.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') {
-            hidePanel();
+            closeSearch();
             input.blur();
         }
 
@@ -112,7 +152,7 @@ function initializeGlobalSearch(root) {
 
     document.addEventListener('click', (event) => {
         if (!root.contains(event.target)) {
-            hidePanel();
+            closeSearch();
         }
     });
 }

@@ -91,9 +91,15 @@ function initializeNotificationBell(root) {
     const panel = root.querySelector('[data-notification-panel]');
     const dropdownUrl = root.dataset.dropdownUrl;
 
+    const closePanel = () => {
+        panel.classList.add('hidden');
+        toggle.setAttribute('aria-expanded', 'false');
+    };
+
     const load = async () => {
         panel.innerHTML = '<div class="p-5 text-sm text-slate-500">Loading alerts...</div>';
         panel.classList.remove('hidden');
+        toggle.setAttribute('aria-expanded', 'true');
 
         const response = await fetch(dropdownUrl, {
             headers: {
@@ -111,7 +117,7 @@ function initializeNotificationBell(root) {
 
     toggle.addEventListener('click', async () => {
         if (!panel.classList.contains('hidden')) {
-            panel.classList.add('hidden');
+            closePanel();
             return;
         }
 
@@ -144,7 +150,7 @@ function initializeNotificationBell(root) {
 
     document.addEventListener('click', (event) => {
         if (!root.contains(event.target)) {
-            panel.classList.add('hidden');
+            closePanel();
         }
     });
 }

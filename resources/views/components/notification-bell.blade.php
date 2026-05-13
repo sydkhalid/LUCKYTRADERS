@@ -13,11 +13,14 @@
     <button
         type="button"
         data-notification-toggle
-        class="relative inline-flex h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 shadow-sm hover:border-cyan-200 hover:bg-cyan-50/70 hover:text-slate-950"
+        class="lt-header-control relative"
         aria-label="Notifications"
+        aria-expanded="false"
     >
-        <span class="relative h-4 w-4 rounded-full border-2 border-slate-500 before:absolute before:-bottom-1 before:left-1/2 before:h-1 before:w-2 before:-translate-x-1/2 before:rounded-b-full before:border-x-2 before:border-b-2 before:border-slate-500"></span>
-        <span class="hidden sm:inline">Alerts</span>
+        <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M13.73 21a2 2 0 0 1-3.46 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
         <span
             data-notification-count
             class="{{ $unreadCount > 0 ? '' : 'hidden' }} absolute -right-2 -top-2 min-w-5 rounded-full bg-red-600 px-1.5 py-0.5 text-xs font-black leading-none text-white ring-2 ring-white"
@@ -26,6 +29,6 @@
 
     <div
         data-notification-panel
-        class="absolute right-0 top-full z-50 mt-2 hidden w-[min(24rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl shadow-slate-300/30"
+        class="lt-notification-panel absolute right-0 top-full z-50 mt-2 hidden w-[min(24rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl shadow-slate-300/30"
     ></div>
 </div>

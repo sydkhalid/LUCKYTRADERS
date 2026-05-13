@@ -11,14 +11,18 @@
     <div class="lt-header-grid">
         <div class="lt-title-row">
             <button type="button" class="btn lt-icon-button d-lg-none" data-lt-sidebar-open aria-label="Open sidebar">
-                <span class="d-block rounded" style="width: 20px; height: 2px; background: currentColor; box-shadow: 0 -6px 0 currentColor, 0 6px 0 currentColor;"></span>
+                <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
             </button>
 
             <button type="button" class="btn lt-icon-button d-none d-lg-inline-flex" data-lt-sidebar-collapse aria-label="Toggle sidebar">
-                <span class="d-block rounded" style="width: 18px; height: 2px; background: currentColor; box-shadow: 0 -6px 0 currentColor, 0 6px 0 currentColor;"></span>
+                <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
             </button>
 
-            <div class="min-w-0">
+            <div class="lt-header-title-block min-w-0">
                 <div class="lt-breadcrumb text-truncate">
                     @if ($erpBreadcrumbs->isEmpty() || request()->routeIs('dashboard'))
                         <span>Dashboard</span>
@@ -35,9 +39,8 @@
         </div>
 
         <div class="lt-header-actions">
-            <x-global-search />
-
             <div class="lt-header-action-row">
+                <x-global-search />
                 <x-notification-bell />
 
                 <div class="dropdown no-print">
@@ -49,19 +52,31 @@
                         aria-expanded="false"
                     >
                         <span class="lt-avatar">{{ mb_substr($erpUser?->name ?: 'U', 0, 1) }}</span>
-                        <span class="lt-user-name text-truncate">{{ $erpUser?->name }}</span>
-                        <span class="lt-user-name text-secondary">▾</span>
+                        <span class="lt-user-name text-truncate">{{ $erpUser?->name ?: 'User' }}</span>
+                        <svg class="lt-user-chevron" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
                     </button>
 
-                    <div class="dropdown-menu dropdown-menu-end mt-2 shadow border-0 rounded-3 overflow-hidden" style="width: 17rem;">
+                    <div class="dropdown-menu dropdown-menu-end mt-2 shadow border-0 rounded-3 overflow-hidden lt-profile-dropdown" style="width: 17rem;">
                         <div class="px-3 py-3 border-bottom">
-                            <div class="fw-black text-truncate">{{ $erpUser?->name }}</div>
+                            <div class="fw-black text-truncate">{{ $erpUser?->name ?: 'User' }}</div>
                             <div class="small text-secondary text-truncate">{{ $erpUser?->email }}</div>
                         </div>
-                        <a href="{{ route('profile.edit') }}" class="dropdown-item fw-semibold py-2">Profile Settings</a>
+                        <a href="{{ route('profile.edit') }}" class="dropdown-item fw-semibold py-2 lt-dropdown-action">
+                            <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M20 21a8 8 0 0 0-16 0M12 13a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                            </svg>
+                            <span>Profile Settings</span>
+                        </a>
                         <form method="POST" action="{{ route('logout') }}" data-confirm-action data-confirm-title="Logout from ERP?" data-confirm-text="Your current screen will close after logout.">
                             @csrf
-                            <button class="dropdown-item fw-semibold text-danger py-2">Logout</button>
+                            <button class="dropdown-item fw-semibold text-danger py-2 lt-dropdown-action lt-logout-action">
+                                <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M10 17l5-5-5-5M15 12H3M21 19V5a2 2 0 0 0-2-2h-5M14 21h5a2 2 0 0 0 2-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                <span>Logout</span>
+                            </button>
                         </form>
                     </div>
                 </div>
