@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\Cashbook;
 use App\Models\Customer;
+use App\Models\Expense;
+use App\Models\ExpenseCategory;
 use App\Models\Loan;
 use App\Models\Partner;
 use App\Models\Product;
@@ -54,13 +56,20 @@ class DashboardTest extends TestCase
         $response->assertSee('Rs. 800.00');
         $response->assertSee('Rs. 3,000.00');
         $response->assertSee('Rs. 7,000.00');
-        $response->assertSee('Rs. 300.00');
+        $response->assertSee('Total Expense');
+        $response->assertSee('Rs. 125.00');
+        $response->assertSee('Rs. 175.00');
         $response->assertSee('Recent Sales');
         $response->assertSee('DASH-GST-001');
         $response->assertSee('Low Stock Products');
         $response->assertSee('MS Sheet');
         $response->assertSee('Active Loans');
         $response->assertSee('DASH-LOAN-001');
+        $response->assertSee('monthlySalesChart', false);
+        $response->assertSee('monthlyPurchaseChart', false);
+        $response->assertSee('gstSplitChart', false);
+        $response->assertSee('cashFlowChart', false);
+        $response->assertSee('topProductsChart', false);
     }
 
     public function test_dashboard_custom_date_range_limits_period_tables(): void
@@ -78,6 +87,24 @@ class DashboardTest extends TestCase
         $response->assertDontSee('DASH-MONTH-001');
         $response->assertSee('DASH-PUR-001');
         $response->assertDontSee('DASH-PUR-MONTH');
+    }
+
+    public function test_dashboard_empty_states_render_when_no_data_exists(): void
+    {
+        $response = $this->actingAs(User::factory()->create())->get(route('dashboard', [
+            'period' => 'custom',
+            'from_date' => '2026-04-01',
+            'to_date' => '2026-04-30',
+        ]));
+
+        $response->assertOk();
+        $response->assertSee('No sales data for selected period.');
+        $response->assertSee('No purchase data for selected period.');
+        $response->assertSee('No cash or bank movement for selected period.');
+        $response->assertSee('No sales in selected period.');
+        $response->assertSee('No purchases in selected period.');
+        $response->assertSee('No pending customer payments.');
+        $response->assertSee('No pending supplier payments.');
     }
 
     private function seedDashboardData(): void
@@ -206,6 +233,19 @@ class DashboardTest extends TestCase
             'reference_id' => 4,
             'amount' => 800,
             'payment_mode' => 'upi',
+        ]);
+
+        $expenseCategory = ExpenseCategory::create([
+            'name' => 'Office Expense',
+            'status' => 'active',
+        ]);
+        Expense::create([
+            'expense_no' => 'DASH-EXP-001',
+            'expense_date' => '2026-05-13',
+            'expense_category_id' => $expenseCategory->id,
+            'amount' => 125,
+            'payment_mode' => 'cash',
+            'paid_to' => 'Stationery Shop',
         ]);
 
         Loan::create([

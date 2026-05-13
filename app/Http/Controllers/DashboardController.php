@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cashbook;
+use App\Models\Expense;
 use App\Models\Loan;
 use App\Models\Partner;
 use App\Models\Product;
@@ -12,7 +13,6 @@ use App\Models\SaleItem;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class DashboardController extends Controller
@@ -23,7 +23,7 @@ class DashboardController extends Controller
 
         return view('dashboard', [
             'filters' => $filters,
-            'cards' => $this->cards(),
+            'cards' => $this->cards($filters),
             'charts' => $this->charts($filters),
             'tables' => $this->tables($filters),
         ]);
@@ -60,7 +60,7 @@ class DashboardController extends Controller
         ];
     }
 
-    private function cards(): array
+    private function cards(array $filters): array
     {
         $today = now()->toDateString();
         $monthStart = now()->startOfMonth()->toDateString();
@@ -71,8 +71,16 @@ class DashboardController extends Controller
         $bankIn = Cashbook::where('transaction_type', 'bank_in')->sum('amount');
         $bankOut = Cashbook::where('transaction_type', 'bank_out')->sum('amount');
 
-        $grossProfit = SaleItem::sum('profit_amount');
-        $expenses = Schema::hasTable('expenses') ? (float) DB::table('expenses')->sum('amount') : 0;
+        $grossProfit = (float) SaleItem::query()
+            ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
+            ->whereDate('sales.sale_date', '>=', $filters['from_date'])
+            ->whereDate('sales.sale_date', '<=', $filters['to_date'])
+            ->sum('sale_items.profit_amount');
+        $expenses = Schema::hasTable('expenses')
+            ? (float) Expense::whereDate('expense_date', '>=', $filters['from_date'])
+                ->whereDate('expense_date', '<=', $filters['to_date'])
+                ->sum('amount')
+            : 0;
 
         return [
             'today_sales' => (float) Sale::whereDate('sale_date', $today)->sum('total_amount'),
@@ -84,6 +92,7 @@ class DashboardController extends Controller
             'pending_customer_collection' => (float) Sale::where('balance_amount', '>', 0)->sum('balance_amount'),
             'supplier_payable' => (float) Purchase::where('balance_amount', '>', 0)->sum('balance_amount'),
             'stock_value' => (float) Product::selectRaw('COALESCE(SUM(current_stock * purchase_price), 0) as value')->value('value'),
+            'total_expense' => $expenses,
             'active_loans' => Schema::hasTable('loans') ? (float) Loan::where('status', 'active')->sum('balance_amount') : 0,
             'partner_investment' => Schema::hasTable('partners') ? (float) Partner::where('status', 'active')->sum('current_investment') : 0,
             'net_profit' => (float) $grossProfit - $expenses,
@@ -152,9 +161,11 @@ class DashboardController extends Controller
         $data = [];
 
         foreach ($months as $month) {
+            $rangeStart = $month->copy()->startOfMonth()->max(Carbon::parse($filters['from_date']));
+            $rangeEnd = $month->copy()->endOfMonth()->min(Carbon::parse($filters['to_date']));
             $labels[] = $month->format('M Y');
-            $data[] = (float) $modelClass::whereDate($dateColumn, '>=', $month->copy()->startOfMonth()->toDateString())
-                ->whereDate($dateColumn, '<=', $month->copy()->endOfMonth()->toDateString())
+            $data[] = (float) $modelClass::whereDate($dateColumn, '>=', $rangeStart->toDateString())
+                ->whereDate($dateColumn, '<=', $rangeEnd->toDateString())
                 ->sum($amountColumn);
         }
 
@@ -203,8 +214,8 @@ class DashboardController extends Controller
             ->get();
 
         return [
-            'labels' => $rows->pluck('name')->values(),
-            'data' => $rows->pluck('sold_quantity')->map(fn ($value) => round((float) $value, 3))->values(),
+            'labels' => $rows->pluck('name')->values()->all(),
+            'data' => $rows->pluck('sold_quantity')->map(fn ($value) => round((float) $value, 3))->values()->all(),
         ];
     }
 

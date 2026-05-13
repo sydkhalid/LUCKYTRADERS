@@ -6,6 +6,7 @@
     @php
         $money = fn ($value) => 'Rs. '.number_format((float) $value, 2);
         $number = fn ($value) => number_format((float) $value, 3);
+        $chartEmpty = fn (array $dataset) => array_sum(array_map('floatval', $dataset['data'] ?? [])) <= 0;
         $cardItems = [
             ['label' => 'Today Sales', 'value' => $money($cards['today_sales']), 'tone' => 'text-emerald-700'],
             ['label' => 'This Month Sales', 'value' => $money($cards['month_sales']), 'tone' => 'text-emerald-700'],
@@ -16,6 +17,7 @@
             ['label' => 'Pending Customer Collection', 'value' => $money($cards['pending_customer_collection']), 'tone' => 'text-amber-700'],
             ['label' => 'Supplier Payable', 'value' => $money($cards['supplier_payable']), 'tone' => 'text-red-700'],
             ['label' => 'Stock Value', 'value' => $money($cards['stock_value']), 'tone' => 'text-gray-900'],
+            ['label' => 'Total Expense', 'value' => $money($cards['total_expense']), 'tone' => 'text-red-700'],
             ['label' => 'Active Loans', 'value' => $money($cards['active_loans']), 'tone' => 'text-red-700'],
             ['label' => 'Partner Investment', 'value' => $money($cards['partner_investment']), 'tone' => 'text-gray-900'],
             ['label' => 'Net Profit', 'value' => $money($cards['net_profit']), 'tone' => $cards['net_profit'] >= 0 ? 'text-emerald-700' : 'text-red-700'],
@@ -72,7 +74,11 @@
                 <span class="text-xs text-gray-500">{{ $filters['label'] }}</span>
             </div>
             <div class="h-72">
-                <canvas id="monthlySalesChart"></canvas>
+                @if ($chartEmpty($charts['monthly_sales']))
+                    <div class="flex h-full items-center justify-center rounded border border-dashed border-gray-200 text-sm text-gray-500">No sales data for selected period.</div>
+                @else
+                    <canvas id="monthlySalesChart"></canvas>
+                @endif
             </div>
         </div>
 
@@ -82,28 +88,44 @@
                 <span class="text-xs text-gray-500">{{ $filters['label'] }}</span>
             </div>
             <div class="h-72">
-                <canvas id="monthlyPurchaseChart"></canvas>
+                @if ($chartEmpty($charts['monthly_purchases']))
+                    <div class="flex h-full items-center justify-center rounded border border-dashed border-gray-200 text-sm text-gray-500">No purchase data for selected period.</div>
+                @else
+                    <canvas id="monthlyPurchaseChart"></canvas>
+                @endif
             </div>
         </div>
 
         <div class="rounded bg-white p-5 shadow">
             <h3 class="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-600">GST vs Non-GST Sales</h3>
             <div class="h-72">
-                <canvas id="gstSplitChart"></canvas>
+                @if ($chartEmpty($charts['gst_split']))
+                    <div class="flex h-full items-center justify-center rounded border border-dashed border-gray-200 text-sm text-gray-500">No sales split data for selected period.</div>
+                @else
+                    <canvas id="gstSplitChart"></canvas>
+                @endif
             </div>
         </div>
 
         <div class="rounded bg-white p-5 shadow">
             <h3 class="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-600">Cash In vs Cash Out</h3>
             <div class="h-72">
-                <canvas id="cashFlowChart"></canvas>
+                @if ($chartEmpty($charts['cash_flow']))
+                    <div class="flex h-full items-center justify-center rounded border border-dashed border-gray-200 text-sm text-gray-500">No cash or bank movement for selected period.</div>
+                @else
+                    <canvas id="cashFlowChart"></canvas>
+                @endif
             </div>
         </div>
 
         <div class="rounded bg-white p-5 shadow xl:col-span-2">
             <h3 class="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-600">Top Selling Products</h3>
             <div class="h-80">
-                <canvas id="topProductsChart"></canvas>
+                @if ($chartEmpty($charts['top_products']))
+                    <div class="flex h-full items-center justify-center rounded border border-dashed border-gray-200 text-sm text-gray-500">No product sales for selected period.</div>
+                @else
+                    <canvas id="topProductsChart"></canvas>
+                @endif
             </div>
         </div>
     </div>
