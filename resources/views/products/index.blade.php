@@ -43,11 +43,13 @@
                             <div class="flex justify-end gap-3">
                                 <a href="{{ route('products.edit', $product) }}" class="font-semibold text-slate-700 hover:text-slate-900">Edit</a>
                                 <a href="{{ route('stock-adjustments.products.history', $product) }}" class="font-semibold text-slate-700 hover:text-slate-900">History</a>
-                                <form method="POST" action="{{ route('products.destroy', $product) }}" onsubmit="return confirm('Delete this product?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="font-semibold text-red-600 hover:text-red-800">Delete</button>
-                                </form>
+                                @can('delete_records')
+                                    <form method="POST" action="{{ route('products.destroy', $product) }}" onsubmit="return confirm('Delete this product?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="font-semibold text-red-600 hover:text-red-800">Delete</button>
+                                    </form>
+                                @endcan
                             </div>
                         </td>
                     </tr>

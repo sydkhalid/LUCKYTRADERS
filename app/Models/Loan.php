@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsErpActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Loan extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsErpActivity, SoftDeletes;
 
     public const TYPES = [
         'loan_taken' => 'Loan Taken',

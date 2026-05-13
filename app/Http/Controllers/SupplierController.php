@@ -43,8 +43,10 @@ class SupplierController extends Controller
             ->with('success', 'Supplier updated successfully.');
     }
 
-    public function destroy(Supplier $supplier)
+    public function destroy(Request $request, Supplier $supplier)
     {
+        $this->authorizeDelete($request);
+
         if ($supplier->ledgers()->exists()) {
             return back()->with('error', 'Cannot delete supplier with ledger transactions.');
         }
@@ -68,5 +70,10 @@ class SupplierController extends Controller
             'balance_type' => ['required', Rule::in(['debit', 'credit'])],
             'status' => ['required', Rule::in(['active', 'inactive'])],
         ]);
+    }
+
+    private function authorizeDelete(Request $request): void
+    {
+        abort_unless($request->user()?->can('delete_records'), 403);
     }
 }

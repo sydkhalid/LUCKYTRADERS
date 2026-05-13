@@ -93,6 +93,21 @@ class SystemSettingsTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_admin_can_open_production_testing_checklist(): void
+    {
+        $admin = $this->userWithRole('Admin');
+
+        $this->get(route('settings.testing-checklist'))
+            ->assertRedirect('/login');
+
+        $this->actingAs($admin)
+            ->get(route('settings.testing-checklist'))
+            ->assertOk()
+            ->assertSee('Production Testing Checklist')
+            ->assertSee('GST invoice testing')
+            ->assertSee('php artisan migrate --force');
+    }
+
     public function test_sales_use_separate_gst_and_normal_bill_number_series(): void
     {
         $admin = $this->userWithRole('Admin');

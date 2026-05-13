@@ -43,8 +43,10 @@ class CustomerController extends Controller
             ->with('success', 'Customer updated successfully.');
     }
 
-    public function destroy(Customer $customer)
+    public function destroy(Request $request, Customer $customer)
     {
+        $this->authorizeDelete($request);
+
         if ($customer->ledgers()->exists()) {
             return back()->with('error', 'Cannot delete customer with ledger transactions.');
         }
@@ -68,5 +70,10 @@ class CustomerController extends Controller
             'balance_type' => ['required', Rule::in(['debit', 'credit'])],
             'status' => ['required', Rule::in(['active', 'inactive'])],
         ]);
+    }
+
+    private function authorizeDelete(Request $request): void
+    {
+        abort_unless($request->user()?->can('delete_records'), 403);
     }
 }

@@ -50,8 +50,10 @@ class ProductController extends Controller
             ->with('success', 'Product updated successfully.');
     }
 
-    public function destroy(Product $product)
+    public function destroy(Request $request, Product $product)
     {
+        $this->authorizeDelete($request);
+
         $product->delete();
 
         return redirect()
@@ -77,5 +79,10 @@ class ProductController extends Controller
             'current_stock' => ['required', 'numeric', 'min:0'],
             'status' => ['required', Rule::in(['active', 'inactive'])],
         ]);
+    }
+
+    private function authorizeDelete(Request $request): void
+    {
+        abort_unless($request->user()?->can('delete_records'), 403);
     }
 }

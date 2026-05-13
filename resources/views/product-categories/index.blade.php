@@ -36,11 +36,13 @@
                         <td class="px-4 py-3">
                             <div class="flex justify-end gap-3">
                                 <a href="{{ route('product-categories.edit', $category) }}" class="font-semibold text-slate-700 hover:text-slate-900">Edit</a>
-                                <form method="POST" action="{{ route('product-categories.destroy', $category) }}" onsubmit="return confirm('Delete this category?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="font-semibold text-red-600 hover:text-red-800">Delete</button>
-                                </form>
+                                @can('delete_records')
+                                    <form method="POST" action="{{ route('product-categories.destroy', $category) }}" onsubmit="return confirm('Delete this category?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="font-semibold text-red-600 hover:text-red-800">Delete</button>
+                                    </form>
+                                @endcan
                             </div>
                         </td>
                     </tr>

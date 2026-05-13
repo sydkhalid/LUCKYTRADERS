@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsErpActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Payment extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsErpActivity, SoftDeletes;
 
     protected $fillable = [
         'payment_no',

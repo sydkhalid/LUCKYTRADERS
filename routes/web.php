@@ -15,6 +15,7 @@ use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductionReadinessController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\PurchaseReturnController;
@@ -45,6 +46,7 @@ Route::middleware('auth')->group(function () {
         Route::patch('/company', [SystemSettingController::class, 'updateCompany'])->name('company.update');
         Route::get('/invoice', [SystemSettingController::class, 'invoice'])->name('invoice');
         Route::patch('/invoice', [SystemSettingController::class, 'updateInvoice'])->name('invoice.update');
+        Route::get('/testing-checklist', [ProductionReadinessController::class, 'checklist'])->name('testing-checklist');
 
         Route::middleware('role:Super Admin')->prefix('backups')->name('backups.')->group(function () {
             Route::get('/', [BackupController::class, 'index'])->name('index');

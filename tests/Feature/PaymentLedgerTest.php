@@ -204,6 +204,7 @@ class PaymentLedgerTest extends TestCase
         $this->assertSame(100.0, (float) $purchase->paid_amount);
         $this->assertSame(400.0, (float) $purchase->balance_amount);
         $this->assertSame(400.0, (float) $supplier->fresh()->current_balance);
+        $this->assertSame(5.0, (float) $product->fresh()->current_stock);
 
         $this->assertDatabaseHas('payments', [
             'party_type' => 'supplier',

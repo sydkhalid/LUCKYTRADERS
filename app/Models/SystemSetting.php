@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsErpActivity;
 use Illuminate\Database\Eloquent\Model;
 
 class SystemSetting extends Model
 {
+    use LogsErpActivity;
+
     protected $fillable = [
         'company_name',
         'address',

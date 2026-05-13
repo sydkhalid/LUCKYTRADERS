@@ -45,8 +45,10 @@ class ProductCategoryController extends Controller
             ->with('success', 'Product category updated successfully.');
     }
 
-    public function destroy(ProductCategory $productCategory)
+    public function destroy(Request $request, ProductCategory $productCategory)
     {
+        $this->authorizeDelete($request);
+
         if ($productCategory->products()->exists()) {
             return back()->with('error', 'Cannot delete category while products are linked to it.');
         }
@@ -65,5 +67,10 @@ class ProductCategoryController extends Controller
             'description' => ['nullable', 'string'],
             'status' => ['required', Rule::in(['active', 'inactive'])],
         ]);
+    }
+
+    private function authorizeDelete(Request $request): void
+    {
+        abort_unless($request->user()?->can('delete_records'), 403);
     }
 }
