@@ -11,8 +11,9 @@ class CashbookController extends Controller
     {
         $filters = $this->filters($request);
         $query = $this->reportQuery(['cash_in', 'cash_out'], $filters);
-        $totalIn = (clone $query)->where('transaction_type', 'cash_in')->sum('amount');
-        $totalOut = (clone $query)->where('transaction_type', 'cash_out')->sum('amount');
+        $totals = $this->transactionTotals($query);
+        $totalIn = (float) ($totals['cash_in'] ?? 0);
+        $totalOut = (float) ($totals['cash_out'] ?? 0);
         $balance = $totalIn - $totalOut;
 
         $entries = $query
@@ -28,8 +29,9 @@ class CashbookController extends Controller
     {
         $filters = $this->filters($request);
         $query = $this->reportQuery(['bank_in', 'bank_out'], $filters);
-        $totalIn = (clone $query)->where('transaction_type', 'bank_in')->sum('amount');
-        $totalOut = (clone $query)->where('transaction_type', 'bank_out')->sum('amount');
+        $totals = $this->transactionTotals($query);
+        $totalIn = (float) ($totals['bank_in'] ?? 0);
+        $totalOut = (float) ($totals['bank_out'] ?? 0);
         $balance = $totalIn - $totalOut;
 
         $entries = $query
@@ -52,7 +54,17 @@ class CashbookController extends Controller
     private function reportQuery(array $transactionTypes, array $filters)
     {
         return Cashbook::whereIn('transaction_type', $transactionTypes)
-            ->when($filters['from_date'] ?? null, fn ($query, $date) => $query->whereDate('entry_date', '>=', $date))
-            ->when($filters['to_date'] ?? null, fn ($query, $date) => $query->whereDate('entry_date', '<=', $date));
+            ->when($filters['from_date'] ?? null, fn ($query, $date) => $query->where('entry_date', '>=', $date))
+            ->when($filters['to_date'] ?? null, fn ($query, $date) => $query->where('entry_date', '<=', $date));
+    }
+
+    private function transactionTotals($query): array
+    {
+        return (clone $query)
+            ->select('transaction_type')
+            ->selectRaw('COALESCE(SUM(amount), 0) as total_amount')
+            ->groupBy('transaction_type')
+            ->pluck('total_amount', 'transaction_type')
+            ->all();
     }
 }

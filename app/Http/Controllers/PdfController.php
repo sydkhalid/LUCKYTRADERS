@@ -263,24 +263,24 @@ class PdfController extends Controller
     {
         return Sale::with('customer')
             ->where('bill_type', 'gst')
-            ->when($filters['from_date'], fn ($query, $date) => $query->whereDate('sale_date', '>=', $date))
-            ->when($filters['to_date'], fn ($query, $date) => $query->whereDate('sale_date', '<=', $date));
+            ->when($filters['from_date'], fn ($query, $date) => $query->where('sale_date', '>=', $date))
+            ->when($filters['to_date'], fn ($query, $date) => $query->where('sale_date', '<=', $date));
     }
 
     private function purchasesQuery(array $filters)
     {
         return Purchase::with('supplier')
             ->where('bill_type', 'gst')
-            ->when($filters['from_date'], fn ($query, $date) => $query->whereDate('purchase_date', '>=', $date))
-            ->when($filters['to_date'], fn ($query, $date) => $query->whereDate('purchase_date', '<=', $date));
+            ->when($filters['from_date'], fn ($query, $date) => $query->where('purchase_date', '>=', $date))
+            ->when($filters['to_date'], fn ($query, $date) => $query->where('purchase_date', '<=', $date));
     }
 
     private function salesReturnRows(array $filters)
     {
         return SalesReturn::with(['sale.customer', 'customer'])
             ->whereHas('sale', fn ($query) => $query->where('bill_type', 'gst'))
-            ->when($filters['from_date'], fn ($query, $date) => $query->whereDate('return_date', '>=', $date))
-            ->when($filters['to_date'], fn ($query, $date) => $query->whereDate('return_date', '<=', $date))
+            ->when($filters['from_date'], fn ($query, $date) => $query->where('return_date', '>=', $date))
+            ->when($filters['to_date'], fn ($query, $date) => $query->where('return_date', '<=', $date))
             ->orderBy('return_date')
             ->orderBy('id')
             ->get();
@@ -290,8 +290,8 @@ class PdfController extends Controller
     {
         return PurchaseReturn::with(['purchase.supplier', 'supplier'])
             ->whereHas('purchase', fn ($query) => $query->where('bill_type', 'gst'))
-            ->when($filters['from_date'], fn ($query, $date) => $query->whereDate('return_date', '>=', $date))
-            ->when($filters['to_date'], fn ($query, $date) => $query->whereDate('return_date', '<=', $date))
+            ->when($filters['from_date'], fn ($query, $date) => $query->where('return_date', '>=', $date))
+            ->when($filters['to_date'], fn ($query, $date) => $query->where('return_date', '<=', $date))
             ->orderBy('return_date')
             ->orderBy('id')
             ->get();

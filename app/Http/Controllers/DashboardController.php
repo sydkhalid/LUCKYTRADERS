@@ -13,6 +13,7 @@ use App\Models\SaleItem;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class DashboardController extends Controller
@@ -66,31 +67,42 @@ class DashboardController extends Controller
         $monthStart = now()->startOfMonth()->toDateString();
         $monthEnd = now()->endOfMonth()->toDateString();
 
-        $cashIn = Cashbook::where('transaction_type', 'cash_in')->sum('amount');
-        $cashOut = Cashbook::where('transaction_type', 'cash_out')->sum('amount');
-        $bankIn = Cashbook::where('transaction_type', 'bank_in')->sum('amount');
-        $bankOut = Cashbook::where('transaction_type', 'bank_out')->sum('amount');
+        $cashbookTotals = Cashbook::query()
+            ->select('transaction_type')
+            ->selectRaw('COALESCE(SUM(amount), 0) as total_amount')
+            ->groupBy('transaction_type')
+            ->pluck('total_amount', 'transaction_type');
+
+        $salesSummary = Sale::query()
+            ->selectRaw('COALESCE(SUM(CASE WHEN sale_date = ? THEN total_amount ELSE 0 END), 0) as today_sales', [$today])
+            ->selectRaw('COALESCE(SUM(CASE WHEN sale_date BETWEEN ? AND ? THEN total_amount ELSE 0 END), 0) as month_sales', [$monthStart, $monthEnd])
+            ->selectRaw('COALESCE(SUM(CASE WHEN balance_amount > 0 THEN balance_amount ELSE 0 END), 0) as pending_customer_collection')
+            ->first();
+
+        $purchaseSummary = Purchase::query()
+            ->selectRaw('COALESCE(SUM(CASE WHEN purchase_date = ? THEN total_amount ELSE 0 END), 0) as today_purchase', [$today])
+            ->selectRaw('COALESCE(SUM(CASE WHEN purchase_date BETWEEN ? AND ? THEN total_amount ELSE 0 END), 0) as month_purchase', [$monthStart, $monthEnd])
+            ->selectRaw('COALESCE(SUM(CASE WHEN balance_amount > 0 THEN balance_amount ELSE 0 END), 0) as supplier_payable')
+            ->first();
 
         $grossProfit = (float) SaleItem::query()
             ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
-            ->whereDate('sales.sale_date', '>=', $filters['from_date'])
-            ->whereDate('sales.sale_date', '<=', $filters['to_date'])
+            ->whereBetween('sales.sale_date', [$filters['from_date'], $filters['to_date']])
             ->sum('sale_items.profit_amount');
         $expenses = Schema::hasTable('expenses')
-            ? (float) Expense::whereDate('expense_date', '>=', $filters['from_date'])
-                ->whereDate('expense_date', '<=', $filters['to_date'])
+            ? (float) Expense::whereBetween('expense_date', [$filters['from_date'], $filters['to_date']])
                 ->sum('amount')
             : 0;
 
         return [
-            'today_sales' => (float) Sale::whereDate('sale_date', $today)->sum('total_amount'),
-            'month_sales' => (float) Sale::whereDate('sale_date', '>=', $monthStart)->whereDate('sale_date', '<=', $monthEnd)->sum('total_amount'),
-            'today_purchase' => (float) Purchase::whereDate('purchase_date', $today)->sum('total_amount'),
-            'month_purchase' => (float) Purchase::whereDate('purchase_date', '>=', $monthStart)->whereDate('purchase_date', '<=', $monthEnd)->sum('total_amount'),
-            'cash_balance' => (float) $cashIn - (float) $cashOut,
-            'bank_balance' => (float) $bankIn - (float) $bankOut,
-            'pending_customer_collection' => (float) Sale::where('balance_amount', '>', 0)->sum('balance_amount'),
-            'supplier_payable' => (float) Purchase::where('balance_amount', '>', 0)->sum('balance_amount'),
+            'today_sales' => (float) $salesSummary->today_sales,
+            'month_sales' => (float) $salesSummary->month_sales,
+            'today_purchase' => (float) $purchaseSummary->today_purchase,
+            'month_purchase' => (float) $purchaseSummary->month_purchase,
+            'cash_balance' => (float) ($cashbookTotals['cash_in'] ?? 0) - (float) ($cashbookTotals['cash_out'] ?? 0),
+            'bank_balance' => (float) ($cashbookTotals['bank_in'] ?? 0) - (float) ($cashbookTotals['bank_out'] ?? 0),
+            'pending_customer_collection' => (float) $salesSummary->pending_customer_collection,
+            'supplier_payable' => (float) $purchaseSummary->supplier_payable,
             'stock_value' => (float) Product::selectRaw('COALESCE(SUM(current_stock * purchase_price), 0) as value')->value('value'),
             'total_expense' => $expenses,
             'active_loans' => Schema::hasTable('loans') ? (float) Loan::where('status', 'active')->sum('balance_amount') : 0,
@@ -133,15 +145,13 @@ class DashboardController extends Controller
                 ->limit(8)
                 ->get(),
             'pending_customer_payments' => Sale::with('customer')
-                ->whereDate('sale_date', '>=', $filters['from_date'])
-                ->whereDate('sale_date', '<=', $filters['to_date'])
+                ->whereBetween('sale_date', [$filters['from_date'], $filters['to_date']])
                 ->where('balance_amount', '>', 0)
                 ->oldest('sale_date')
                 ->limit(8)
                 ->get(),
             'pending_supplier_payments' => Purchase::with('supplier')
-                ->whereDate('purchase_date', '>=', $filters['from_date'])
-                ->whereDate('purchase_date', '<=', $filters['to_date'])
+                ->whereBetween('purchase_date', [$filters['from_date'], $filters['to_date']])
                 ->where('balance_amount', '>', 0)
                 ->oldest('purchase_date')
                 ->limit(8)
@@ -159,14 +169,18 @@ class DashboardController extends Controller
         $months = CarbonPeriod::create($start, '1 month', $end);
         $labels = [];
         $data = [];
+        $monthExpression = $this->monthExpression($dateColumn);
+        $totals = $modelClass::query()
+            ->whereBetween($dateColumn, [$filters['from_date'], $filters['to_date']])
+            ->selectRaw($monthExpression.' as month_key')
+            ->selectRaw('COALESCE(SUM('.$amountColumn.'), 0) as total_amount')
+            ->groupByRaw($monthExpression)
+            ->pluck('total_amount', 'month_key');
 
         foreach ($months as $month) {
-            $rangeStart = $month->copy()->startOfMonth()->max(Carbon::parse($filters['from_date']));
-            $rangeEnd = $month->copy()->endOfMonth()->min(Carbon::parse($filters['to_date']));
+            $monthKey = $month->format('Y-m');
             $labels[] = $month->format('M Y');
-            $data[] = (float) $modelClass::whereDate($dateColumn, '>=', $rangeStart->toDateString())
-                ->whereDate($dateColumn, '<=', $rangeEnd->toDateString())
-                ->sum($amountColumn);
+            $data[] = (float) ($totals[$monthKey] ?? 0);
         }
 
         return compact('labels', 'data');
@@ -185,16 +199,20 @@ class DashboardController extends Controller
 
     private function cashFlow(array $filters): array
     {
-        $query = Cashbook::whereDate('entry_date', '>=', $filters['from_date'])
-            ->whereDate('entry_date', '<=', $filters['to_date']);
+        $totals = Cashbook::query()
+            ->whereBetween('entry_date', [$filters['from_date'], $filters['to_date']])
+            ->select('transaction_type')
+            ->selectRaw('COALESCE(SUM(amount), 0) as total_amount')
+            ->groupBy('transaction_type')
+            ->pluck('total_amount', 'transaction_type');
 
         return [
             'labels' => ['Cash In', 'Cash Out', 'Bank In', 'Bank Out'],
             'data' => [
-                (float) (clone $query)->where('transaction_type', 'cash_in')->sum('amount'),
-                (float) (clone $query)->where('transaction_type', 'cash_out')->sum('amount'),
-                (float) (clone $query)->where('transaction_type', 'bank_in')->sum('amount'),
-                (float) (clone $query)->where('transaction_type', 'bank_out')->sum('amount'),
+                (float) ($totals['cash_in'] ?? 0),
+                (float) ($totals['cash_out'] ?? 0),
+                (float) ($totals['bank_in'] ?? 0),
+                (float) ($totals['bank_out'] ?? 0),
             ],
         ];
     }
@@ -204,8 +222,7 @@ class DashboardController extends Controller
         $rows = SaleItem::query()
             ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
             ->join('products', 'sale_items.product_id', '=', 'products.id')
-            ->whereDate('sales.sale_date', '>=', $filters['from_date'])
-            ->whereDate('sales.sale_date', '<=', $filters['to_date'])
+            ->whereBetween('sales.sale_date', [$filters['from_date'], $filters['to_date']])
             ->select('products.name')
             ->selectRaw('SUM(sale_items.quantity) as sold_quantity')
             ->groupBy('products.id', 'products.name')
@@ -221,13 +238,18 @@ class DashboardController extends Controller
 
     private function periodSales(array $filters)
     {
-        return Sale::whereDate('sale_date', '>=', $filters['from_date'])
-            ->whereDate('sale_date', '<=', $filters['to_date']);
+        return Sale::whereBetween('sale_date', [$filters['from_date'], $filters['to_date']]);
     }
 
     private function periodPurchases(array $filters)
     {
-        return Purchase::whereDate('purchase_date', '>=', $filters['from_date'])
-            ->whereDate('purchase_date', '<=', $filters['to_date']);
+        return Purchase::whereBetween('purchase_date', [$filters['from_date'], $filters['to_date']]);
+    }
+
+    private function monthExpression(string $column): string
+    {
+        return DB::connection()->getDriverName() === 'sqlite'
+            ? "strftime('%Y-%m', {$column})"
+            : "DATE_FORMAT({$column}, '%Y-%m')";
     }
 }

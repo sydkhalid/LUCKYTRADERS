@@ -60,7 +60,8 @@
         'Admin' => [
             ['label' => 'Users & Roles', 'route' => 'users.index', 'active' => ['users.*'], 'permission' => 'manage_users'],
             ['label' => 'Activity Logs', 'route' => 'activity-logs.index', 'active' => ['activity-logs.*'], 'permission' => 'view_activity_logs'],
-            ['label' => 'Settings', 'route' => 'settings.company', 'active' => ['settings.*'], 'permission' => 'manage_settings'],
+            ['label' => 'Settings', 'route' => 'settings.company', 'active' => ['settings.company', 'settings.invoice', 'settings.bank', 'settings.terms', 'settings.media'], 'permission' => 'manage_settings'],
+            ['label' => 'Testing Checklist', 'route' => 'settings.testing-checklist', 'active' => ['settings.testing-checklist'], 'permission' => 'manage_settings'],
             ['label' => 'Backup System', 'route' => 'settings.backups.index', 'active' => ['settings.backups.*'], 'permission' => null, 'super_admin' => true],
         ],
     ];

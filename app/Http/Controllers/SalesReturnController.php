@@ -77,16 +77,10 @@ class SalesReturnController extends Controller
         ]);
 
         $query = SalesReturn::with(['sale', 'customer'])
-            ->when($filters['from_date'] ?? null, fn ($query, $date) => $query->whereDate('return_date', '>=', $date))
-            ->when($filters['to_date'] ?? null, fn ($query, $date) => $query->whereDate('return_date', '<=', $date));
+            ->when($filters['from_date'] ?? null, fn ($query, $date) => $query->where('return_date', '>=', $date))
+            ->when($filters['to_date'] ?? null, fn ($query, $date) => $query->where('return_date', '<=', $date));
 
-        $totals = [
-            'subtotal' => (float) (clone $query)->sum('subtotal'),
-            'gst' => (float) (clone $query)->sum('gst_amount'),
-            'total' => (float) (clone $query)->sum('total_amount'),
-            'refund' => (float) (clone $query)->sum('refund_amount'),
-            'adjustment' => (float) (clone $query)->sum('adjustment_amount'),
-        ];
+        $totals = $this->totals($query);
         $returns = $query
             ->latest('return_date')
             ->latest('id')
@@ -140,5 +134,25 @@ class SalesReturnController extends Controller
                 ],
             ];
         })->all();
+    }
+
+    private function totals($query): array
+    {
+        $totals = (clone $query)
+            ->toBase()
+            ->selectRaw('COALESCE(SUM(subtotal), 0) as subtotal')
+            ->selectRaw('COALESCE(SUM(gst_amount), 0) as gst')
+            ->selectRaw('COALESCE(SUM(total_amount), 0) as total')
+            ->selectRaw('COALESCE(SUM(refund_amount), 0) as refund')
+            ->selectRaw('COALESCE(SUM(adjustment_amount), 0) as adjustment')
+            ->first();
+
+        return [
+            'subtotal' => (float) $totals->subtotal,
+            'gst' => (float) $totals->gst,
+            'total' => (float) $totals->total,
+            'refund' => (float) $totals->refund,
+            'adjustment' => (float) $totals->adjustment,
+        ];
     }
 }

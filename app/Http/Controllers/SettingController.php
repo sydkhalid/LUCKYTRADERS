@@ -8,7 +8,9 @@ use App\Models\SystemSetting;
 use App\Services\SystemSettingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class SettingController extends Controller
@@ -44,7 +46,7 @@ class SettingController extends Controller
 
         if ($request->hasFile('logo')) {
             $this->deletePublicFile($settings->logo);
-            $validated['logo'] = $request->file('logo')->store('settings', 'public');
+            $validated['logo'] = $this->storeOptimizedImage($request->file('logo'));
         }
 
         $settings->update($validated);
@@ -89,7 +91,7 @@ class SettingController extends Controller
 
         if ($request->hasFile('signature_image')) {
             $this->deletePublicFile($settings->signature_image);
-            $validated['signature_image'] = $request->file('signature_image')->store('settings', 'public');
+            $validated['signature_image'] = $this->storeOptimizedImage($request->file('signature_image'));
         }
 
         $settings->update($validated);
@@ -155,14 +157,14 @@ class SettingController extends Controller
         if ($request->hasFile('logo')) {
             $this->deletePublicFile($company->logo);
             $company->update([
-                'logo' => $request->file('logo')->store('settings', 'public'),
+                'logo' => $this->storeOptimizedImage($request->file('logo')),
             ]);
         }
 
         if ($request->hasFile('signature_image')) {
             $this->deletePublicFile($invoice->signature_image);
             $invoice->update([
-                'signature_image' => $request->file('signature_image')->store('settings', 'public'),
+                'signature_image' => $this->storeOptimizedImage($request->file('signature_image')),
             ]);
         }
 
@@ -188,5 +190,84 @@ class SettingController extends Controller
         if ($path) {
             Storage::disk('public')->delete($path);
         }
+    }
+
+    private function storeOptimizedImage(UploadedFile $file): string
+    {
+        if (! extension_loaded('gd')) {
+            return $file->store('settings', 'public');
+        }
+
+        $source = @imagecreatefromstring((string) file_get_contents($file->getRealPath()));
+
+        if (! $source) {
+            return $file->store('settings', 'public');
+        }
+
+        $width = imagesx($source);
+        $height = imagesy($source);
+        $maxDimension = 1200;
+        $target = $source;
+        $targetCreated = false;
+
+        if (max($width, $height) > $maxDimension) {
+            $ratio = $maxDimension / max($width, $height);
+            $targetWidth = max(1, (int) round($width * $ratio));
+            $targetHeight = max(1, (int) round($height * $ratio));
+            $target = imagecreatetruecolor($targetWidth, $targetHeight);
+            imagealphablending($target, false);
+            imagesavealpha($target, true);
+            imagecopyresampled($target, $source, 0, 0, 0, 0, $targetWidth, $targetHeight, $width, $height);
+            $targetCreated = true;
+        }
+
+        $extension = strtolower($file->extension() ?: $file->guessExtension() ?: 'jpg');
+        $extension = $extension === 'jpeg' ? 'jpg' : $extension;
+
+        if ($extension === 'webp' && ! function_exists('imagewebp')) {
+            $extension = 'jpg';
+        }
+
+        if (! in_array($extension, ['jpg', 'png', 'webp'], true)) {
+            $extension = 'jpg';
+        }
+
+        $tempPath = tempnam(sys_get_temp_dir(), 'erp-img-');
+
+        if (! $tempPath) {
+            if ($targetCreated) {
+                imagedestroy($target);
+            }
+
+            imagedestroy($source);
+
+            return $file->store('settings', 'public');
+        }
+
+        $saved = match ($extension) {
+            'png' => imagepng($target, $tempPath, 6),
+            'webp' => imagewebp($target, $tempPath, 82),
+            default => imagejpeg($target, $tempPath, 82),
+        };
+
+        if ($targetCreated) {
+            imagedestroy($target);
+        }
+
+        imagedestroy($source);
+
+        if (! $saved || ! $tempPath || ! is_file($tempPath)) {
+            if ($tempPath && is_file($tempPath)) {
+                @unlink($tempPath);
+            }
+
+            return $file->store('settings', 'public');
+        }
+
+        $path = 'settings/'.Str::uuid().'.'.$extension;
+        Storage::disk('public')->put($path, (string) file_get_contents($tempPath));
+        @unlink($tempPath);
+
+        return $path;
     }
 }

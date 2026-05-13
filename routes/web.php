@@ -2,15 +2,15 @@
 
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\AdvancedReportController;
+use App\Http\Controllers\BackupController;
 use App\Http\Controllers\CashbookController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CustomerReceiptController;
-use App\Http\Controllers\BackupController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseCategoryController;
 use App\Http\Controllers\ExpenseController;
-use App\Http\Controllers\GSTReportController;
 use App\Http\Controllers\GlobalSearchController;
+use App\Http\Controllers\GSTReportController;
 use App\Http\Controllers\LedgerController;
 use App\Http\Controllers\LoanController;
 use App\Http\Controllers\LoanTransactionController;
@@ -28,14 +28,14 @@ use App\Http\Controllers\PurchaseReturnController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SalesReturnController;
+use App\Http\Controllers\SettingController;
 use App\Http\Controllers\StockAdjustmentController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\SupplierPaymentController;
-use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'throttle:erp'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->middleware('permission:view_dashboard');
     Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('permission:view_dashboard')->name('dashboard');
 

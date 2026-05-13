@@ -54,8 +54,8 @@ class RolePermissionTest extends TestCase
             ->post(route('users.store'), [
                 'name' => 'Billing User',
                 'email' => 'billing@example.com',
-                'password' => 'password',
-                'password_confirmation' => 'password',
+                'password' => 'Str0ng!Pass123',
+                'password_confirmation' => 'Str0ng!Pass123',
                 'role' => 'Billing Staff',
             ]);
 

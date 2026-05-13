@@ -21,8 +21,8 @@ class AuthFlowTest extends TestCase
         $this->post('/register', [
             'name' => 'Admin',
             'email' => 'admin@luckytraders.test',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'Str0ng!Pass123',
+            'password_confirmation' => 'Str0ng!Pass123',
         ])->assertRedirect('/dashboard');
 
         $this->assertAuthenticated();
@@ -44,12 +44,12 @@ class AuthFlowTest extends TestCase
     {
         User::factory()->create([
             'email' => 'admin@luckytraders.test',
-            'password' => 'password123',
+            'password' => 'Str0ng!Pass123',
         ]);
 
         $this->post('/login', [
             'email' => 'admin@luckytraders.test',
-            'password' => 'password123',
+            'password' => 'Str0ng!Pass123',
         ])->assertRedirect('/dashboard');
 
         $this->assertAuthenticated();

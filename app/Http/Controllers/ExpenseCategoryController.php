@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Expenses\StoreExpenseCategoryRequest;
 use App\Http\Requests\Expenses\UpdateExpenseCategoryRequest;
 use App\Models\ExpenseCategory;
+use Illuminate\Http\Request;
 
 class ExpenseCategoryController extends Controller
 {
@@ -45,8 +46,10 @@ class ExpenseCategoryController extends Controller
             ->with('success', 'Expense category '.$expenseCategory->name.' updated successfully.');
     }
 
-    public function destroy(ExpenseCategory $expenseCategory)
+    public function destroy(Request $request, ExpenseCategory $expenseCategory)
     {
+        abort_unless($request->user()?->can('delete_records'), 403);
+
         $expenseCategory->delete();
 
         return redirect()

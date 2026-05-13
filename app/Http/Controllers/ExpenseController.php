@@ -19,11 +19,17 @@ class ExpenseController extends Controller
             ->latest('id')
             ->paginate(20);
 
-        $todayTotal = Expense::whereDate('expense_date', now()->toDateString())->sum('amount');
-        $monthTotal = Expense::whereDate('expense_date', '>=', now()->startOfMonth()->toDateString())
-            ->whereDate('expense_date', '<=', now()->endOfMonth()->toDateString())
-            ->sum('amount');
-        $overallTotal = Expense::sum('amount');
+        $today = now()->toDateString();
+        $monthStart = now()->startOfMonth()->toDateString();
+        $monthEnd = now()->endOfMonth()->toDateString();
+        $summary = Expense::query()
+            ->selectRaw('COALESCE(SUM(CASE WHEN expense_date = ? THEN amount ELSE 0 END), 0) as today_total', [$today])
+            ->selectRaw('COALESCE(SUM(CASE WHEN expense_date BETWEEN ? AND ? THEN amount ELSE 0 END), 0) as month_total', [$monthStart, $monthEnd])
+            ->selectRaw('COALESCE(SUM(amount), 0) as overall_total')
+            ->first();
+        $todayTotal = (float) $summary->today_total;
+        $monthTotal = (float) $summary->month_total;
+        $overallTotal = (float) $summary->overall_total;
 
         return view('expenses.index', compact('expenses', 'todayTotal', 'monthTotal', 'overallTotal'));
     }
@@ -124,8 +130,7 @@ class ExpenseController extends Controller
     private function filteredExpenses(array $filters)
     {
         return Expense::query()
-            ->whereDate('expense_date', '>=', $filters['from_date'])
-            ->whereDate('expense_date', '<=', $filters['to_date']);
+            ->whereBetween('expense_date', [$filters['from_date'], $filters['to_date']]);
     }
 
     private function grossProfit(array $filters): float
@@ -136,8 +141,7 @@ class ExpenseController extends Controller
 
         return (float) DB::table('sale_items')
             ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
-            ->whereDate('sales.sale_date', '>=', $filters['from_date'])
-            ->whereDate('sales.sale_date', '<=', $filters['to_date'])
+            ->whereBetween('sales.sale_date', [$filters['from_date'], $filters['to_date']])
             ->sum('sale_items.profit_amount');
     }
 }

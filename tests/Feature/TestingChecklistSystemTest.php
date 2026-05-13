@@ -28,6 +28,7 @@ class TestingChecklistSystemTest extends TestCase
             ->get(route('settings.testing-checklist'))
             ->assertOk()
             ->assertSee('Production Testing Checklist')
+            ->assertSee('href="'.route('settings.testing-checklist').'"', false)
             ->assertSee('Product CRUD testing')
             ->assertSee('Backup system testing')
             ->assertSee('Bug Tracking Section');

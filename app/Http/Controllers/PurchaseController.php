@@ -97,6 +97,7 @@ class PurchaseController extends Controller
 
         DB::transaction(function () use ($purchase, $data, $totals) {
             $purchase->load('items');
+            $this->assertPurchaseStockCanBeReduced($purchase, $totals['items']);
             $this->reversePurchasePosting($purchase);
 
             $purchase->update([
@@ -138,6 +139,7 @@ class PurchaseController extends Controller
 
         DB::transaction(function () use ($purchase) {
             $purchase->load('items');
+            $this->assertPurchaseStockCanBeReduced($purchase);
             $this->reversePurchasePosting($purchase);
 
             StockMovement::where('reference_type', 'purchase')
@@ -363,6 +365,43 @@ class PurchaseController extends Controller
         }
 
         return $paidAmount >= $totalAmount ? 'paid' : 'partial';
+    }
+
+    private function assertPurchaseStockCanBeReduced(Purchase $purchase, array $replacementItems = []): void
+    {
+        $oldQuantities = $purchase->items
+            ->groupBy('product_id')
+            ->map(fn ($items) => round((float) $items->sum('quantity'), 3));
+
+        $replacementQuantities = collect($replacementItems)
+            ->groupBy('product_id')
+            ->map(fn ($items) => round((float) $items->sum('quantity'), 3));
+
+        $productIds = $oldQuantities->keys()
+            ->merge($replacementQuantities->keys())
+            ->unique()
+            ->values();
+
+        $products = Product::whereIn('id', $productIds)
+            ->lockForUpdate()
+            ->get()
+            ->keyBy('id');
+
+        foreach ($oldQuantities as $productId => $oldQuantity) {
+            $netReduction = round((float) $oldQuantity - (float) ($replacementQuantities[$productId] ?? 0), 3);
+
+            if ($netReduction <= 0) {
+                continue;
+            }
+
+            $product = $products->get((int) $productId);
+
+            if (! $product || round((float) $product->current_stock, 3) < $netReduction) {
+                throw ValidationException::withMessages([
+                    'items' => 'Cannot edit or delete this purchase because stock has already moved below the required reversal quantity.',
+                ]);
+            }
+        }
     }
 
     private function nextPurchaseNo(): string

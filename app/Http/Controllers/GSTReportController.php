@@ -199,8 +199,8 @@ class GSTReportController extends Controller
         return Sale::with('customer')
             ->where('bill_type', $billType)
             ->when($this->billTypeConflicts($filters, $billType), fn ($query) => $query->whereRaw('1 = 0'))
-            ->when($filters['from_date'] ?? null, fn ($query, $date) => $query->whereDate('sale_date', '>=', $date))
-            ->when($filters['to_date'] ?? null, fn ($query, $date) => $query->whereDate('sale_date', '<=', $date))
+            ->when($filters['from_date'] ?? null, fn ($query, $date) => $query->where('sale_date', '>=', $date))
+            ->when($filters['to_date'] ?? null, fn ($query, $date) => $query->where('sale_date', '<=', $date))
             ->when($filters['customer_id'] ?? null, fn ($query, $customerId) => $query->where('customer_id', $customerId))
             ->when($filters['payment_status'] ?? null, fn ($query, $status) => $query->where('payment_status', $status));
     }
@@ -210,8 +210,8 @@ class GSTReportController extends Controller
         return Purchase::with('supplier')
             ->where('bill_type', $billType)
             ->when($this->billTypeConflicts($filters, $billType), fn ($query) => $query->whereRaw('1 = 0'))
-            ->when($filters['from_date'] ?? null, fn ($query, $date) => $query->whereDate('purchase_date', '>=', $date))
-            ->when($filters['to_date'] ?? null, fn ($query, $date) => $query->whereDate('purchase_date', '<=', $date))
+            ->when($filters['from_date'] ?? null, fn ($query, $date) => $query->where('purchase_date', '>=', $date))
+            ->when($filters['to_date'] ?? null, fn ($query, $date) => $query->where('purchase_date', '<=', $date))
             ->when($filters['supplier_id'] ?? null, fn ($query, $supplierId) => $query->where('supplier_id', $supplierId))
             ->when($filters['payment_status'] ?? null, fn ($query, $status) => $query->where('payment_status', $status));
     }
@@ -224,8 +224,8 @@ class GSTReportController extends Controller
                 $query->where('bill_type', $billType)
                     ->when($filters['payment_status'] ?? null, fn ($query, $status) => $query->where('payment_status', $status));
             })
-            ->when($filters['from_date'] ?? null, fn ($query, $date) => $query->whereDate('return_date', '>=', $date))
-            ->when($filters['to_date'] ?? null, fn ($query, $date) => $query->whereDate('return_date', '<=', $date))
+            ->when($filters['from_date'] ?? null, fn ($query, $date) => $query->where('return_date', '>=', $date))
+            ->when($filters['to_date'] ?? null, fn ($query, $date) => $query->where('return_date', '<=', $date))
             ->when($filters['customer_id'] ?? null, fn ($query, $customerId) => $query->where('customer_id', $customerId));
     }
 
@@ -237,8 +237,8 @@ class GSTReportController extends Controller
                 $query->where('bill_type', $billType)
                     ->when($filters['payment_status'] ?? null, fn ($query, $status) => $query->where('payment_status', $status));
             })
-            ->when($filters['from_date'] ?? null, fn ($query, $date) => $query->whereDate('return_date', '>=', $date))
-            ->when($filters['to_date'] ?? null, fn ($query, $date) => $query->whereDate('return_date', '<=', $date))
+            ->when($filters['from_date'] ?? null, fn ($query, $date) => $query->where('return_date', '>=', $date))
+            ->when($filters['to_date'] ?? null, fn ($query, $date) => $query->where('return_date', '<=', $date))
             ->when($filters['supplier_id'] ?? null, fn ($query, $supplierId) => $query->where('supplier_id', $supplierId));
     }
 
@@ -271,23 +271,41 @@ class GSTReportController extends Controller
 
     private function documentTotals(Builder $query): array
     {
+        $totals = (clone $query)
+            ->toBase()
+            ->selectRaw('COALESCE(SUM(subtotal), 0) as taxable')
+            ->selectRaw('COALESCE(SUM(gst_amount), 0) as gst')
+            ->selectRaw('COALESCE(SUM(total_amount), 0) as total')
+            ->selectRaw('COALESCE(SUM(paid_amount), 0) as paid')
+            ->selectRaw('COALESCE(SUM(balance_amount), 0) as balance')
+            ->first();
+
         return [
-            'taxable' => (float) (clone $query)->sum('subtotal'),
-            'gst' => (float) (clone $query)->sum('gst_amount'),
-            'total' => (float) (clone $query)->sum('total_amount'),
-            'paid' => (float) (clone $query)->sum('paid_amount'),
-            'balance' => (float) (clone $query)->sum('balance_amount'),
+            'taxable' => (float) $totals->taxable,
+            'gst' => (float) $totals->gst,
+            'total' => (float) $totals->total,
+            'paid' => (float) $totals->paid,
+            'balance' => (float) $totals->balance,
         ];
     }
 
     private function returnTotals(Builder $query): array
     {
+        $totals = (clone $query)
+            ->toBase()
+            ->selectRaw('COALESCE(SUM(subtotal), 0) as taxable')
+            ->selectRaw('COALESCE(SUM(gst_amount), 0) as gst')
+            ->selectRaw('COALESCE(SUM(total_amount), 0) as total')
+            ->selectRaw('COALESCE(SUM(refund_amount), 0) as refund')
+            ->selectRaw('COALESCE(SUM(adjustment_amount), 0) as adjustment')
+            ->first();
+
         return [
-            'taxable' => (float) (clone $query)->sum('subtotal'),
-            'gst' => (float) (clone $query)->sum('gst_amount'),
-            'total' => (float) (clone $query)->sum('total_amount'),
-            'refund' => (float) (clone $query)->sum('refund_amount'),
-            'adjustment' => (float) (clone $query)->sum('adjustment_amount'),
+            'taxable' => (float) $totals->taxable,
+            'gst' => (float) $totals->gst,
+            'total' => (float) $totals->total,
+            'refund' => (float) $totals->refund,
+            'adjustment' => (float) $totals->adjustment,
         ];
     }
 

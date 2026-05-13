@@ -422,16 +422,14 @@ class AdvancedReportController extends Controller
         $query = DB::table('loans')
             ->leftJoin('partners', 'loans.partner_id', '=', 'partners.id')
             ->whereNull('loans.deleted_at')
-            ->when($filters['from_date'], fn ($query, $date) => $query->whereDate('loans.loan_date', '>=', $date))
-            ->when($filters['to_date'], fn ($query, $date) => $query->whereDate('loans.loan_date', '<=', $date))
+            ->whereBetween('loans.loan_date', [$filters['from_date'], $filters['to_date']])
             ->select('loans.id', 'loans.loan_no', 'loans.loan_type', 'loans.party_name', 'partners.name as partner', 'loans.status')
             ->selectRaw('loans.principal_amount, loans.total_interest, loans.total_amount, loans.paid_amount, loans.balance_amount')
             ->orderByDesc('loans.loan_date')
             ->orderByDesc('loans.id');
 
         $summaryQuery = DB::table('loans')->whereNull('deleted_at')
-            ->when($filters['from_date'], fn ($query, $date) => $query->whereDate('loan_date', '>=', $date))
-            ->when($filters['to_date'], fn ($query, $date) => $query->whereDate('loan_date', '<=', $date));
+            ->whereBetween('loan_date', [$filters['from_date'], $filters['to_date']]);
 
         return $this->reportPayload('Loan Summary Report', [
             ['label' => 'Active Loans', 'value' => (clone $summaryQuery)->where('status', 'active')->count(), 'type' => 'number'],
@@ -537,8 +535,7 @@ class AdvancedReportController extends Controller
     {
         return DB::table('sales')
             ->whereNull('deleted_at')
-            ->whereDate('sale_date', '>=', $filters['from_date'])
-            ->whereDate('sale_date', '<=', $filters['to_date'])
+            ->whereBetween('sale_date', [$filters['from_date'], $filters['to_date']])
             ->when($filters['customer_id'], fn ($query, $id) => $query->where('customer_id', $id))
             ->when($filters['payment_status'], fn ($query, $status) => $query->where('payment_status', $status));
     }
@@ -547,8 +544,7 @@ class AdvancedReportController extends Controller
     {
         return DB::table('purchases')
             ->whereNull('deleted_at')
-            ->whereDate('purchase_date', '>=', $filters['from_date'])
-            ->whereDate('purchase_date', '<=', $filters['to_date'])
+            ->whereBetween('purchase_date', [$filters['from_date'], $filters['to_date']])
             ->when($filters['supplier_id'], fn ($query, $id) => $query->where('supplier_id', $id))
             ->when($filters['payment_status'], fn ($query, $status) => $query->where('payment_status', $status));
     }
@@ -561,8 +557,7 @@ class AdvancedReportController extends Controller
             ->leftJoin('product_categories', 'products.product_category_id', '=', 'product_categories.id')
             ->whereNull('sales.deleted_at')
             ->whereNull('products.deleted_at')
-            ->whereDate('sales.sale_date', '>=', $filters['from_date'])
-            ->whereDate('sales.sale_date', '<=', $filters['to_date'])
+            ->whereBetween('sales.sale_date', [$filters['from_date'], $filters['to_date']])
             ->when($filters['product_id'], fn ($query, $id) => $query->where('products.id', $id))
             ->when($filters['product_category_id'], fn ($query, $id) => $query->where('products.product_category_id', $id))
             ->when($filters['customer_id'], fn ($query, $id) => $query->where('sales.customer_id', $id))
@@ -573,8 +568,7 @@ class AdvancedReportController extends Controller
     {
         return DB::table('expenses')
             ->whereNull('expenses.deleted_at')
-            ->whereDate('expense_date', '>=', $filters['from_date'])
-            ->whereDate('expense_date', '<=', $filters['to_date'])
+            ->whereBetween('expense_date', [$filters['from_date'], $filters['to_date']])
             ->when($filters['category_id'], fn ($query, $id) => $query->where('expense_category_id', $id));
     }
 
@@ -582,8 +576,7 @@ class AdvancedReportController extends Controller
     {
         return DB::table('payments')
             ->whereNull('deleted_at')
-            ->whereDate('payment_date', '>=', $filters['from_date'])
-            ->whereDate('payment_date', '<=', $filters['to_date'])
+            ->whereBetween('payment_date', [$filters['from_date'], $filters['to_date']])
             ->when($filters['customer_id'], fn ($query, $id) => $query->where('party_type', 'customer')->where('party_id', $id))
             ->when($filters['supplier_id'], fn ($query, $id) => $query->where('party_type', 'supplier')->where('party_id', $id));
     }
@@ -595,8 +588,7 @@ class AdvancedReportController extends Controller
             ->whereNull('sales_returns.deleted_at')
             ->whereNull('sales.deleted_at')
             ->where('sales.bill_type', 'gst')
-            ->whereDate('sales_returns.return_date', '>=', $filters['from_date'])
-            ->whereDate('sales_returns.return_date', '<=', $filters['to_date'])
+            ->whereBetween('sales_returns.return_date', [$filters['from_date'], $filters['to_date']])
             ->when($filters['customer_id'], fn ($query, $id) => $query->where('sales_returns.customer_id', $id))
             ->when($filters['payment_status'], fn ($query, $status) => $query->where('sales.payment_status', $status))
             ->sum('sales_returns.gst_amount');
@@ -609,8 +601,7 @@ class AdvancedReportController extends Controller
             ->whereNull('purchase_returns.deleted_at')
             ->whereNull('purchases.deleted_at')
             ->where('purchases.bill_type', 'gst')
-            ->whereDate('purchase_returns.return_date', '>=', $filters['from_date'])
-            ->whereDate('purchase_returns.return_date', '<=', $filters['to_date'])
+            ->whereBetween('purchase_returns.return_date', [$filters['from_date'], $filters['to_date']])
             ->when($filters['supplier_id'], fn ($query, $id) => $query->where('purchase_returns.supplier_id', $id))
             ->when($filters['payment_status'], fn ($query, $status) => $query->where('purchases.payment_status', $status))
             ->sum('purchase_returns.gst_amount');
@@ -631,8 +622,7 @@ class AdvancedReportController extends Controller
     {
         return DB::table('cashbooks')
             ->where('transaction_type', $type)
-            ->whereDate('entry_date', '>=', $filters['from_date'])
-            ->whereDate('entry_date', '<=', $filters['to_date'])
+            ->whereBetween('entry_date', [$filters['from_date'], $filters['to_date']])
             ->selectRaw('DATE(entry_date) as report_date')
             ->selectRaw('SUM(amount) as total_amount')
             ->groupByRaw('DATE(entry_date)')
@@ -755,11 +745,11 @@ class AdvancedReportController extends Controller
     private function applyDateToJoin($join, string $column, array $filters): void
     {
         if ($filters['from_date']) {
-            $join->whereDate($column, '>=', $filters['from_date']);
+            $join->where($column, '>=', $filters['from_date']);
         }
 
         if ($filters['to_date']) {
-            $join->whereDate($column, '<=', $filters['to_date']);
+            $join->where($column, '<=', $filters['to_date']);
         }
     }
 
