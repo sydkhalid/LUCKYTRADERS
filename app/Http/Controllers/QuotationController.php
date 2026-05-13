@@ -8,6 +8,7 @@ use App\Http\Requests\Quotations\UpdateQuotationRequest;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Quotation;
+use App\Services\ActivityLogger;
 use App\Services\QuotationService;
 use App\Services\SystemSettingService;
 use Illuminate\Http\Request;
@@ -64,7 +65,19 @@ class QuotationController extends Controller
 
     public function update(UpdateQuotationRequest $request, Quotation $quotation, QuotationService $quotationService)
     {
-        $quotationService->updateQuotation($quotation, $request->validated());
+        $oldStatus = $quotation->status;
+        $updatedQuotation = $quotationService->updateQuotation($quotation, $request->validated());
+
+        if ($oldStatus !== 'accepted' && $updatedQuotation->status === 'accepted') {
+            app(ActivityLogger::class)->log(
+                'approve',
+                'quotations',
+                'Quotation '.$updatedQuotation->quotation_no.' approved',
+                $updatedQuotation,
+                ['status' => $oldStatus],
+                ['status' => 'accepted']
+            );
+        }
 
         return redirect()
             ->route('quotations.show', $quotation)

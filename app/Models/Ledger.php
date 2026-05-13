@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsErpActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Ledger extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsErpActivity;
 
     protected $fillable = [
         'ledger_date',

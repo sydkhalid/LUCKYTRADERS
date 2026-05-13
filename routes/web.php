@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CashbookController;
+use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CustomerReceiptController;
 use App\Http\Controllers\BackupController;
@@ -41,6 +42,14 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('permission:manage_users')->group(function () {
         Route::resource('users', UserController::class)->only(['index', 'create', 'store', 'edit', 'update']);
+    });
+
+    Route::middleware('permission:view_activity_logs')->prefix('activity-logs')->name('activity-logs.')->group(function () {
+        Route::get('/', [ActivityLogController::class, 'index'])->name('index');
+        Route::get('/users', [ActivityLogController::class, 'users'])->name('users');
+        Route::get('/modules', [ActivityLogController::class, 'modules'])->name('modules');
+        Route::get('/dates', [ActivityLogController::class, 'dates'])->name('dates');
+        Route::delete('/{activity}', [ActivityLogController::class, 'destroy'])->middleware('role:Super Admin')->name('destroy');
     });
 
     Route::middleware('permission:manage_settings')->prefix('settings')->name('settings.')->group(function () {

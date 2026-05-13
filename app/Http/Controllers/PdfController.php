@@ -15,6 +15,7 @@ use App\Models\Quotation;
 use App\Models\Sale;
 use App\Models\SalesReturn;
 use App\Models\Supplier;
+use App\Services\ActivityLogger;
 use App\Services\SystemSettingService;
 use App\Support\AmountInWords;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -27,6 +28,15 @@ class PdfController extends Controller
     {
         $sale->load(['customer', 'items.product']);
         $title = $sale->bill_type === 'gst' ? 'GST Invoice' : 'Normal Bill';
+
+        app(ActivityLogger::class)->log(
+            'print_invoice',
+            'sales',
+            $title.' '.$sale->sale_no.' PDF generated',
+            $sale,
+            [],
+            ['sale_no' => $sale->sale_no, 'bill_type' => $sale->bill_type, 'download' => $request->boolean('download')]
+        );
 
         return $this->render($request, 'pdf.sale', [
             'title' => $title,
@@ -139,6 +149,15 @@ class PdfController extends Controller
         $purchases = $this->purchasesQuery($filters)->orderBy('purchase_date')->orderBy('id')->get();
         $salesReturns = $this->salesReturnRows($filters);
         $purchaseReturns = $this->purchaseReturnRows($filters);
+
+        app(ActivityLogger::class)->log(
+            'export_report',
+            'gst_reports',
+            'GST report PDF generated',
+            null,
+            [],
+            ['format' => 'pdf', 'filters' => $filters, 'download' => $request->boolean('download')]
+        );
 
         return $this->render($request, 'pdf.gst-report', [
             'title' => 'GST Report',

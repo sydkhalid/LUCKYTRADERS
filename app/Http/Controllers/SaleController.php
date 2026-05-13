@@ -9,6 +9,7 @@ use App\Models\Payment;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\StockMovement;
+use App\Services\ActivityLogger;
 use App\Services\SystemSettingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -126,9 +127,19 @@ class SaleController extends Controller
 
         DB::transaction(function () use ($sale) {
             $sale->load('items');
+            $oldValues = $sale->getAttributes();
             $this->reverseSalePosting($sale);
             $this->deleteSaleReferences($sale);
             $sale->delete();
+
+            app(ActivityLogger::class)->log(
+                'cancel',
+                'sales',
+                'Sale '.$sale->sale_no.' cancelled',
+                $sale,
+                $oldValues,
+                ['status' => 'cancelled']
+            );
         });
 
         return redirect()
@@ -141,6 +152,15 @@ class SaleController extends Controller
         $sale->load(['customer', 'items.product']);
 
         $settings = app(SystemSettingService::class);
+
+        app(ActivityLogger::class)->log(
+            'print_invoice',
+            'sales',
+            'Invoice '.$sale->sale_no.' opened for printing',
+            $sale,
+            [],
+            ['sale_no' => $sale->sale_no, 'bill_type' => $sale->bill_type]
+        );
 
         return view('sales.print', [
             'sale' => $sale,

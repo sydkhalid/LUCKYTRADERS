@@ -75,6 +75,9 @@
             @can('manage_users')
                 <a href="{{ route('users.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('users.*') ? 'bg-slate-700' : '' }}">Users & Roles</a>
             @endcan
+            @can('view_activity_logs')
+                <a href="{{ route('activity-logs.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('activity-logs.*') ? 'bg-slate-700' : '' }}">Activity Logs</a>
+            @endcan
             @can('manage_settings')
                 <a href="{{ route('settings.company') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('settings.*') ? 'bg-slate-700' : '' }}">Settings</a>
             @endcan

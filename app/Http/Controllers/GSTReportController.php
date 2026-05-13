@@ -8,6 +8,7 @@ use App\Models\PurchaseReturn;
 use App\Models\Sale;
 use App\Models\SalesReturn;
 use App\Models\Supplier;
+use App\Services\ActivityLogger;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -121,6 +122,15 @@ class GSTReportController extends Controller
             'type' => ['nullable', 'in:sales,purchases,sales_returns,purchase_returns,summary,all'],
         ])['type'] ?? 'all';
         $fileName = 'gst-auditor-export-'.$type.'-'.now()->format('YmdHis').'.csv';
+
+        app(ActivityLogger::class)->log(
+            'export_report',
+            'gst_reports',
+            'GST auditor export generated',
+            null,
+            [],
+            ['format' => 'csv', 'type' => $type, 'filters' => $filters, 'file_name' => $fileName]
+        );
 
         return response()->streamDownload(function () use ($filters, $type) {
             $handle = fopen('php://output', 'w');
