@@ -3,6 +3,7 @@
 use App\Http\Controllers\CashbookController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CustomerReceiptController;
+use App\Http\Controllers\GSTReportController;
 use App\Http\Controllers\LedgerController;
 use App\Http\Controllers\LoanController;
 use App\Http\Controllers\PartnerController;
@@ -67,6 +68,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/partners/{partner}/transactions/create', [PartnerController::class, 'createTransaction'])->name('partners.transactions.create');
     Route::post('/partners/{partner}/transactions', [PartnerController::class, 'storeTransaction'])->name('partners.transactions.store');
     Route::resource('partners', PartnerController::class)->only(['index', 'create', 'store', 'show']);
+
+    Route::get('/gst-reports', [GSTReportController::class, 'index'])->name('gst-reports.index');
+    Route::get('/gst-reports/sales', [GSTReportController::class, 'sales'])->name('gst-reports.sales');
+    Route::get('/gst-reports/purchases', [GSTReportController::class, 'purchases'])->name('gst-reports.purchases');
+    Route::get('/gst-reports/non-gst-sales', [GSTReportController::class, 'nonGstSales'])->name('gst-reports.non-gst-sales');
+    Route::get('/gst-reports/export', [GSTReportController::class, 'export'])->name('gst-reports.export');
 });
 
 require __DIR__.'/auth.php';

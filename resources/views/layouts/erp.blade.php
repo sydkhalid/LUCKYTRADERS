@@ -30,7 +30,7 @@
             <a href="#" class="block px-4 py-2 rounded hover:bg-slate-700">Stock</a>
             <a href="{{ route('loans.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('loans.*') ? 'bg-slate-700' : '' }}">Loans</a>
             <a href="{{ route('partners.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('partners.*') ? 'bg-slate-700' : '' }}">Partners</a>
-            <a href="#" class="block px-4 py-2 rounded hover:bg-slate-700">GST Reports</a>
+            <a href="{{ route('gst-reports.index') }}" class="block px-4 py-2 rounded hover:bg-slate-700 {{ request()->routeIs('gst-reports.*') ? 'bg-slate-700' : '' }}">GST Reports</a>
         </nav>
     </aside>
 
