@@ -3,6 +3,7 @@ import './ui';
 import './global-search';
 import './notifications';
 import './erp-ux';
+import './auth-flow';
 
 import Alpine from 'alpinejs';
 import Chart from 'chart.js/auto';

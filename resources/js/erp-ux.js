@@ -402,6 +402,10 @@ function initializeDashboardCharts() {
 window.ErpToast = { toast, modal };
 
 function initializePageLoadingOverlay() {
+    if (!document.body.classList.contains('lt-app')) {
+        return;
+    }
+
     if (!document.querySelector('[data-page-loading-overlay]')) {
         const overlay = document.createElement('div');
         overlay.dataset.pageLoadingOverlay = 'true';
