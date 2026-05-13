@@ -19,7 +19,7 @@
                     @endif
                 </p>
             @endif
-            @if (! empty($company['gst_number']))
+            @if (($showCompanyGst ?? true) && ! empty($company['gst_number']))
                 <p class="company-address">GSTIN: {{ $company['gst_number'] }}</p>
             @endif
         </td>

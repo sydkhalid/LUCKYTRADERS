@@ -15,6 +15,16 @@
             'gst_percentage' => 0,
         ]];
     $rows = old('items', $saleRows);
+    $saleProductRows = $products->map(fn ($product) => [
+        'id' => $product->id,
+        'name' => $product->name,
+        'code' => $product->code,
+        'unit' => $product->unit,
+        'rate' => (float) $product->selling_price,
+        'gst_percentage' => (float) $product->gst_percentage,
+        'purchase_price' => (float) $product->purchase_price,
+        'current_stock' => (float) $product->current_stock,
+    ])->values();
 @endphp
 
 @if ($errors->any())
@@ -133,16 +143,7 @@
 </form>
 
 <script>
-    const products = @json($products->map(fn ($product) => [
-        'id' => $product->id,
-        'name' => $product->name,
-        'code' => $product->code,
-        'unit' => $product->unit,
-        'rate' => (float) $product->selling_price,
-        'gst_percentage' => (float) $product->gst_percentage,
-        'purchase_price' => (float) $product->purchase_price,
-        'current_stock' => (float) $product->current_stock,
-    ])->values());
+    const products = @json($saleProductRows);
     const initialRows = @json($rows);
     const productMeta = @json($productData);
     let rowIndex = 0;
@@ -195,7 +196,7 @@
                 <input type="number" name="items[${index}][rate]" value="${data.rate ?? 0}" step="0.01" min="0" class="rate-input w-28 rounded border-gray-300 text-right shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
             </td>
             <td class="px-3 py-3">
-                <input type="number" name="items[${index}][gst_percentage]" value="${data.gst_percentage ?? 0}" step="0.01" min="0" max="100" class="gst-input w-24 rounded border-gray-300 text-right shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
+                <input type="number" name="items[${index}][gst_percentage]" value="${data.gst_percentage ?? 0}" step="0.01" min="0" max="100" class="gst-input w-24 rounded border-gray-300 bg-gray-50 text-right shadow-sm focus:border-slate-500 focus:ring-slate-500" readonly required>
             </td>
             <td class="row-subtotal px-3 py-3 text-right text-gray-700">Rs. 0.00</td>
             <td class="row-gst px-3 py-3 text-right text-gray-700">Rs. 0.00</td>

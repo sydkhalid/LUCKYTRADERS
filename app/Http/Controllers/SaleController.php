@@ -121,7 +121,7 @@ class SaleController extends Controller
 
     public function destroy(Request $request, Sale $sale)
     {
-        $this->authorizePermission($request, 'delete_records');
+        $this->authorizeCancel($request);
         $this->ensureNoExternalReceipts($sale);
 
         DB::transaction(function () use ($sale) {
@@ -133,7 +133,7 @@ class SaleController extends Controller
 
         return redirect()
             ->route('sales.index')
-            ->with('success', 'Sale deleted and stock reversed successfully.');
+            ->with('success', 'Sale cancelled and stock reversed successfully.');
     }
 
     public function printInvoice(Sale $sale)
@@ -199,7 +199,7 @@ class SaleController extends Controller
             $quantity = round((float) $item['quantity'], 3);
             $rate = round((float) $item['rate'], 2);
             $itemSubtotal = round($quantity * $rate, 2);
-            $gstPercentage = $data['bill_type'] === 'gst' ? round((float) $item['gst_percentage'], 2) : 0;
+            $gstPercentage = $data['bill_type'] === 'gst' ? round((float) $product->gst_percentage, 2) : 0;
             $itemGst = round($itemSubtotal * $gstPercentage / 100, 2);
             $itemTotal = round($itemSubtotal + $itemGst, 2);
             $purchaseCost = round($quantity * (float) $product->purchase_price, 2);
@@ -207,7 +207,7 @@ class SaleController extends Controller
             $items[] = [
                 'product_id' => $product->id,
                 'quantity' => $quantity,
-                'unit' => $item['unit'],
+                'unit' => $product->unit,
                 'rate' => $rate,
                 'subtotal' => $itemSubtotal,
                 'gst_percentage' => $gstPercentage,
@@ -395,5 +395,18 @@ class SaleController extends Controller
     private function authorizePermission(Request $request, string $permission): void
     {
         abort_unless($request->user()?->can($permission), 403);
+    }
+
+    private function authorizeCancel(Request $request): void
+    {
+        $user = $request->user();
+
+        abort_unless(
+            $user && (
+                $user->hasRole('Super Admin')
+                || $user->hasRole('Admin')
+            ),
+            403
+        );
     }
 }

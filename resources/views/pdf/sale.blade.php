@@ -5,6 +5,7 @@
     @include('pdf.partials.header', [
         'documentNo' => $sale->sale_no,
         'documentDate' => $sale->sale_date?->format('d M Y'),
+        'showCompanyGst' => $isGst,
     ])
 
     <table class="grid-2 section">

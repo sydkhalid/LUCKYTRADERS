@@ -15,6 +15,13 @@
             @can('edit_old_records')
                 <a href="{{ route('sales.edit', $sale) }}" class="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Edit</a>
             @endcan
+            @if (auth()->user()?->hasRole('Super Admin') || auth()->user()?->hasRole('Admin'))
+                <form method="POST" action="{{ route('sales.destroy', $sale) }}" onsubmit="return confirm('Cancel this sale and reverse stock?')">
+                    @csrf
+                    @method('DELETE')
+                    <button class="rounded border border-red-200 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50">Cancel Sale</button>
+                </form>
+            @endif
             <a href="{{ route('sales.index') }}" class="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Back</a>
         </div>
     </div>

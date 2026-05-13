@@ -44,7 +44,7 @@
                             @endif
                         </p>
                     @endif
-                    @if (! empty($company['gst_number']))
+                    @if ($sale->bill_type === 'gst' && ! empty($company['gst_number']))
                         <p class="text-sm text-gray-700">GSTIN: {{ $company['gst_number'] }}</p>
                     @endif
                 </div>
@@ -62,7 +62,9 @@
                 <h3 class="mt-2 text-lg font-semibold text-gray-900">{{ $sale->customer?->name }}</h3>
                 <p class="mt-1 text-sm text-gray-700">{{ $sale->customer?->address ?: '-' }}</p>
                 <p class="text-sm text-gray-700">Phone: {{ $sale->customer?->phone ?: '-' }}</p>
-                <p class="text-sm text-gray-700">GST: {{ $sale->customer?->gst_number ?: '-' }}</p>
+                @if ($sale->bill_type === 'gst')
+                    <p class="text-sm text-gray-700">GST: {{ $sale->customer?->gst_number ?: '-' }}</p>
+                @endif
             </div>
             <div class="rounded border border-gray-200 p-4">
                 <p class="text-xs font-semibold uppercase text-gray-500">Payment</p>
@@ -76,6 +78,9 @@
                 <thead>
                     <tr class="bg-slate-100">
                         <th class="border border-gray-300 px-3 py-2 text-left">Product</th>
+                        @if ($sale->bill_type === 'gst')
+                            <th class="border border-gray-300 px-3 py-2 text-left">HSN</th>
+                        @endif
                         <th class="border border-gray-300 px-3 py-2 text-right">Qty</th>
                         <th class="border border-gray-300 px-3 py-2 text-left">Unit</th>
                         <th class="border border-gray-300 px-3 py-2 text-right">Rate</th>
@@ -91,6 +96,9 @@
                     @foreach ($sale->items as $item)
                         <tr>
                             <td class="border border-gray-300 px-3 py-2">{{ $item->product?->name }}</td>
+                            @if ($sale->bill_type === 'gst')
+                                <td class="border border-gray-300 px-3 py-2">{{ $item->product?->hsn_code ?: '-' }}</td>
+                            @endif
                             <td class="border border-gray-300 px-3 py-2 text-right">{{ number_format((float) $item->quantity, 3) }}</td>
                             <td class="border border-gray-300 px-3 py-2">{{ $item->unit }}</td>
                             <td class="border border-gray-300 px-3 py-2 text-right">Rs. {{ number_format((float) $item->rate, 2) }}</td>
@@ -112,10 +120,12 @@
                     <span>Subtotal</span>
                     <span>Rs. {{ number_format((float) $sale->subtotal, 2) }}</span>
                 </div>
-                <div class="flex justify-between">
-                    <span>GST</span>
-                    <span>Rs. {{ number_format((float) $sale->gst_amount, 2) }}</span>
-                </div>
+                @if ($sale->bill_type === 'gst')
+                    <div class="flex justify-between">
+                        <span>GST</span>
+                        <span>Rs. {{ number_format((float) $sale->gst_amount, 2) }}</span>
+                    </div>
+                @endif
                 <div class="flex justify-between border-t border-gray-300 pt-2 text-lg font-bold">
                     <span>Grand Total</span>
                     <span>Rs. {{ number_format((float) $sale->total_amount, 2) }}</span>
