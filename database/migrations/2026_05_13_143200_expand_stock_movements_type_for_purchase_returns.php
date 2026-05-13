@@ -15,8 +15,8 @@ return new class extends Migration
     public function down(): void
     {
         if (DB::getDriverName() === 'mysql') {
-            DB::statement("UPDATE stock_movements SET movement_type = 'adjustment' WHERE movement_type IN ('sales_return_in', 'purchase_return_out')");
-            DB::statement("ALTER TABLE stock_movements MODIFY movement_type ENUM('purchase_in', 'sale_out', 'adjustment') NOT NULL");
+            DB::statement("UPDATE stock_movements SET movement_type = 'adjustment' WHERE movement_type = 'purchase_return_out'");
+            DB::statement("ALTER TABLE stock_movements MODIFY movement_type ENUM('purchase_in', 'sale_out', 'sales_return_in', 'adjustment') NOT NULL");
         }
     }
 };

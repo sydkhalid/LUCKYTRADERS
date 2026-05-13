@@ -228,7 +228,7 @@ class ReturnPostingService
 
             StockMovement::create([
                 'product_id' => $item['product_id'],
-                'movement_type' => 'adjustment',
+                'movement_type' => 'purchase_return_out',
                 'reference_type' => 'purchase_return',
                 'reference_id' => $purchaseReturn->id,
                 'quantity' => $item['quantity'],

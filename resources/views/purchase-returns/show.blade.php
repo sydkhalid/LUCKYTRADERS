@@ -9,6 +9,7 @@
             <p class="text-sm text-gray-500">{{ $return->supplier?->name }} - {{ $return->return_date?->format('d M Y') }}</p>
         </div>
         <div class="flex gap-2">
+            <a href="{{ route('purchase-returns.print', $return) }}" class="rounded bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">Print Debit Note</a>
             <a href="{{ route('purchases.show', $return->purchase) }}" class="rounded border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Purchase</a>
             <a href="{{ route('purchase-returns.index') }}" class="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Back</a>
         </div>

@@ -105,6 +105,7 @@ class ReturnManagementTest extends TestCase
         $this->assertSame(522.0, (float) $purchase->fresh()->balance_amount);
 
         $movement = StockMovement::firstOrFail();
+        $this->assertSame('purchase_return_out', $movement->movement_type);
         $this->assertSame('purchase_return', $movement->reference_type);
         $this->assertSame($return->id, $movement->reference_id);
 
@@ -191,6 +192,21 @@ class ReturnManagementTest extends TestCase
         $this->assertSame(0.5, (float) $product->fresh()->current_stock);
     }
 
+    public function test_purchase_return_adjustment_without_refund_does_not_create_cashbook_entry(): void
+    {
+        [$supplier, $product, $purchase] = $this->seedPurchase(balance: 590, supplierBalance: 590, stock: 10);
+
+        $return = $this->createPurchaseReturn($purchase, $product);
+
+        $this->assertSame(0, Cashbook::count());
+        $this->assertSame(1, Ledger::count());
+        $this->assertSame(118.0, (float) $return->adjustment_amount);
+        $this->assertSame(0.0, (float) $return->refund_amount);
+        $this->assertSame(472.0, (float) $supplier->fresh()->current_balance);
+        $this->assertSame(472.0, (float) $purchase->fresh()->balance_amount);
+        $this->assertSame('purchase_return_out', StockMovement::firstOrFail()->movement_type);
+    }
+
     public function test_gst_summary_subtracts_gst_returns_and_ignores_non_gst_returns(): void
     {
         [$customer, $product, $gstSale] = $this->seedSale(balance: 1180, customerBalance: 1180, stock: 20, subtotal: 1000, gst: 180, total: 1180, billType: 'gst');
@@ -263,6 +279,7 @@ class ReturnManagementTest extends TestCase
         $this->actingAs($user)->get(route('purchase-returns.index'))->assertOk()->assertSee($purchaseReturn->return_no);
         $this->actingAs($user)->get(route('purchase-returns.show', $purchaseReturn))->assertOk()->assertSee('Purchase Return Details');
         $this->actingAs($user)->get(route('purchase-returns.create'))->assertOk()->assertSee('Create Purchase Return');
+        $this->actingAs($user)->get(route('purchase-returns.print', $purchaseReturn))->assertOk()->assertSee('DEBIT NOTE');
         $this->actingAs($user)->get(route('purchase-returns.report'))->assertOk()->assertSee($purchaseReturn->return_no);
     }
 

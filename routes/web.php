@@ -70,6 +70,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/purchases/{purchase}/print', [PurchaseController::class, 'print'])->name('purchases.print');
         Route::resource('purchases', PurchaseController::class);
         Route::get('/purchase-returns/report', [PurchaseReturnController::class, 'report'])->name('purchase-returns.report');
+        Route::get('/purchase-returns/{purchaseReturn}/print', [PurchaseReturnController::class, 'print'])->name('purchase-returns.print');
         Route::resource('purchase-returns', PurchaseReturnController::class)->only(['index', 'create', 'store', 'show']);
     });
 

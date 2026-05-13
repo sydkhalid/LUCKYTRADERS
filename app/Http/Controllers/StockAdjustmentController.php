@@ -106,7 +106,7 @@ class StockAdjustmentController extends Controller
             'from_date' => ['nullable', 'date'],
             'to_date' => ['nullable', 'date', 'after_or_equal:from_date'],
             'product_id' => ['nullable', 'exists:products,id'],
-            'movement_type' => ['nullable', 'in:purchase_in,sale_out,sales_return_in,adjustment'],
+            'movement_type' => ['nullable', 'in:purchase_in,sale_out,sales_return_in,purchase_return_out,adjustment'],
         ]);
 
         $query = StockMovement::with('product')

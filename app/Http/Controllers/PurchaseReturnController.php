@@ -7,6 +7,8 @@ use App\Models\Purchase;
 use App\Models\PurchaseReturn;
 use App\Models\PurchaseReturnItem;
 use App\Services\ReturnPostingService;
+use App\Services\SystemSettingService;
+use App\Support\AmountInWords;
 use Illuminate\Http\Request;
 
 class PurchaseReturnController extends Controller
@@ -51,6 +53,20 @@ class PurchaseReturnController extends Controller
         $purchaseReturn->load(['purchase', 'supplier', 'items.product']);
 
         return view('purchase-returns.show', ['return' => $purchaseReturn]);
+    }
+
+    public function print(PurchaseReturn $purchaseReturn)
+    {
+        $purchaseReturn->load(['purchase.supplier', 'supplier', 'items.product']);
+        $settings = app(SystemSettingService::class);
+
+        return view('purchase-returns.print', [
+            'return' => $purchaseReturn,
+            'company' => $settings->company(),
+            'amountWords' => AmountInWords::rupees($purchaseReturn->total_amount),
+            'termsAndConditions' => $settings->termsAndConditions(),
+            'signatureImagePath' => $settings->signatureImagePath(),
+        ]);
     }
 
     public function report(Request $request)
@@ -118,6 +134,8 @@ class PurchaseReturnController extends Controller
             return [
                 $purchase->id => [
                     'party' => $purchase->supplier?->name,
+                    'purchase_no' => $purchase->purchase_no,
+                    'supplier_invoice_no' => $purchase->supplier_invoice_no,
                     'bill_type' => $purchase->bill_type,
                     'balance_amount' => (float) $purchase->balance_amount,
                     'items' => $items,

@@ -22,6 +22,7 @@
                         'purchase_in' => 'Purchase In',
                         'sale_out' => 'Sale Out',
                         'sales_return_in' => 'Sales Return In',
+                        'purchase_return_out' => 'Purchase Return Out',
                         'adjustment' => match ($movement->reference_type) {
                             'sales_return' => 'Sales Return',
                             'purchase_return' => 'Purchase Return',
@@ -34,6 +35,7 @@
                         || $movement->reference_type === 'sales_return'
                         || ($movement->movement_type === 'adjustment' && $adjustment?->adjustment_type === 'increase');
                     $isOut = $movement->movement_type === 'sale_out'
+                        || $movement->movement_type === 'purchase_return_out'
                         || $movement->reference_type === 'purchase_return'
                         || ($movement->movement_type === 'adjustment' && $adjustment?->adjustment_type === 'decrease');
                 @endphp

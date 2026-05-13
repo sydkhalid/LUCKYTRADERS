@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('stock_movements', function (Blueprint $table) {
             $table->id();
             $table->foreignId('product_id')->constrained()->restrictOnDelete();
-            $table->enum('movement_type', ['purchase_in', 'sale_out', 'sales_return_in', 'adjustment']);
+            $table->enum('movement_type', ['purchase_in', 'sale_out', 'sales_return_in', 'purchase_return_out', 'adjustment']);
             $table->string('reference_type')->nullable();
             $table->unsignedBigInteger('reference_id')->nullable();
             $table->decimal('quantity', 15, 3);

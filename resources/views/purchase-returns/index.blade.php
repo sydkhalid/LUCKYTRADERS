@@ -44,7 +44,10 @@
                         <td class="px-4 py-3 text-right font-semibold text-gray-900">Rs. {{ number_format((float) $return->total_amount, 2) }}</td>
                         <td class="px-4 py-3 text-right text-emerald-700">Rs. {{ number_format((float) $return->refund_amount, 2) }}</td>
                         <td class="px-4 py-3 text-right text-red-700">Rs. {{ number_format((float) $return->adjustment_amount, 2) }}</td>
-                        <td class="px-4 py-3 text-right"><a href="{{ route('purchase-returns.show', $return) }}" class="font-semibold text-slate-700 hover:text-slate-900">View</a></td>
+                        <td class="px-4 py-3 text-right space-x-3">
+                            <a href="{{ route('purchase-returns.print', $return) }}" class="font-semibold text-slate-700 hover:text-slate-900">Print</a>
+                            <a href="{{ route('purchase-returns.show', $return) }}" class="font-semibold text-slate-700 hover:text-slate-900">View</a>
+                        </td>
                     </tr>
                 @empty
                     <tr><td colspan="8" class="px-4 py-8 text-center text-gray-500">No purchase returns found.</td></tr>
