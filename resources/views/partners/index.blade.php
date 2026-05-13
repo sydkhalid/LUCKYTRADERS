@@ -58,7 +58,10 @@
                             </span>
                         </td>
                         <td class="px-4 py-3 text-right">
-                            <a href="{{ route('partners.show', $partner) }}" class="font-semibold text-slate-700 hover:text-slate-900">View</a>
+                            <div class="flex justify-end gap-3">
+                                <a href="{{ route('partners.show', $partner) }}" class="font-semibold text-slate-700 hover:text-slate-900">View</a>
+                                <a href="{{ route('partners.edit', $partner) }}" class="font-semibold text-slate-700 hover:text-slate-900">Edit</a>
+                            </div>
                         </td>
                     </tr>
                 @empty

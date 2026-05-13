@@ -25,6 +25,9 @@
         <form method="POST" action="{{ route('partners.transactions.store', $partner) }}" class="rounded bg-white p-6 shadow">
             @csrf
             <input type="hidden" name="transaction_type" value="{{ old('transaction_type', $transactionType) }}">
+            @if ($transactionType === 'profit_share')
+                <input type="hidden" name="payment_mode" value="{{ old('payment_mode', 'bank') }}">
+            @endif
 
             <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
                 <div>
@@ -37,15 +40,17 @@
                     <input type="number" name="amount" value="{{ old('amount', request('amount')) }}" min="0.01" step="0.01" class="w-full rounded border-gray-300 text-right shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
                 </div>
 
-                <div>
-                    <label class="mb-1 block text-sm font-medium text-gray-700">Payment Mode</label>
-                    <select name="payment_mode" class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
-                        <option value="cash" @selected(old('payment_mode') === 'cash')>Cash</option>
-                        <option value="bank" @selected(old('payment_mode') === 'bank')>Bank</option>
-                        <option value="upi" @selected(old('payment_mode') === 'upi')>UPI</option>
-                        <option value="cheque" @selected(old('payment_mode') === 'cheque')>Cheque</option>
-                    </select>
-                </div>
+                @if ($transactionType !== 'profit_share')
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-gray-700">Payment Mode</label>
+                        <select name="payment_mode" class="w-full rounded border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
+                            <option value="cash" @selected(old('payment_mode') === 'cash')>Cash</option>
+                            <option value="bank" @selected(old('payment_mode') === 'bank')>Bank</option>
+                            <option value="upi" @selected(old('payment_mode') === 'upi')>UPI</option>
+                            <option value="cheque" @selected(old('payment_mode') === 'cheque')>Cheque</option>
+                        </select>
+                    </div>
+                @endif
 
                 <div>
                     <label class="mb-1 block text-sm font-medium text-gray-700">Type</label>

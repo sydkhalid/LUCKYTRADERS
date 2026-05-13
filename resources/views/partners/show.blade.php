@@ -11,6 +11,9 @@
         <div class="flex gap-2">
             <a href="{{ route('partners.investments.create', $partner) }}" class="rounded bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">Add Investment</a>
             <a href="{{ route('partners.withdrawals.create', $partner) }}" class="rounded bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700">Add Withdrawal</a>
+            <a href="{{ route('partners.transactions.create', ['partner' => $partner, 'transaction_type' => 'return']) }}" class="rounded border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Return</a>
+            <a href="{{ route('partners.transactions.index', $partner) }}" class="rounded border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Transactions</a>
+            <a href="{{ route('partners.edit', $partner) }}" class="rounded border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Edit</a>
             <a href="{{ route('partners.index') }}" class="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Back</a>
         </div>
     </div>
@@ -71,7 +74,7 @@
                     <tr class="hover:bg-gray-50">
                         <td class="px-4 py-3 text-gray-700">{{ $transaction->transaction_date?->format('d M Y') }}</td>
                         <td class="px-4 py-3 font-medium text-gray-900">{{ $transaction->typeLabel() }}</td>
-                        <td class="px-4 py-3 text-gray-700">{{ strtoupper($transaction->payment_mode) }}</td>
+                        <td class="px-4 py-3 text-gray-700">{{ $transaction->transaction_type === 'profit_share' ? '-' : strtoupper($transaction->payment_mode) }}</td>
                         <td class="px-4 py-3 text-right font-semibold text-gray-900">Rs. {{ number_format((float) $transaction->amount, 2) }}</td>
                         <td class="px-4 py-3 text-gray-600">{{ $transaction->notes ?: '-' }}</td>
                         <td class="px-4 py-3 text-right">

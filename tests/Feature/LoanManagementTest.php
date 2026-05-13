@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Cashbook;
 use App\Models\Ledger;
 use App\Models\Loan;
+use App\Models\Partner;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -190,5 +191,103 @@ class LoanManagementTest extends TestCase
 
         $this->assertSame(1, $loan->transactions()->count());
         $this->assertSame('active', $loan->fresh()->status);
+    }
+
+    public function test_loan_pages_reports_and_partner_selection_render(): void
+    {
+        $partner = Partner::create([
+            'name' => 'Partner Kumar',
+            'phone' => '9000000088',
+            'share_percentage' => 25,
+            'opening_investment' => 0,
+            'current_investment' => 0,
+            'status' => 'active',
+        ]);
+
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get(route('loans.create'))
+            ->assertOk()
+            ->assertSee('Create Loan Entry')
+            ->assertSee('Partner Kumar');
+
+        $this->actingAs($user)->post(route('loans.store'), [
+            'loan_type' => 'partner_deposit',
+            'party_name' => $partner->name,
+            'party_phone' => $partner->phone,
+            'partner_id' => $partner->id,
+            'loan_date' => '2026-05-13',
+            'principal_amount' => 1500,
+            'interest_percentage' => 0,
+            'interest_type' => 'none',
+            'payment_mode' => 'bank',
+        ]);
+
+        $loan = Loan::firstOrFail();
+
+        $this->actingAs($user)
+            ->get(route('loans.index'))
+            ->assertOk()
+            ->assertSee('Loan Management')
+            ->assertSee($loan->loan_no);
+
+        $this->actingAs($user)
+            ->get(route('loans.show', $loan))
+            ->assertOk()
+            ->assertSee($loan->loan_no)
+            ->assertSee('Partner Kumar')
+            ->assertSee('Add Transaction');
+
+        $this->actingAs($user)
+            ->get(route('loans.transactions.index', $loan))
+            ->assertOk()
+            ->assertSee('Transaction History')
+            ->assertSee('Received');
+
+        $this->actingAs($user)
+            ->get(route('loans.reports.active'))
+            ->assertOk()
+            ->assertSee('Active Loan Report')
+            ->assertSee($loan->loan_no);
+
+        $this->actingAs($user)->post(route('loans.transactions.store', $loan), [
+            'transaction_date' => '2026-05-14',
+            'transaction_type' => 'return',
+            'amount' => 1500,
+            'payment_mode' => 'cash',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('loans.reports.closed'))
+            ->assertOk()
+            ->assertSee('Closed Loan Report')
+            ->assertSee($loan->loan_no);
+    }
+
+    public function test_closed_loan_cannot_open_add_transaction_page(): void
+    {
+        $this->actingAs(User::factory()->create())->post(route('loans.store'), [
+            'loan_type' => 'loan_given',
+            'party_name' => 'Closed Borrower',
+            'loan_date' => '2026-05-13',
+            'principal_amount' => 1000,
+            'interest_percentage' => 0,
+            'interest_type' => 'none',
+            'payment_mode' => 'cash',
+        ]);
+
+        $loan = Loan::firstOrFail();
+
+        $this->actingAs(User::factory()->create())->post(route('loans.transactions.store', $loan), [
+            'transaction_date' => '2026-05-14',
+            'transaction_type' => 'received',
+            'amount' => 1000,
+            'payment_mode' => 'bank',
+        ]);
+
+        $this->actingAs(User::factory()->create())
+            ->get(route('loans.transactions.create', $loan->fresh()))
+            ->assertRedirect(route('loans.show', $loan));
     }
 }

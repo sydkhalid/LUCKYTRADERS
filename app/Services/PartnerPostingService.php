@@ -50,6 +50,7 @@ class PartnerPostingService
 
             $this->validateTransaction($partner, $transactionType, $amount);
 
+            $openingLedgerBalance = $this->currentLedgerBalance($partner);
             $newBalance = $this->newPartnerBalance($partner, $transactionType, $amount);
 
             $transaction = $partner->transactions()->create([
@@ -63,7 +64,7 @@ class PartnerPostingService
             $partner->forceFill(['current_investment' => $newBalance])->save();
 
             $this->postCashbook($partner, $transaction);
-            $this->postLedger($partner, $transaction, $newBalance);
+            $this->postLedger($partner, $transaction, $openingLedgerBalance);
 
             return $transaction;
         });
@@ -90,10 +91,15 @@ class PartnerPostingService
             ]);
         }
 
-        if (in_array($transactionType, ['withdrawal', 'return'], true)
-            && $amount > round((float) $partner->current_investment, 2)) {
+        if ($transactionType === 'withdrawal' && $amount > round((float) $partner->current_investment, 2)) {
             throw ValidationException::withMessages([
                 'amount' => 'Transaction amount cannot be greater than partner current investment.',
+            ]);
+        }
+
+        if ($transactionType === 'return' && $amount > $this->currentLedgerBalance($partner)) {
+            throw ValidationException::withMessages([
+                'amount' => 'Transaction amount cannot be greater than partner returnable balance.',
             ]);
         }
     }
@@ -104,7 +110,8 @@ class PartnerPostingService
 
         return match ($transactionType) {
             'investment' => round($currentInvestment + $amount, 2),
-            'withdrawal', 'return' => round($currentInvestment - $amount, 2),
+            'withdrawal' => round($currentInvestment - $amount, 2),
+            'return' => max(round($currentInvestment - $amount, 2), 0),
             'profit_share' => round($currentInvestment, 2),
             default => round($currentInvestment, 2),
         };
@@ -112,6 +119,10 @@ class PartnerPostingService
 
     private function postCashbook(Partner $partner, PartnerTransaction $transaction): void
     {
+        if ($transaction->transaction_type === 'profit_share') {
+            return;
+        }
+
         $direction = $transaction->transaction_type === 'investment' ? 'in' : 'out';
         $book = $transaction->payment_mode === 'cash' ? 'cash' : 'bank';
 
@@ -126,9 +137,13 @@ class PartnerPostingService
         ]);
     }
 
-    private function postLedger(Partner $partner, PartnerTransaction $transaction, float $balance): void
+    private function postLedger(Partner $partner, PartnerTransaction $transaction, float $openingBalance): void
     {
-        $isCredit = $transaction->transaction_type === 'investment';
+        $isCredit = in_array($transaction->transaction_type, ['investment', 'profit_share'], true);
+        $amount = (float) $transaction->amount;
+        $balance = $isCredit
+            ? round($openingBalance + $amount, 2)
+            : max(round($openingBalance - $amount, 2), 0);
 
         Ledger::create([
             'ledger_date' => $transaction->transaction_date,
@@ -136,10 +151,20 @@ class PartnerPostingService
             'party_id' => $partner->id,
             'reference_type' => 'partner_transaction',
             'reference_id' => $transaction->id,
-            'debit' => $isCredit ? 0 : $transaction->amount,
-            'credit' => $isCredit ? $transaction->amount : 0,
+            'debit' => $isCredit ? 0 : $amount,
+            'credit' => $isCredit ? $amount : 0,
             'balance' => $balance,
             'remarks' => $partner->name.' - '.$transaction->typeLabel(),
         ]);
+    }
+
+    private function currentLedgerBalance(Partner $partner): float
+    {
+        $ledgerBalance = Ledger::where('party_type', 'partner')
+            ->where('party_id', $partner->id)
+            ->latest('id')
+            ->value('balance');
+
+        return round((float) ($ledgerBalance ?? $partner->current_investment), 2);
     }
 }

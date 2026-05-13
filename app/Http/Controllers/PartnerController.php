@@ -3,10 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Partners\StorePartnerRequest;
-use App\Http\Requests\Partners\StorePartnerTransactionRequest;
+use App\Http\Requests\Partners\UpdatePartnerRequest;
 use App\Models\Ledger;
 use App\Models\Partner;
-use App\Models\PartnerTransaction;
 use App\Services\PartnerPostingService;
 use Illuminate\Http\Request;
 
@@ -53,46 +52,18 @@ class PartnerController extends Controller
         return view('partners.show', compact('partner', 'ledgers', 'transactions'));
     }
 
-    public function createInvestment(Partner $partner)
+    public function edit(Partner $partner)
     {
-        return view('partners.transaction-create', [
-            'partner' => $partner,
-            'transactionType' => 'investment',
-            'title' => 'Add Investment',
-        ]);
+        return view('partners.edit', compact('partner'));
     }
 
-    public function createWithdrawal(Partner $partner)
+    public function update(UpdatePartnerRequest $request, Partner $partner)
     {
-        return view('partners.transaction-create', [
-            'partner' => $partner,
-            'transactionType' => 'withdrawal',
-            'title' => 'Add Withdrawal',
-        ]);
-    }
-
-    public function createTransaction(Request $request, Partner $partner)
-    {
-        $transactionType = $request->query('transaction_type', 'investment');
-
-        if (! array_key_exists($transactionType, PartnerTransaction::TYPES)) {
-            abort(404);
-        }
-
-        return view('partners.transaction-create', [
-            'partner' => $partner,
-            'transactionType' => $transactionType,
-            'title' => PartnerTransaction::TYPES[$transactionType],
-        ]);
-    }
-
-    public function storeTransaction(StorePartnerTransactionRequest $request, Partner $partner, PartnerPostingService $postingService)
-    {
-        $postingService->recordTransaction($partner, $request->validated());
+        $partner->update($request->validated());
 
         return redirect()
             ->route('partners.show', $partner)
-            ->with('success', 'Partner transaction saved successfully.');
+            ->with('success', 'Partner '.$partner->name.' updated successfully.');
     }
 
     public function profitShareReport(Request $request, PartnerPostingService $postingService)

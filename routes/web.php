@@ -13,6 +13,7 @@ use App\Http\Controllers\LedgerController;
 use App\Http\Controllers\LoanController;
 use App\Http\Controllers\LoanTransactionController;
 use App\Http\Controllers\PartnerController;
+use App\Http\Controllers\PartnerTransactionController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
@@ -142,11 +143,12 @@ Route::middleware('auth')->group(function () {
     Route::middleware('permission:manage_partners')->group(function () {
         Route::get('/partners/{partner}/transactions/{transaction}/pdf', [DocumentPdfController::class, 'partnerTransaction'])->name('partners.transactions.pdf');
         Route::get('/partners/profit-share', [PartnerController::class, 'profitShareReport'])->name('partners.profit-share');
-        Route::get('/partners/{partner}/investments/create', [PartnerController::class, 'createInvestment'])->name('partners.investments.create');
-        Route::get('/partners/{partner}/withdrawals/create', [PartnerController::class, 'createWithdrawal'])->name('partners.withdrawals.create');
-        Route::get('/partners/{partner}/transactions/create', [PartnerController::class, 'createTransaction'])->name('partners.transactions.create');
-        Route::post('/partners/{partner}/transactions', [PartnerController::class, 'storeTransaction'])->name('partners.transactions.store');
-        Route::resource('partners', PartnerController::class)->only(['index', 'create', 'store', 'show']);
+        Route::get('/partners/{partner}/investments/create', [PartnerTransactionController::class, 'create'])->defaults('transaction_type', 'investment')->name('partners.investments.create');
+        Route::get('/partners/{partner}/withdrawals/create', [PartnerTransactionController::class, 'create'])->defaults('transaction_type', 'withdrawal')->name('partners.withdrawals.create');
+        Route::get('/partners/{partner}/transactions', [PartnerTransactionController::class, 'index'])->name('partners.transactions.index');
+        Route::get('/partners/{partner}/transactions/create', [PartnerTransactionController::class, 'create'])->name('partners.transactions.create');
+        Route::post('/partners/{partner}/transactions', [PartnerTransactionController::class, 'store'])->name('partners.transactions.store');
+        Route::resource('partners', PartnerController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update']);
     });
 
     Route::middleware('permission:view_gst_reports')->group(function () {

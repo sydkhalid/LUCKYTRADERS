@@ -108,6 +108,55 @@ class PartnerManagementTest extends TestCase
         $this->assertSame(0, Cashbook::count());
     }
 
+    public function test_partner_edit_and_transaction_history_pages_render(): void
+    {
+        $partner = Partner::create([
+            'name' => 'Partner Edit',
+            'phone' => '9000000002',
+            'email' => 'old@example.test',
+            'share_percentage' => 20,
+            'opening_investment' => 2000,
+            'current_investment' => 2000,
+            'status' => 'active',
+        ]);
+
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get(route('partners.index'))
+            ->assertOk()
+            ->assertSee('Partner Management')
+            ->assertSee('Partner Edit')
+            ->assertSee('Edit');
+
+        $this->actingAs($user)
+            ->get(route('partners.edit', $partner))
+            ->assertOk()
+            ->assertSee('Edit Partner')
+            ->assertSee('Partner Edit');
+
+        $response = $this->actingAs($user)->put(route('partners.update', $partner), [
+            'name' => 'Partner Updated',
+            'phone' => '9000000003',
+            'email' => 'new@example.test',
+            'address' => 'Krishnagiri',
+            'share_percentage' => 30,
+            'status' => 'inactive',
+        ]);
+
+        $response->assertRedirect(route('partners.show', $partner));
+
+        $partner->refresh();
+        $this->assertSame('Partner Updated', $partner->name);
+        $this->assertSame('inactive', $partner->status);
+        $this->assertSame(30.0, (float) $partner->share_percentage);
+
+        $this->actingAs($user)
+            ->get(route('partners.transactions.index', $partner))
+            ->assertOk()
+            ->assertSee('Partner Updated Transactions');
+    }
+
     public function test_profit_share_report_calculates_partner_share_percentage(): void
     {
         Partner::create([
@@ -135,7 +184,7 @@ class PartnerManagementTest extends TestCase
         $response->assertSee('100.00%');
     }
 
-    public function test_profit_share_transaction_posts_cash_out_without_changing_capital(): void
+    public function test_profit_share_transaction_posts_ledger_payable_without_cash_movement(): void
     {
         $partner = Partner::create([
             'name' => 'Partner D',
@@ -158,12 +207,52 @@ class PartnerManagementTest extends TestCase
         $partner->refresh();
         $this->assertSame(7000.0, (float) $partner->current_investment);
 
-        $cashbook = Cashbook::firstOrFail();
-        $this->assertSame('bank_out', $cashbook->transaction_type);
-        $this->assertSame('upi', $cashbook->payment_mode);
+        $this->assertSame(0, Cashbook::count());
 
         $ledger = Ledger::firstOrFail();
-        $this->assertSame(2500.0, (float) $ledger->debit);
-        $this->assertSame(7000.0, (float) $ledger->balance);
+        $this->assertSame(0.0, (float) $ledger->debit);
+        $this->assertSame(2500.0, (float) $ledger->credit);
+        $this->assertSame(9500.0, (float) $ledger->balance);
+    }
+
+    public function test_return_can_pay_profit_share_payable_and_posts_cash_out(): void
+    {
+        $partner = Partner::create([
+            'name' => 'Partner E',
+            'share_percentage' => 50,
+            'opening_investment' => 1000,
+            'current_investment' => 1000,
+            'status' => 'active',
+        ]);
+
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->post(route('partners.transactions.store', $partner), [
+            'transaction_date' => '2026-05-13',
+            'transaction_type' => 'profit_share',
+            'amount' => 500,
+            'payment_mode' => 'bank',
+            'notes' => 'Profit payable',
+        ]);
+
+        $this->actingAs($user)->post(route('partners.transactions.store', $partner), [
+            'transaction_date' => '2026-05-14',
+            'transaction_type' => 'return',
+            'amount' => 1200,
+            'payment_mode' => 'cheque',
+            'notes' => 'Capital and profit return',
+        ]);
+
+        $partner->refresh();
+        $this->assertSame(0.0, (float) $partner->current_investment);
+
+        $cashbook = Cashbook::firstOrFail();
+        $this->assertSame('bank_out', $cashbook->transaction_type);
+        $this->assertSame('cheque', $cashbook->payment_mode);
+
+        $ledger = Ledger::latest('id')->firstOrFail();
+        $this->assertSame(1200.0, (float) $ledger->debit);
+        $this->assertSame(0.0, (float) $ledger->credit);
+        $this->assertSame(300.0, (float) $ledger->balance);
     }
 }
