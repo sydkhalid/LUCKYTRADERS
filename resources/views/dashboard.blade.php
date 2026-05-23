@@ -5,25 +5,34 @@
 @section('content')
     @php
         $money = fn ($value) => ($erpCurrency['symbol'] ?? 'Rs.').' '.number_format((float) $value, 2);
-        $chartEmpty = fn (array $dataset) => array_sum(array_map('floatval', $dataset['data'] ?? [])) <= 0;
+        $chartValues = function ($value) use (&$chartValues): array {
+            if (is_array($value)) {
+                return collect($value)
+                    ->flatMap(fn ($item, $key) => $key === 'labels' ? [] : $chartValues($item))
+                    ->all();
+            }
+
+            return is_numeric($value) ? [(float) $value] : [];
+        };
+        $chartEmpty = fn (array $dataset) => array_sum(array_map('abs', $chartValues($dataset))) <= 0;
         $periodOptions = [
             'today' => 'Today',
             'this_month' => 'This Month',
             'custom' => 'Custom Range',
         ];
         $chartCards = [
-            ['key' => 'sales_vs_purchases', 'id' => 'purchaseVsSalesChart', 'title' => 'Sales vs Purchase', 'subtitle' => 'Filtered month comparison', 'empty' => 'No purchase or sales comparison for selected period.', 'column' => 'col-xl-8'],
-            ['key' => 'cash_flow', 'id' => 'cashFlowChart', 'title' => 'Cash Flow', 'subtitle' => 'Cash and bank movement', 'empty' => 'No cash or bank movement for selected period.', 'column' => 'col-xl-4'],
-            ['key' => 'gst_split', 'id' => 'gstSplitChart', 'title' => 'GST vs Non-GST Sales', 'subtitle' => 'Invoice type split', 'empty' => 'No sales split data for selected period.', 'column' => 'col-md-6 col-xl-4'],
-            ['key' => 'monthly_sales', 'id' => 'monthlySalesChart', 'title' => 'Monthly Sales', 'subtitle' => 'Sales trend', 'empty' => 'No sales data for selected period.', 'column' => 'col-md-6 col-xl-4'],
-            ['key' => 'monthly_purchases', 'id' => 'monthlyPurchaseChart', 'title' => 'Monthly Purchases', 'subtitle' => 'Purchase trend', 'empty' => 'No purchase data for selected period.', 'column' => 'col-md-6 col-xl-4'],
-            ['key' => 'top_products', 'id' => 'topProductsChart', 'title' => 'Top Selling Products', 'subtitle' => 'Quantity sold', 'empty' => 'No product sales for selected period.', 'column' => 'col-xl-8'],
-            ['key' => 'expense_categories', 'id' => 'expenseCategoryChart', 'title' => 'Expense Category', 'subtitle' => 'Spend concentration', 'empty' => 'No expense category data for selected period.', 'column' => 'col-md-6 col-xl-4'],
-            ['key' => 'stock_value', 'id' => 'stockValueChart', 'title' => 'Stock Report', 'subtitle' => 'Stock value by category', 'empty' => 'No stock value data available.', 'column' => 'col-md-6 col-xl-4'],
-            ['key' => 'pending_payments', 'id' => 'pendingPaymentsChart', 'title' => 'Pending Payments', 'subtitle' => 'Receivable, payable and loans', 'empty' => 'No pending payment data available.', 'column' => 'col-md-6 col-xl-4'],
-            ['key' => 'period_business_mix', 'id' => 'periodBusinessMixChart', 'title' => 'Business Mix', 'subtitle' => 'Sales, purchase, collection and expenses', 'empty' => 'No business movement for selected period.', 'column' => 'col-xl-8'],
-            ['key' => 'profit_vs_expense', 'id' => 'profitExpenseChart', 'title' => 'Profit vs Expense', 'subtitle' => 'Gross profit, expenses and net result', 'empty' => 'No profit or expense data for selected period.', 'column' => 'col-md-6 col-xl-4'],
-            ['key' => 'stock_units_by_category', 'id' => 'stockUnitsByCategoryChart', 'title' => 'Stock Units', 'subtitle' => 'Inventory quantity by category', 'empty' => 'No stock unit data available.', 'column' => 'col-md-6 col-xl-4'],
+            ['key' => 'stacked_business_flow', 'id' => 'stackedBusinessFlowChart', 'engine' => 'apex', 'type' => 'Stacked Area', 'title' => 'Last Updates', 'subtitle' => 'Sales, collection, purchase and expenses', 'empty' => 'No business movement for selected period.', 'column' => 'col-12', 'size' => 'showcase'],
+            ['key' => 'sales_vs_purchases', 'id' => 'purchaseVsSalesChart', 'engine' => 'apex', 'type' => 'Column', 'title' => 'Data Science', 'subtitle' => 'Sales and purchase comparison', 'empty' => 'No purchase or sales comparison for selected period.', 'column' => 'col-xl-8', 'size' => 'wide'],
+            ['key' => 'monthly_sales', 'id' => 'monthlySalesChart', 'engine' => 'apex', 'type' => 'Column', 'title' => 'Latest Statistics', 'subtitle' => 'Monthly sales momentum', 'empty' => 'No sales data for selected period.', 'column' => 'col-md-6 col-xl-4', 'size' => 'compact'],
+            ['key' => 'monthly_purchases', 'id' => 'monthlyPurchaseChart', 'engine' => 'apex', 'type' => 'Line', 'title' => 'Balance', 'subtitle' => 'Supplier buying movement', 'empty' => 'No purchase data for selected period.', 'column' => 'col-xl-8', 'size' => 'wide'],
+            ['key' => 'cash_flow', 'id' => 'cashFlowChart', 'engine' => 'chartjs', 'type' => 'Doughnut', 'title' => 'Cash Flow Split', 'subtitle' => 'Cash and bank movement', 'empty' => 'No cash flow data for selected period.', 'column' => 'col-md-6 col-xl-4', 'size' => 'compact'],
+            ['key' => 'top_products', 'id' => 'topProductsChart', 'engine' => 'apex', 'type' => 'Horizontal Bar', 'title' => 'Product Movement', 'subtitle' => 'Top selling products', 'empty' => 'No product sales for selected period.', 'column' => 'col-xl-6', 'size' => 'wide'],
+            ['key' => 'stock_value', 'id' => 'stockValueChart', 'engine' => 'apex', 'type' => 'Horizontal Bar', 'title' => 'Stock Prices', 'subtitle' => 'Inventory value by category', 'empty' => 'No stock value data available.', 'column' => 'col-xl-6', 'size' => 'wide'],
+            ['key' => 'gst_split', 'id' => 'gstSplitChart', 'engine' => 'apex', 'type' => 'Donut', 'title' => 'GST Split', 'subtitle' => 'GST and non-GST invoices', 'empty' => 'No sales split data for selected period.', 'column' => 'col-md-6 col-xl-4', 'size' => 'compact'],
+            ['key' => 'pending_payments', 'id' => 'pendingPaymentsChart', 'engine' => 'chartjs', 'type' => 'Polar', 'title' => 'Statistics', 'subtitle' => 'Receivable, payable and loans', 'empty' => 'No pending payment data available.', 'column' => 'col-md-6 col-xl-4', 'size' => 'compact'],
+            ['key' => 'period_business_mix', 'id' => 'periodBusinessMixChart', 'engine' => 'chartjs', 'type' => 'Pie', 'title' => 'Expense Ratio', 'subtitle' => 'Current period composition', 'empty' => 'No business movement for selected period.', 'column' => 'col-md-6 col-xl-4', 'size' => 'compact'],
+            ['key' => 'profit_vs_expense', 'id' => 'profitExpenseChart', 'engine' => 'chartjs', 'type' => 'Radar', 'title' => 'Mobile Comparison', 'subtitle' => 'Gross, expense and net position', 'empty' => 'No profit or expense data for selected period.', 'column' => 'col-md-6 col-xl-4', 'size' => 'compact'],
+            ['key' => 'expense_categories', 'id' => 'expenseCategoriesChart', 'engine' => 'apex', 'type' => 'Bar', 'title' => 'Expense Categories', 'subtitle' => 'Spending by category', 'empty' => 'No expense category data for selected period.', 'column' => 'col-md-6 col-xl-4', 'size' => 'compact'],
         ];
     @endphp
 
@@ -174,19 +183,44 @@
             @foreach ($chartCards as $chartCard)
                 @php $isEmpty = $chartEmpty($charts[$chartCard['key']] ?? []); @endphp
                 <div class="{{ $chartCard['column'] }}">
-                    <article class="card lt-chart-card sneat-chart-card h-100">
+                    <article class="card lt-chart-card sneat-chart-card h-100" data-chart-card="{{ $chartCard['key'] }}" data-chart-size="{{ $chartCard['size'] }}">
                         <div class="card-header lt-chart-card-header">
                             <div>
                                 <h5 class="card-title mb-1">{{ $chartCard['title'] }}</h5>
                                 <small class="text-muted">{{ $chartCard['subtitle'] }} | <span data-dashboard-range-label>{{ $filters['label'] }}</span></small>
                             </div>
+                            <div class="lt-chart-actions" title="{{ $chartCard['type'] }}" aria-label="{{ $chartCard['type'] }} chart">
+                                <span class="lt-chart-action-icon" aria-hidden="true">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                                        <path d="M16 2v4"></path>
+                                        <path d="M8 2v4"></path>
+                                        <path d="M3 10h18"></path>
+                                    </svg>
+                                </span>
+                                <span class="lt-chart-action-icon" aria-hidden="true">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="m6 9 6 6 6-6"></path>
+                                    </svg>
+                                </span>
+                            </div>
                         </div>
                         <div class="card-body lt-chart-shell" data-chart-shell="{{ $chartCard['key'] }}">
-                            <canvas
-                                id="{{ $chartCard['id'] }}"
-                                data-dashboard-chart="{{ $chartCard['key'] }}"
-                                class="{{ $isEmpty ? 'hidden' : '' }}"
-                            ></canvas>
+                            @if ($chartCard['engine'] === 'chartjs')
+                                <canvas
+                                    id="{{ $chartCard['id'] }}"
+                                    data-dashboard-chart="{{ $chartCard['key'] }}"
+                                    data-dashboard-chart-engine="chartjs"
+                                    class="{{ $isEmpty ? 'hidden' : '' }}"
+                                ></canvas>
+                            @else
+                                <div
+                                    id="{{ $chartCard['id'] }}"
+                                    data-dashboard-chart="{{ $chartCard['key'] }}"
+                                    data-dashboard-chart-engine="apex"
+                                    class="lt-apex-chart {{ $isEmpty ? 'hidden' : '' }}"
+                                ></div>
+                            @endif
                             <div class="erp-empty-state {{ $isEmpty ? '' : 'hidden' }}" data-chart-empty="{{ $chartCard['key'] }}">{{ $chartCard['empty'] }}</div>
                         </div>
                     </article>

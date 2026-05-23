@@ -45,6 +45,7 @@
 
         document.querySelectorAll('[data-lt-menu-toggle]').forEach((button) => {
             const target = document.getElementById(button.dataset.ltMenuToggle || '');
+            const section = button.closest('.lt-menu-section');
 
             button.addEventListener('click', () => {
                 if (body.classList.contains('lt-sidebar-collapsed') && window.innerWidth >= 992) {
@@ -53,7 +54,23 @@
                 }
 
                 const expanded = button.getAttribute('aria-expanded') === 'true';
+                const sidebarRoot = button.closest('[data-lt-sidebar]');
+
+                if (!expanded) {
+                    sidebarRoot?.querySelectorAll('[data-lt-menu-toggle][aria-expanded="true"]').forEach((openButton) => {
+                        if (openButton === button) {
+                            return;
+                        }
+
+                        const openTarget = document.getElementById(openButton.dataset.ltMenuToggle || '');
+                        openButton.setAttribute('aria-expanded', 'false');
+                        openButton.closest('.lt-menu-section')?.classList.remove('open');
+                        openTarget?.classList.remove('show');
+                    });
+                }
+
                 button.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+                section?.classList.toggle('open', !expanded);
                 target?.classList.toggle('show', !expanded);
             });
         });

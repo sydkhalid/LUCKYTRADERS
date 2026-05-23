@@ -12,256 +12,546 @@ function parseJsonScript(root, selector, fallback = {}) {
     }
 }
 
-function sumValues(values = []) {
-    return values.reduce((total, value) => total + Math.abs(Number(value || 0)), 0);
-}
-
-function datasetValues(charts, key) {
-    const dataset = charts[key] || {};
-
-    if (key === 'sales_vs_purchases') {
-        return [...(dataset.sales || []), ...(dataset.purchases || [])];
+function collectNumericValues(value) {
+    if (Array.isArray(value)) {
+        return value.flatMap((item) => collectNumericValues(item));
     }
 
-    return dataset.data || [];
+    if (value && typeof value === 'object') {
+        return Object.entries(value)
+            .filter(([key]) => key !== 'labels')
+            .flatMap(([, item]) => collectNumericValues(item));
+    }
+
+    const number = Number(value);
+
+    return Number.isFinite(number) ? [number] : [];
 }
 
 function chartIsEmpty(charts, key) {
-    return sumValues(datasetValues(charts, key)) <= 0;
+    return collectNumericValues(charts[key] || {}).reduce((total, value) => total + Math.abs(value), 0) <= 0;
+}
+
+function cssVariable(name, fallback = '') {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
 }
 
 function chartColors() {
+    const primary = window.erpSettings?.theme?.color || cssVariable('--lt-primary', '#696cff');
+
     return {
-        primary: '#696cff',
+        primary,
         success: '#71dd37',
         info: '#03c3ec',
         warning: '#ffab00',
         danger: '#ff3e1d',
         secondary: '#8592a3',
-        purple: '#8c57ff',
-        teal: '#00b8a9',
+        purple: '#7367f0',
+        violet: '#8c57ff',
+        teal: '#28dac6',
+        cyan: '#00cfe8',
+        blue: '#2f8be6',
+        yellow: '#ffdd00',
+        orange: '#ff9f43',
+        dark: '#566a7f',
+        text: cssVariable('--lt-text', '#697a8d'),
+        heading: cssVariable('--lt-heading', '#384551'),
+        surface: '#ffffff',
+        grid: 'rgba(67, 89, 113, 0.12)',
+        softGrid: 'rgba(67, 89, 113, 0.08)',
     };
 }
 
-function baseChartOptions() {
+function withAlpha(color, alpha = 0.18) {
+    const hex = String(color || '').replace('#', '');
+
+    if (/^[0-9a-f]{3}$/i.test(hex)) {
+        const expanded = hex.split('').map((char) => char + char).join('');
+        return withAlpha(`#${expanded}`, alpha);
+    }
+
+    if (/^[0-9a-f]{6}$/i.test(hex)) {
+        const value = parseInt(hex, 16);
+        const red = (value >> 16) & 255;
+        const green = (value >> 8) & 255;
+        const blue = value & 255;
+
+        return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
+    }
+
+    return color;
+}
+
+function moneyFormatter(value) {
+    const symbol = window.erpSettings?.currency?.symbol || 'Rs.';
+
+    return `${symbol} ${Number(value || 0).toLocaleString('en-IN', {
+        maximumFractionDigits: 2,
+    })}`;
+}
+
+function quantityFormatter(value) {
+    return Number(value || 0).toLocaleString('en-IN', {
+        maximumFractionDigits: 3,
+    });
+}
+
+function apexBaseOptions(height = 285) {
+    const colors = chartColors();
+    const isDark = document.documentElement.dataset.bsTheme === 'dark';
+
     return {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                labels: {
-                    boxWidth: 12,
-                    color: '#697a8d',
-                    font: { weight: '600' },
+        chart: {
+            height,
+            fontFamily: 'Public Sans, Inter, sans-serif',
+            foreColor: colors.text,
+            toolbar: { show: false },
+            zoom: { enabled: false },
+            parentHeightOffset: 0,
+            animations: {
+                enabled: true,
+                easing: 'easeinout',
+                speed: 650,
+                animateGradually: { enabled: true, delay: 85 },
+                dynamicAnimation: { enabled: true, speed: 320 },
+            },
+        },
+        colors: [colors.primary, colors.teal, colors.yellow, colors.orange, colors.info, colors.purple, colors.success, colors.danger],
+        dataLabels: { enabled: false },
+        grid: {
+            borderColor: colors.grid,
+            strokeDashArray: 0,
+            padding: { left: 8, right: 12, top: -6, bottom: 0 },
+        },
+        legend: {
+            position: 'top',
+            horizontalAlign: 'left',
+            fontSize: '12px',
+            fontWeight: 400,
+            labels: { colors: colors.text },
+            markers: { width: 8, height: 8, radius: 8, offsetX: -2 },
+            itemMargin: { horizontal: 12, vertical: 6 },
+        },
+        stroke: {
+            width: 3,
+            curve: 'smooth',
+            lineCap: 'round',
+        },
+        states: {
+            hover: { filter: { type: 'lighten', value: 0.04 } },
+            active: { filter: { type: 'none' } },
+        },
+        tooltip: {
+            theme: isDark ? 'dark' : 'light',
+            style: { fontSize: '12px', fontFamily: 'Public Sans, Inter, sans-serif' },
+            y: {
+                formatter: (value) => moneyFormatter(value),
+            },
+        },
+        xaxis: {
+            labels: {
+                style: { colors: colors.secondary, fontSize: '11px', fontWeight: 400 },
+                trim: true,
+            },
+            axisBorder: { show: false },
+            axisTicks: { show: false },
+            tooltip: { enabled: false },
+        },
+        yaxis: {
+            min: 0,
+            labels: {
+                style: { colors: colors.secondary, fontSize: '11px', fontWeight: 400 },
+                formatter: (value) => Number(value || 0).toLocaleString('en-IN', { notation: 'compact', maximumFractionDigits: 1 }),
+            },
+        },
+        responsive: [{
+            breakpoint: 768,
+            options: {
+                chart: { height: Math.max(height - 30, 230) },
+                legend: { position: 'bottom', horizontalAlign: 'center' },
+            },
+        }],
+    };
+}
+
+function apexChartConfig(key, charts, element) {
+    const colors = chartColors();
+    const dataset = charts[key] || {};
+    const chartSize = element.closest('[data-chart-size]')?.dataset.chartSize || 'compact';
+    const height = chartSize === 'showcase' ? 312 : chartSize === 'wide' ? 296 : 250;
+    const base = apexBaseOptions(height);
+
+    const configs = {
+        stacked_business_flow: {
+            ...base,
+            chart: { ...base.chart, type: 'area', stacked: true },
+            colors: [colors.teal, colors.info, colors.success, colors.purple],
+            series: [
+                { name: 'Sales', data: dataset.sales || [] },
+                { name: 'Collection', data: dataset.collections || [] },
+                { name: 'Purchases', data: dataset.purchases || [] },
+                { name: 'Expenses', data: dataset.expenses || [] },
+            ],
+            xaxis: { ...base.xaxis, categories: dataset.labels || [] },
+            stroke: { ...base.stroke, width: 2.5 },
+            markers: { size: 0, hover: { size: 5 } },
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shadeIntensity: 0.35,
+                    opacityFrom: 0.82,
+                    opacityTo: 0.28,
+                    stops: [0, 70, 100],
                 },
             },
         },
-        scales: {
-            x: {
-                grid: { color: 'rgba(67, 89, 113, 0.08)' },
-                ticks: { color: '#697a8d' },
+        sales_vs_purchases: {
+            ...base,
+            chart: { ...base.chart, type: 'bar' },
+            colors: [colors.purple, '#efb9ff'],
+            plotOptions: {
+                bar: {
+                    borderRadius: 4,
+                    borderRadiusApplication: 'end',
+                    columnWidth: '24%',
+                },
             },
-            y: {
-                beginAtZero: true,
-                grid: { color: 'rgba(67, 89, 113, 0.08)' },
-                ticks: { color: '#697a8d' },
+            series: [
+                { name: 'Sales', data: dataset.sales || [] },
+                { name: 'Purchases', data: dataset.purchases || [] },
+            ],
+            xaxis: { ...base.xaxis, categories: dataset.labels || [] },
+            fill: {
+                type: 'gradient',
+                gradient: { shade: 'light', type: 'vertical', opacityFrom: 0.95, opacityTo: 0.72 },
             },
         },
-    };
-}
-
-function chartConfig(key, charts) {
-    const colors = chartColors();
-    const common = baseChartOptions();
-
-    const configs = {
         monthly_sales: {
-            type: 'line',
-            data: {
-                labels: charts.monthly_sales?.labels || [],
-                datasets: [{
-                    label: 'Sales',
-                    data: charts.monthly_sales?.data || [],
-                    borderColor: colors.success,
-                    backgroundColor: 'rgba(113, 221, 55, 0.14)',
-                    tension: 0.35,
-                    fill: true,
-                    pointRadius: 3,
-                    pointHoverRadius: 5,
-                }],
+            ...base,
+            chart: { ...base.chart, type: 'bar', height },
+            colors: [colors.teal],
+            plotOptions: {
+                bar: {
+                    borderRadius: 6,
+                    borderRadiusApplication: 'end',
+                    columnWidth: '36%',
+                },
             },
-            options: common,
+            series: [{ name: 'Sales', data: dataset.data || [] }],
+            xaxis: { ...base.xaxis, categories: dataset.labels || [] },
+            fill: {
+                type: 'gradient',
+                gradient: { shade: 'light', type: 'vertical', opacityFrom: 0.95, opacityTo: 0.72 },
+            },
         },
         monthly_purchases: {
-            type: 'line',
-            data: {
-                labels: charts.monthly_purchases?.labels || [],
-                datasets: [{
-                    label: 'Purchases',
-                    data: charts.monthly_purchases?.data || [],
-                    borderColor: colors.danger,
-                    backgroundColor: 'rgba(255, 62, 29, 0.14)',
-                    tension: 0.35,
-                    fill: true,
-                    pointRadius: 3,
-                    pointHoverRadius: 5,
-                }],
+            ...base,
+            chart: { ...base.chart, type: 'line', height },
+            colors: [colors.warning],
+            series: [{ name: 'Purchases', data: dataset.data || [] }],
+            xaxis: { ...base.xaxis, categories: dataset.labels || [] },
+            stroke: { ...base.stroke, width: 4 },
+            markers: {
+                size: 0,
+                strokeWidth: 4,
+                strokeColors: '#fff',
+                hover: { size: 6 },
             },
-            options: common,
-        },
-        sales_vs_purchases: {
-            type: 'bar',
-            data: {
-                labels: charts.sales_vs_purchases?.labels || [],
-                datasets: [
-                    {
-                        label: 'Sales',
-                        data: charts.sales_vs_purchases?.sales || [],
-                        backgroundColor: colors.primary,
-                        borderRadius: 10,
-                    },
-                    {
-                        label: 'Purchases',
-                        data: charts.sales_vs_purchases?.purchases || [],
-                        backgroundColor: colors.warning,
-                        borderRadius: 10,
-                    },
-                ],
-            },
-            options: common,
         },
         gst_split: {
-            type: 'doughnut',
-            data: {
-                labels: charts.gst_split?.labels || [],
-                datasets: [{
-                    data: charts.gst_split?.data || [],
-                    backgroundColor: [colors.info, colors.secondary],
-                    borderWidth: 0,
-                }],
+            ...base,
+            chart: { ...base.chart, type: 'donut', height },
+            colors: [colors.yellow, colors.info, colors.purple, colors.teal],
+            labels: dataset.labels || [],
+            series: dataset.data || [],
+            stroke: { width: 0 },
+            plotOptions: {
+                pie: {
+                    donut: {
+                        size: '72%',
+                        labels: {
+                            show: true,
+                            name: { show: true, fontSize: '12px', fontWeight: 400, color: colors.secondary },
+                            value: { show: true, fontSize: '15px', fontWeight: 600, color: colors.heading, formatter: (value) => moneyFormatter(value) },
+                            total: {
+                                show: true,
+                                label: 'Total',
+                                color: colors.secondary,
+                                formatter: (context) => moneyFormatter(context.globals.seriesTotals.reduce((total, value) => total + value, 0)),
+                            },
+                        },
+                    },
+                },
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '68%',
-                plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, color: '#697a8d', font: { weight: '600' } } } },
-            },
-        },
-        cash_flow: {
-            type: 'bar',
-            data: {
-                labels: charts.cash_flow?.labels || [],
-                datasets: [{
-                    label: 'Amount',
-                    data: charts.cash_flow?.data || [],
-                    backgroundColor: [colors.success, colors.danger, colors.info, colors.warning],
-                    borderRadius: 10,
-                }],
-            },
-            options: common,
+            tooltip: { ...base.tooltip, y: { formatter: (value) => moneyFormatter(value) } },
         },
         top_products: {
-            type: 'bar',
-            data: {
-                labels: charts.top_products?.labels || [],
-                datasets: [{
-                    label: 'Sold Quantity',
-                    data: charts.top_products?.data || [],
-                    backgroundColor: colors.info,
-                    borderRadius: 10,
-                }],
+            ...base,
+            chart: { ...base.chart, type: 'bar' },
+            colors: [colors.cyan],
+            plotOptions: {
+                bar: {
+                    horizontal: true,
+                    borderRadius: 6,
+                    borderRadiusApplication: 'end',
+                    barHeight: '42%',
+                },
             },
-            options: { ...common, indexAxis: 'y' },
-        },
-        expense_categories: {
-            type: 'doughnut',
-            data: {
-                labels: charts.expense_categories?.labels || [],
-                datasets: [{
-                    data: charts.expense_categories?.data || [],
-                    backgroundColor: [colors.primary, colors.info, colors.success, colors.warning, colors.danger, colors.purple, colors.teal, colors.secondary],
-                    borderWidth: 0,
-                }],
+            series: [{ name: 'Sold Quantity', data: dataset.data || [] }],
+            xaxis: { ...base.xaxis, categories: dataset.labels || [] },
+            yaxis: {
+                ...base.yaxis,
+                labels: { ...base.yaxis.labels, maxWidth: 148 },
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '62%',
-                plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, color: '#697a8d', font: { weight: '600' } } } },
-            },
+            tooltip: { ...base.tooltip, y: { formatter: (value) => quantityFormatter(value) } },
         },
         stock_value: {
-            type: 'bar',
-            data: {
-                labels: charts.stock_value?.labels || [],
-                datasets: [{
-                    label: 'Stock Value',
-                    data: charts.stock_value?.data || [],
-                    backgroundColor: colors.primary,
-                    borderRadius: 10,
-                }],
+            ...base,
+            chart: { ...base.chart, type: 'bar', height },
+            colors: [colors.success],
+            plotOptions: {
+                bar: {
+                    horizontal: true,
+                    borderRadius: 6,
+                    borderRadiusApplication: 'end',
+                    barHeight: '42%',
+                },
             },
-            options: { ...common, indexAxis: 'y' },
+            series: [{ name: 'Stock Value', data: dataset.data || [] }],
+            xaxis: { ...base.xaxis, categories: dataset.labels || [] },
+            yaxis: {
+                ...base.yaxis,
+                labels: { ...base.yaxis.labels, maxWidth: 148 },
+            },
         },
-        pending_payments: {
-            type: 'bar',
-            data: {
-                labels: charts.pending_payments?.labels || [],
-                datasets: [{
-                    label: 'Pending',
-                    data: charts.pending_payments?.data || [],
-                    backgroundColor: [colors.warning, colors.danger, colors.primary],
-                    borderRadius: 10,
-                }],
+        expense_categories: {
+            ...base,
+            chart: { ...base.chart, type: 'bar', height },
+            colors: [colors.orange],
+            plotOptions: {
+                bar: {
+                    horizontal: true,
+                    borderRadius: 6,
+                    borderRadiusApplication: 'end',
+                    barHeight: '42%',
+                },
             },
-            options: common,
-        },
-        period_business_mix: {
-            type: 'bar',
-            data: {
-                labels: charts.period_business_mix?.labels || [],
-                datasets: [{
-                    label: 'Amount',
-                    data: charts.period_business_mix?.data || [],
-                    backgroundColor: [colors.primary, colors.warning, colors.info, colors.danger],
-                    borderRadius: 10,
-                }],
+            series: [{ name: 'Expenses', data: dataset.data || [] }],
+            xaxis: { ...base.xaxis, categories: dataset.labels || [] },
+            yaxis: {
+                ...base.yaxis,
+                labels: { ...base.yaxis.labels, maxWidth: 132 },
             },
-            options: common,
-        },
-        profit_vs_expense: {
-            type: 'bar',
-            data: {
-                labels: charts.profit_vs_expense?.labels || [],
-                datasets: [{
-                    label: 'Amount',
-                    data: charts.profit_vs_expense?.data || [],
-                    backgroundColor: [colors.success, colors.danger, colors.primary],
-                    borderRadius: 10,
-                }],
-            },
-            options: common,
-        },
-        stock_units_by_category: {
-            type: 'bar',
-            data: {
-                labels: charts.stock_units_by_category?.labels || [],
-                datasets: [{
-                    label: 'Stock Units',
-                    data: charts.stock_units_by_category?.data || [],
-                    backgroundColor: colors.success,
-                    borderRadius: 10,
-                }],
-            },
-            options: { ...common, indexAxis: 'y' },
         },
     };
 
     return configs[key];
 }
 
+const centerTextPlugin = {
+    id: 'ltCenterText',
+    afterDraw(chart, _args, options) {
+        if (!options?.text) {
+            return;
+        }
+
+        const { ctx, chartArea } = chart;
+        if (!chartArea) {
+            return;
+        }
+
+        const centerX = (chartArea.left + chartArea.right) / 2;
+        const centerY = (chartArea.top + chartArea.bottom) / 2;
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = options.color || chartColors().heading;
+        ctx.font = '500 15px "Public Sans", Inter, sans-serif';
+        ctx.fillText(options.text, centerX, centerY - 7);
+
+        if (options.subtext) {
+            ctx.fillStyle = options.subColor || chartColors().text;
+            ctx.font = '400 12px "Public Sans", Inter, sans-serif';
+            ctx.fillText(options.subtext, centerX, centerY + 14);
+        }
+
+        ctx.restore();
+    },
+};
+
+function chartJsBaseOptions({ circular = false, legendPosition = 'bottom' } = {}) {
+    const colors = chartColors();
+
+    return {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: {
+            duration: 780,
+            easing: 'easeOutQuart',
+        },
+        interaction: {
+            intersect: false,
+            mode: 'nearest',
+        },
+        plugins: {
+            legend: {
+                position: legendPosition,
+                labels: {
+                    boxWidth: 9,
+                    boxHeight: 9,
+                    usePointStyle: true,
+                    pointStyle: 'circle',
+                    color: colors.text,
+                    font: { weight: '400', size: 11 },
+                    padding: 16,
+                },
+            },
+            tooltip: {
+                backgroundColor: document.documentElement.dataset.bsTheme === 'dark' ? '#2b2c40' : '#fff',
+                bodyColor: colors.heading,
+                borderColor: colors.softGrid,
+                borderWidth: 1,
+                titleColor: colors.text,
+                padding: 12,
+                cornerRadius: 8,
+                displayColors: true,
+                callbacks: {
+                    label: (context) => {
+                        const label = context.label || context.dataset.label || '';
+                        const value = context.parsed?.r ?? context.parsed ?? context.raw ?? 0;
+
+                        return `${label}: ${moneyFormatter(value)}`;
+                    },
+                },
+            },
+        },
+        scales: circular
+            ? {
+                r: {
+                    beginAtZero: true,
+                    grid: { color: colors.grid },
+                    angleLines: { color: colors.softGrid },
+                    pointLabels: { color: colors.text, font: { weight: '400', size: 11 } },
+                    ticks: {
+                        color: colors.secondary,
+                        backdropColor: 'transparent',
+                        callback: (value) => Number(value || 0).toLocaleString('en-IN', { notation: 'compact' }),
+                    },
+                },
+            }
+            : {},
+    };
+}
+
+function chartJsConfig(key, charts) {
+    const colors = chartColors();
+    const dataset = charts[key] || {};
+    const palette = [colors.purple, colors.yellow, colors.orange, colors.blue, colors.teal, colors.success, colors.info, colors.danger];
+    const cashTotal = (charts.cash_flow?.data || []).reduce((total, value) => total + Number(value || 0), 0);
+
+    const configs = {
+        cash_flow: {
+            type: 'doughnut',
+            data: {
+                labels: dataset.labels || [],
+                datasets: [{
+                    data: dataset.data || [],
+                    backgroundColor: [colors.purple, colors.info, colors.yellow, colors.orange],
+                    borderColor: '#fff',
+                    borderWidth: 4,
+                    hoverOffset: 10,
+                    spacing: 2,
+                }],
+            },
+            plugins: [centerTextPlugin],
+            options: {
+                ...chartJsBaseOptions(),
+                cutout: '68%',
+                plugins: {
+                    ...chartJsBaseOptions().plugins,
+                    ltCenterText: {
+                        text: 'Cash Flow',
+                        subtext: moneyFormatter(cashTotal),
+                    },
+                },
+            },
+        },
+        period_business_mix: {
+            type: 'pie',
+            data: {
+                labels: dataset.labels || [],
+                datasets: [{
+                    data: dataset.data || [],
+                    backgroundColor: [colors.yellow, colors.purple, colors.blue, colors.teal],
+                    borderColor: '#fff',
+                    borderWidth: 4,
+                    hoverOffset: 10,
+                    spacing: 1,
+                }],
+            },
+            options: chartJsBaseOptions(),
+        },
+        pending_payments: {
+            type: 'polarArea',
+            data: {
+                labels: dataset.labels || [],
+                datasets: [{
+                    data: dataset.data || [],
+                    backgroundColor: palette.map((color) => withAlpha(color, 0.82)),
+                    borderColor: '#fff',
+                    borderWidth: 3,
+                }],
+            },
+            options: {
+                ...chartJsBaseOptions({ circular: true }),
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        grid: { color: colors.grid },
+                        angleLines: { color: colors.softGrid },
+                        ticks: { display: false },
+                    },
+                },
+            },
+        },
+        profit_vs_expense: {
+            type: 'radar',
+            data: {
+                labels: dataset.labels || [],
+                datasets: [{
+                    label: 'Amount',
+                    data: dataset.data || [],
+                    borderColor: colors.purple,
+                    backgroundColor: withAlpha(colors.purple, 0.32),
+                    pointBackgroundColor: [colors.success, colors.danger, colors.purple],
+                    pointBorderColor: '#fff',
+                    pointHoverRadius: 7,
+                    borderWidth: 3,
+                    tension: 0.24,
+                }],
+            },
+            options: chartJsBaseOptions({ circular: true }),
+        },
+    };
+
+    return configs[key];
+}
+
+function destroyChart(instance) {
+    if (!instance) {
+        return;
+    }
+
+    if (instance.engine === 'apex') {
+        instance.chart.destroy();
+        return;
+    }
+
+    instance.chart.destroy();
+}
+
 function initializeDashboard(root) {
-    if (!window.Chart) {
+    if (!window.Chart && !window.ApexCharts) {
         return;
     }
 
@@ -291,24 +581,51 @@ function initializeDashboard(root) {
     const renderCharts = (nextCharts) => {
         charts = nextCharts || charts;
 
-        root.querySelectorAll('[data-dashboard-chart]').forEach((canvas) => {
-            const key = canvas.dataset.dashboardChart;
+        root.querySelectorAll('[data-dashboard-chart]').forEach((element) => {
+            const key = element.dataset.dashboardChart;
+            const engine = element.dataset.dashboardChartEngine || 'chartjs';
             const empty = chartIsEmpty(charts, key);
             const emptyState = root.querySelector(`[data-chart-empty="${key}"]`);
 
-            canvas.classList.toggle('hidden', empty);
+            element.classList.toggle('hidden', empty);
             emptyState?.classList.toggle('hidden', !empty);
-
-            if (chartInstances[key]) {
-                chartInstances[key].destroy();
-                delete chartInstances[key];
-            }
+            destroyChart(chartInstances[key]);
+            delete chartInstances[key];
 
             if (empty) {
                 return;
             }
 
-            chartInstances[key] = new window.Chart(canvas, chartConfig(key, charts));
+            if (engine === 'apex') {
+                if (!window.ApexCharts) {
+                    return;
+                }
+
+                element.innerHTML = '';
+                const config = apexChartConfig(key, charts, element);
+                if (!config) {
+                    return;
+                }
+
+                const chart = new window.ApexCharts(element, config);
+                chart.render();
+                chartInstances[key] = { engine, chart };
+                return;
+            }
+
+            if (!window.Chart) {
+                return;
+            }
+
+            const config = chartJsConfig(key, charts);
+            if (!config) {
+                return;
+            }
+
+            chartInstances[key] = {
+                engine,
+                chart: new window.Chart(element, config),
+            };
         });
     };
 

@@ -1,6 +1,9 @@
 @php
     $erpUser = auth()->user();
     $erpCompanyName = $erpCompany['name'] ?? 'LUCKY TRADERS';
+    $erpSidebarStyle = in_array($erpTheme['sidebar_style'] ?? 'dark', ['dark', 'light'], true)
+        ? $erpTheme['sidebar_style']
+        : 'dark';
     $erpInitials = collect(explode(' ', $erpCompanyName))
         ->filter()
         ->map(fn ($word) => mb_substr($word, 0, 1))
@@ -22,6 +25,7 @@
     };
     $erpIsSuperAdmin = $erpUser && method_exists($erpUser, 'hasRole') && $erpUser->hasRole('Super Admin');
     $erpRouteExists = fn (array $item): bool => empty($item['route']) || \Illuminate\Support\Facades\Route::has($item['route']);
+    $erpRouteUrl = fn (array $item): string => route($item['route'], $item['params'] ?? []);
     $erpItemVisible = function (array $item) use ($erpCan, $erpIsSuperAdmin, $erpRouteExists): bool {
         if (($item['super_admin'] ?? false) && ! $erpIsSuperAdmin) {
             return false;
@@ -47,7 +51,7 @@
         ->values();
 @endphp
 
-<aside class="lt-sidebar layout-menu menu-vertical menu bg-menu-theme" data-lt-sidebar data-sidebar-style="light" aria-label="Primary navigation">
+<aside class="lt-sidebar layout-menu menu-vertical menu bg-menu-theme" data-lt-sidebar data-sidebar-style="{{ $erpSidebarStyle }}" aria-label="Primary navigation">
     <div class="lt-sidebar-inner menu-inner-shadow">
         <div class="lt-sidebar-brand app-brand demo">
             @if (! empty($erpCompany['logo_url']))
@@ -75,7 +79,7 @@
                     $submenuId = 'lt-menu-'.\Illuminate\Support\Str::slug($item['label']);
                 @endphp
 
-                <div class="lt-menu-section menu-item {{ $isParentActive ? 'active open' : '' }}">
+                <div class="lt-menu-section menu-item {{ $isParentActive ? 'active open' : '' }}" style="--lt-menu-order: {{ $loop->index }};">
                     @if ($hasChildren)
                         <button
                             type="button"
@@ -88,15 +92,22 @@
                                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="{{ $item['icon'] }}" /></svg>
                             </span>
                             <span class="lt-menu-text text-truncate">{{ $item['label'] }}</span>
-                            <span class="lt-menu-arrow">›</span>
+                            <span class="lt-menu-count">{{ $children->count() }}</span>
+                            <span class="lt-menu-arrow" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" focusable="false">
+                                    <path d="m9 6 6 6-6 6" />
+                                </svg>
+                            </span>
                         </button>
 
                         <div id="{{ $submenuId }}" class="lt-submenu menu-sub {{ $isParentActive ? 'show' : '' }}">
                             @foreach ($children as $child)
                                 @php $isActive = $erpItemActive($child); @endphp
                                 <a
-                                    href="{{ route($child['route']) }}"
+                                    href="{{ $erpRouteUrl($child) }}"
                                     class="lt-menu-link menu-link {{ $isActive ? 'active' : '' }}"
+                                    title="{{ $child['label'] }}"
+                                    style="--lt-child-order: {{ $loop->index }};"
                                     @if ($isActive) aria-current="page" @endif
                                 >
                                     <span class="lt-menu-text text-truncate">{{ $child['label'] }}</span>
@@ -106,7 +117,7 @@
                     @else
                         @php $isActive = $erpItemActive($item); @endphp
                         <a
-                            href="{{ route($item['route']) }}"
+                            href="{{ $erpRouteUrl($item) }}"
                             class="lt-menu-link menu-link {{ $isActive ? 'active' : '' }}"
                             title="{{ $item['label'] }}"
                             @if ($isActive) aria-current="page" @endif

@@ -176,6 +176,7 @@ class DashboardController extends Controller
             'stock_value' => $this->stockValueByCategory(),
             'pending_payments' => $this->pendingPayments(),
             'period_business_mix' => $this->periodBusinessMix($filters),
+            'stacked_business_flow' => $this->stackedBusinessFlow($filters),
             'profit_vs_expense' => $this->profitVsExpense($filters),
             'stock_units_by_category' => $this->stockUnitsByCategory(),
         ];
@@ -227,13 +228,18 @@ class DashboardController extends Controller
 
     private function monthlyDataset(string $modelClass, string $dateColumn, string $amountColumn, array $filters): array
     {
+        return $this->monthlyTotalsFromQuery($modelClass::query(), $dateColumn, $amountColumn, $filters);
+    }
+
+    private function monthlyTotalsFromQuery($query, string $dateColumn, string $amountColumn, array $filters): array
+    {
         $start = Carbon::parse($filters['from_date'])->startOfMonth();
         $end = Carbon::parse($filters['to_date'])->startOfMonth();
         $months = CarbonPeriod::create($start, '1 month', $end);
         $labels = [];
         $data = [];
         $monthExpression = $this->monthExpression($dateColumn);
-        $totals = $modelClass::query()
+        $totals = (clone $query)
             ->whereDate($dateColumn, '>=', $filters['from_date'])
             ->whereDate($dateColumn, '<=', $filters['to_date'])
             ->selectRaw($monthExpression.' as month_key')
@@ -248,6 +254,14 @@ class DashboardController extends Controller
         }
 
         return compact('labels', 'data');
+    }
+
+    private function emptyMonthlyDataset(array $labels): array
+    {
+        return [
+            'labels' => $labels,
+            'data' => array_fill(0, count($labels), 0),
+        ];
     }
 
     private function gstSplit(array $filters): array
@@ -385,6 +399,30 @@ class DashboardController extends Controller
         return [
             'labels' => ['Sales', 'Purchases', 'Collection', 'Expenses'],
             'data' => [$sales, $purchases, $collection, $expenses],
+        ];
+    }
+
+    private function stackedBusinessFlow(array $filters): array
+    {
+        $sales = $this->monthlyDataset(Sale::class, 'sale_date', 'total_amount', $filters);
+        $purchases = $this->monthlyDataset(Purchase::class, 'purchase_date', 'total_amount', $filters);
+        $collections = $this->monthlyTotalsFromQuery(
+            Cashbook::query()->whereIn('transaction_type', ['cash_in', 'bank_in']),
+            'entry_date',
+            'amount',
+            $filters
+        );
+        $expenses = Schema::hasTable('expenses')
+            ? $this->monthlyDataset(Expense::class, 'expense_date', 'amount', $filters)
+            : $this->emptyMonthlyDataset($sales['labels']);
+
+        return [
+            'labels' => $sales['labels'],
+            'sales' => $sales['data'],
+            'purchases' => $purchases['data'],
+            'collections' => $collections['data'],
+            'expenses' => $expenses['data'],
+            'data' => array_merge($sales['data'], $purchases['data'], $collections['data'], $expenses['data']),
         ];
     }
 
