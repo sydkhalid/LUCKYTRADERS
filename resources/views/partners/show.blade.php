@@ -6,7 +6,7 @@
     <div class="mb-5 flex items-center justify-between">
         <div>
             <h2 class="text-lg font-semibold text-gray-900">{{ $partner->name }}</h2>
-            <p class="text-sm text-gray-500">Current returnable capital: Rs. {{ number_format((float) $partner->current_investment, 2) }}</p>
+            <p class="text-sm text-gray-500">Current returnable capital: ₹ {{ number_format((float) $partner->current_investment, 2) }}</p>
         </div>
         <div class="flex gap-2">
             <a href="{{ route('partners.investments.create', $partner) }}" class="rounded bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">Add Investment</a>
@@ -25,11 +25,11 @@
         </div>
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">Opening</p>
-            <h3 class="mt-1 text-xl font-bold text-gray-900">Rs. {{ number_format((float) $partner->opening_investment, 2) }}</h3>
+            <h3 class="mt-1 text-xl font-bold text-gray-900">₹ {{ number_format((float) $partner->opening_investment, 2) }}</h3>
         </div>
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">Current Capital</p>
-            <h3 class="mt-1 text-xl font-bold text-red-700">Rs. {{ number_format((float) $partner->current_investment, 2) }}</h3>
+            <h3 class="mt-1 text-xl font-bold text-red-700">₹ {{ number_format((float) $partner->current_investment, 2) }}</h3>
         </div>
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">Status</p>
@@ -75,7 +75,7 @@
                         <td class="px-4 py-3 text-gray-700">{{ $transaction->transaction_date?->format('d M Y') }}</td>
                         <td class="px-4 py-3 font-medium text-gray-900">{{ $transaction->typeLabel() }}</td>
                         <td class="px-4 py-3 text-gray-700">{{ $transaction->transaction_type === 'profit_share' ? '-' : strtoupper($transaction->payment_mode) }}</td>
-                        <td class="px-4 py-3 text-right font-semibold text-gray-900">Rs. {{ number_format((float) $transaction->amount, 2) }}</td>
+                        <td class="px-4 py-3 text-right font-semibold text-gray-900">₹ {{ number_format((float) $transaction->amount, 2) }}</td>
                         <td class="px-4 py-3 text-gray-600">{{ $transaction->notes ?: '-' }}</td>
                         <td class="px-4 py-3 text-right">
                             <div class="flex justify-end gap-3">
@@ -113,9 +113,9 @@
                     <tr class="hover:bg-gray-50">
                         <td class="px-4 py-3 text-gray-700">{{ $ledger->ledger_date?->format('d M Y') }}</td>
                         <td class="px-4 py-3 text-gray-700">{{ ucfirst(str_replace('_', ' ', $ledger->reference_type ?? '-')) }} @if ($ledger->reference_id)#{{ $ledger->reference_id }}@endif</td>
-                        <td class="px-4 py-3 text-right text-gray-900">Rs. {{ number_format((float) $ledger->debit, 2) }}</td>
-                        <td class="px-4 py-3 text-right text-gray-900">Rs. {{ number_format((float) $ledger->credit, 2) }}</td>
-                        <td class="px-4 py-3 text-right font-semibold text-gray-900">Rs. {{ number_format((float) $ledger->balance, 2) }}</td>
+                        <td class="px-4 py-3 text-right text-gray-900">₹ {{ number_format((float) $ledger->debit, 2) }}</td>
+                        <td class="px-4 py-3 text-right text-gray-900">₹ {{ number_format((float) $ledger->credit, 2) }}</td>
+                        <td class="px-4 py-3 text-right font-semibold text-gray-900">₹ {{ number_format((float) $ledger->balance, 2) }}</td>
                         <td class="px-4 py-3 text-gray-600">{{ $ledger->remarks ?: '-' }}</td>
                     </tr>
                 @empty

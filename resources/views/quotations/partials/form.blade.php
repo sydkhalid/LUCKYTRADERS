@@ -113,15 +113,15 @@
             <div class="space-y-3 text-sm">
                 <div class="flex justify-between">
                     <span class="text-gray-600">Subtotal</span>
-                    <span class="font-semibold text-gray-900" id="subtotalText">Rs. 0.00</span>
+                    <span class="font-semibold text-gray-900" id="subtotalText">₹ 0.00</span>
                 </div>
                 <div class="flex justify-between">
                     <span class="text-gray-600">GST</span>
-                    <span class="font-semibold text-gray-900" id="gstText">Rs. 0.00</span>
+                    <span class="font-semibold text-gray-900" id="gstText">₹ 0.00</span>
                 </div>
                 <div class="flex justify-between border-t border-slate-200 pt-3">
                     <span class="text-gray-800">Grand Total</span>
-                    <span class="font-bold text-gray-900" id="totalText">Rs. 0.00</span>
+                    <span class="font-bold text-gray-900" id="totalText">₹ 0.00</span>
                 </div>
             </div>
         </div>
@@ -142,7 +142,7 @@
     const rowsContainer = document.getElementById('quotationRows');
 
     function money(value) {
-        return 'Rs. ' + Number(value || 0).toFixed(2);
+        return '₹ ' + Number(value || 0).toFixed(2);
     }
 
     function escapeHtml(value) {
@@ -187,9 +187,9 @@
             <td class="px-3 py-3">
                 <input type="number" name="items[${index}][gst_percentage]" value="${data.gst_percentage ?? 0}" step="0.01" min="0" max="100" class="gst-input w-24 rounded border-gray-300 text-right shadow-sm focus:border-slate-500 focus:ring-slate-500" required>
             </td>
-            <td class="row-subtotal px-3 py-3 text-right text-gray-700">Rs. 0.00</td>
-            <td class="row-gst px-3 py-3 text-right text-gray-700">Rs. 0.00</td>
-            <td class="row-total px-3 py-3 text-right font-semibold text-gray-900">Rs. 0.00</td>
+            <td class="row-subtotal px-3 py-3 text-right text-gray-700">₹ 0.00</td>
+            <td class="row-gst px-3 py-3 text-right text-gray-700">₹ 0.00</td>
+            <td class="row-total px-3 py-3 text-right font-semibold text-gray-900">₹ 0.00</td>
             <td class="px-3 py-3 text-right">
                 <button type="button" class="remove-row font-semibold text-red-600 hover:text-red-800">Remove</button>
             </td>

@@ -21,11 +21,11 @@
     </form>
 
     <div class="mb-5 grid grid-cols-1 gap-4 md:grid-cols-5">
-        <div class="rounded bg-white p-4 shadow"><p class="text-sm text-gray-500">Taxable</p><h3 class="mt-1 text-xl font-bold text-gray-900">Rs. {{ number_format((float) $totals['subtotal'], 2) }}</h3></div>
-        <div class="rounded bg-white p-4 shadow"><p class="text-sm text-gray-500">GST</p><h3 class="mt-1 text-xl font-bold text-gray-900">Rs. {{ number_format((float) $totals['gst'], 2) }}</h3></div>
-        <div class="rounded bg-white p-4 shadow"><p class="text-sm text-gray-500">Total</p><h3 class="mt-1 text-xl font-bold text-gray-900">Rs. {{ number_format((float) $totals['total'], 2) }}</h3></div>
-        <div class="rounded bg-white p-4 shadow"><p class="text-sm text-gray-500">Refund</p><h3 class="mt-1 text-xl font-bold text-red-700">Rs. {{ number_format((float) $totals['refund'], 2) }}</h3></div>
-        <div class="rounded bg-white p-4 shadow"><p class="text-sm text-gray-500">Adjustment</p><h3 class="mt-1 text-xl font-bold text-emerald-700">Rs. {{ number_format((float) $totals['adjustment'], 2) }}</h3></div>
+        <div class="rounded bg-white p-4 shadow"><p class="text-sm text-gray-500">Taxable</p><h3 class="mt-1 text-xl font-bold text-gray-900">₹ {{ number_format((float) $totals['subtotal'], 2) }}</h3></div>
+        <div class="rounded bg-white p-4 shadow"><p class="text-sm text-gray-500">GST</p><h3 class="mt-1 text-xl font-bold text-gray-900">₹ {{ number_format((float) $totals['gst'], 2) }}</h3></div>
+        <div class="rounded bg-white p-4 shadow"><p class="text-sm text-gray-500">Total</p><h3 class="mt-1 text-xl font-bold text-gray-900">₹ {{ number_format((float) $totals['total'], 2) }}</h3></div>
+        <div class="rounded bg-white p-4 shadow"><p class="text-sm text-gray-500">Refund</p><h3 class="mt-1 text-xl font-bold text-red-700">₹ {{ number_format((float) $totals['refund'], 2) }}</h3></div>
+        <div class="rounded bg-white p-4 shadow"><p class="text-sm text-gray-500">Adjustment</p><h3 class="mt-1 text-xl font-bold text-emerald-700">₹ {{ number_format((float) $totals['adjustment'], 2) }}</h3></div>
     </div>
 
     <div class="overflow-hidden rounded bg-white shadow">
@@ -48,9 +48,9 @@
                         <td class="px-4 py-3 text-gray-700">{{ $return->return_date?->format('d M Y') }}</td>
                         <td class="px-4 py-3 text-gray-700">{{ $return->sale?->sale_no ?: '-' }}</td>
                         <td class="px-4 py-3 text-gray-700">{{ $return->customer?->name ?: '-' }}</td>
-                        <td class="px-4 py-3 text-right font-semibold text-gray-900">Rs. {{ number_format((float) $return->total_amount, 2) }}</td>
-                        <td class="px-4 py-3 text-right text-red-700">Rs. {{ number_format((float) $return->refund_amount, 2) }}</td>
-                        <td class="px-4 py-3 text-right text-emerald-700">Rs. {{ number_format((float) $return->adjustment_amount, 2) }}</td>
+                        <td class="px-4 py-3 text-right font-semibold text-gray-900">₹ {{ number_format((float) $return->total_amount, 2) }}</td>
+                        <td class="px-4 py-3 text-right text-red-700">₹ {{ number_format((float) $return->refund_amount, 2) }}</td>
+                        <td class="px-4 py-3 text-right text-emerald-700">₹ {{ number_format((float) $return->adjustment_amount, 2) }}</td>
                     </tr>
                 @empty
                     <tr><td colspan="7" class="px-4 py-8 text-center text-gray-500">No sales returns found.</td></tr>

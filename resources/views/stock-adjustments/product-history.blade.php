@@ -21,11 +21,11 @@
         </div>
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">Purchase Rate</p>
-            <h3 class="mt-1 text-2xl font-bold text-gray-900">Rs. {{ number_format((float) $product->purchase_price, 2) }}</h3>
+            <h3 class="mt-1 text-2xl font-bold text-gray-900">₹ {{ number_format((float) $product->purchase_price, 2) }}</h3>
         </div>
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">Stock Value</p>
-            <h3 class="mt-1 text-2xl font-bold text-gray-900">Rs. {{ number_format((float) $product->current_stock * (float) $product->purchase_price, 2) }}</h3>
+            <h3 class="mt-1 text-2xl font-bold text-gray-900">₹ {{ number_format((float) $product->current_stock * (float) $product->purchase_price, 2) }}</h3>
         </div>
     </div>
 

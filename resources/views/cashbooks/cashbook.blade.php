@@ -14,15 +14,15 @@
     <div class="mb-5 grid grid-cols-1 gap-4 md:grid-cols-3">
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">Cash In</p>
-            <h3 class="mt-1 text-2xl font-bold text-emerald-700">Rs. {{ number_format((float) $totalIn, 2) }}</h3>
+            <h3 class="mt-1 text-2xl font-bold text-emerald-700">₹ {{ number_format((float) $totalIn, 2) }}</h3>
         </div>
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">Cash Out</p>
-            <h3 class="mt-1 text-2xl font-bold text-red-700">Rs. {{ number_format((float) $totalOut, 2) }}</h3>
+            <h3 class="mt-1 text-2xl font-bold text-red-700">₹ {{ number_format((float) $totalOut, 2) }}</h3>
         </div>
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">Cash Balance</p>
-            <h3 class="mt-1 text-2xl font-bold text-gray-900">Rs. {{ number_format((float) $balance, 2) }}</h3>
+            <h3 class="mt-1 text-2xl font-bold text-gray-900">₹ {{ number_format((float) $balance, 2) }}</h3>
         </div>
     </div>
 
@@ -66,7 +66,7 @@
                             </span>
                         </td>
                         <td class="px-4 py-3 text-gray-700">{{ ucfirst($entry->reference_type ?? '-') }} @if ($entry->reference_id)#{{ $entry->reference_id }}@endif</td>
-                        <td class="px-4 py-3 text-right font-semibold text-gray-900">Rs. {{ number_format((float) $entry->amount, 2) }}</td>
+                        <td class="px-4 py-3 text-right font-semibold text-gray-900">₹ {{ number_format((float) $entry->amount, 2) }}</td>
                         <td class="px-4 py-3 text-gray-600">{{ $entry->remarks ?: '-' }}</td>
                     </tr>
                 @empty

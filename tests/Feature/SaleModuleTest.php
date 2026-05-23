@@ -50,7 +50,9 @@ class SaleModuleTest extends TestCase
                     'quantity' => 5,
                     'unit' => 'Wrong Unit',
                     'rate' => 100,
-                    'gst_percentage' => 0,
+                    'gst_percentage' => 12,
+                    'gst_calculation' => 'exclusive',
+                    'gst_type' => 'cgst_sgst',
                 ],
             ],
         ]);
@@ -61,20 +63,22 @@ class SaleModuleTest extends TestCase
         $this->assertStringStartsWith('GST-', $sale->sale_no);
         $this->assertSame('gst', $sale->bill_type);
         $this->assertSame(500.0, (float) $sale->subtotal);
-        $this->assertSame(90.0, (float) $sale->gst_amount);
-        $this->assertSame(590.0, (float) $sale->total_amount);
+        $this->assertSame(60.0, (float) $sale->gst_amount);
+        $this->assertSame(560.0, (float) $sale->total_amount);
         $this->assertSame(118.0, (float) $sale->paid_amount);
-        $this->assertSame(472.0, (float) $sale->balance_amount);
+        $this->assertSame(442.0, (float) $sale->balance_amount);
         $this->assertSame('partial', $sale->payment_status);
 
         $item = $sale->items->first();
         $this->assertSame('Kg', $item->unit);
-        $this->assertSame(18.0, (float) $item->gst_percentage);
-        $this->assertSame(90.0, (float) $item->gst_amount);
+        $this->assertSame(12.0, (float) $item->gst_percentage);
+        $this->assertSame(60.0, (float) $item->gst_amount);
+        $this->assertSame('exclusive', $item->gst_calculation);
+        $this->assertSame('cgst_sgst', $item->gst_type);
         $this->assertSame(300.0, (float) $item->purchase_cost);
         $this->assertSame(200.0, (float) $item->profit_amount);
         $this->assertSame(10.0, (float) $product->fresh()->current_stock);
-        $this->assertSame(472.0, (float) $customer->fresh()->current_balance);
+        $this->assertSame(442.0, (float) $customer->fresh()->current_balance);
 
         $this->assertDatabaseHas('stock_movements', [
             'product_id' => $product->id,
@@ -84,7 +88,7 @@ class SaleModuleTest extends TestCase
         ]);
 
         $saleLedger = Ledger::where('reference_type', 'sale')->firstOrFail();
-        $this->assertSame(590.0, (float) $saleLedger->debit);
+        $this->assertSame(560.0, (float) $saleLedger->debit);
 
         $receiptLedger = Ledger::where('reference_type', 'sale_direct_payment')->firstOrFail();
         $this->assertSame(118.0, (float) $receiptLedger->credit);
@@ -136,6 +140,52 @@ class SaleModuleTest extends TestCase
             ->get(route('gst-reports.sales'))
             ->assertOk()
             ->assertDontSee($normalSale->sale_no);
+    }
+
+    public function test_gst_sale_can_use_inclusive_igst_pricing(): void
+    {
+        $admin = $this->userWithRole('Admin');
+        $customer = $this->customer();
+        $product = $this->product([
+            'code' => 'SALE-IGST-001',
+            'purchase_price' => 60,
+            'selling_price' => 118,
+            'gst_percentage' => 18,
+            'opening_stock' => 5,
+            'current_stock' => 5,
+        ]);
+
+        $response = $this->actingAs($admin)->post(route('sales.store'), $this->salePayload($customer, $product, [
+            'paid_amount' => 118,
+            'payment_mode' => 'cash',
+            'items' => [
+                [
+                    'product_id' => $product->id,
+                    'quantity' => 1,
+                    'unit' => 'Kg',
+                    'rate' => 118,
+                    'gst_percentage' => 18,
+                    'gst_calculation' => 'inclusive',
+                    'gst_type' => 'igst',
+                ],
+            ],
+        ]));
+
+        $sale = Sale::with('items')->firstOrFail();
+        $response->assertRedirect(route('sales.show', $sale));
+
+        $this->assertSame(100.0, (float) $sale->subtotal);
+        $this->assertSame(18.0, (float) $sale->gst_amount);
+        $this->assertSame(118.0, (float) $sale->total_amount);
+        $this->assertSame('paid', $sale->payment_status);
+
+        $item = $sale->items->first();
+        $this->assertSame(118.0, (float) $item->rate);
+        $this->assertSame(100.0, (float) $item->subtotal);
+        $this->assertSame(18.0, (float) $item->gst_amount);
+        $this->assertSame(118.0, (float) $item->total);
+        $this->assertSame('inclusive', $item->gst_calculation);
+        $this->assertSame('igst', $item->gst_type);
     }
 
     public function test_sale_validation_blocks_zero_quantity_negative_amount_overpayment_and_insufficient_stock(): void
@@ -354,6 +404,8 @@ class SaleModuleTest extends TestCase
                     'unit' => 'Kg',
                     'rate' => 100,
                     'gst_percentage' => 18,
+                    'gst_calculation' => 'exclusive',
+                    'gst_type' => 'cgst_sgst',
                 ],
             ],
         ], $overrides);

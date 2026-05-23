@@ -64,8 +64,8 @@
                     <td class="px-4 py-3 text-right font-semibold {{ $isOut ? 'text-red-700' : ($isIn ? 'text-emerald-700' : 'text-gray-900') }}">
                         {{ $isOut ? '-' : '+' }}{{ number_format((float) $movement->quantity, 3) }}
                     </td>
-                    <td class="px-4 py-3 text-right text-gray-700">Rs. {{ number_format((float) $movement->rate, 2) }}</td>
-                    <td class="px-4 py-3 text-right text-gray-700">Rs. {{ number_format((float) $movement->total_value, 2) }}</td>
+                    <td class="px-4 py-3 text-right text-gray-700">₹ {{ number_format((float) $movement->rate, 2) }}</td>
+                    <td class="px-4 py-3 text-right text-gray-700">₹ {{ number_format((float) $movement->total_value, 2) }}</td>
                     <td class="px-4 py-3 text-gray-600">{{ $movement->remarks ?: '-' }}</td>
                 </tr>
             @empty

@@ -19,15 +19,15 @@
     <div class="mb-5 grid grid-cols-1 gap-4 md:grid-cols-3">
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">Gross Profit</p>
-            <h3 class="mt-1 text-2xl font-bold text-emerald-700">Rs. {{ number_format((float) $grossProfit, 2) }}</h3>
+            <h3 class="mt-1 text-2xl font-bold text-emerald-700">₹ {{ number_format((float) $grossProfit, 2) }}</h3>
         </div>
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">Expenses</p>
-            <h3 class="mt-1 text-2xl font-bold text-red-700">Rs. {{ number_format((float) $expenseTotal, 2) }}</h3>
+            <h3 class="mt-1 text-2xl font-bold text-red-700">₹ {{ number_format((float) $expenseTotal, 2) }}</h3>
         </div>
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">Net Profit</p>
-            <h3 class="mt-1 text-2xl font-bold {{ $netProfit >= 0 ? 'text-gray-900' : 'text-red-700' }}">Rs. {{ number_format((float) $netProfit, 2) }}</h3>
+            <h3 class="mt-1 text-2xl font-bold {{ $netProfit >= 0 ? 'text-gray-900' : 'text-red-700' }}">₹ {{ number_format((float) $netProfit, 2) }}</h3>
         </div>
     </div>
 
@@ -43,7 +43,7 @@
                 @forelse ($categoryRows as $row)
                     <tr class="hover:bg-gray-50">
                         <td class="px-4 py-3 font-medium text-gray-900">{{ $row->name }}</td>
-                        <td class="px-4 py-3 text-right font-semibold text-gray-900">Rs. {{ number_format((float) $row->total_amount, 2) }}</td>
+                        <td class="px-4 py-3 text-right font-semibold text-gray-900">₹ {{ number_format((float) $row->total_amount, 2) }}</td>
                     </tr>
                 @empty
                     <tr>

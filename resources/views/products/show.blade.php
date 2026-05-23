@@ -58,11 +58,11 @@
             </div>
             <div>
                 <p class="text-xs font-semibold uppercase text-gray-500">Purchase Price</p>
-                <p class="mt-1 text-gray-900">Rs. {{ number_format((float) $product->purchase_price, 2) }}</p>
+                <p class="mt-1 text-gray-900">₹ {{ number_format((float) $product->purchase_price, 2) }}</p>
             </div>
             <div>
                 <p class="text-xs font-semibold uppercase text-gray-500">Selling Price</p>
-                <p class="mt-1 text-gray-900">Rs. {{ number_format((float) $product->selling_price, 2) }}</p>
+                <p class="mt-1 text-gray-900">₹ {{ number_format((float) $product->selling_price, 2) }}</p>
             </div>
             <div>
                 <p class="text-xs font-semibold uppercase text-gray-500">GST</p>

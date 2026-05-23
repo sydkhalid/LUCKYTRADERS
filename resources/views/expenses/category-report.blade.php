@@ -18,7 +18,7 @@
 
     <div class="mb-5 rounded bg-white p-5 shadow">
         <p class="text-sm text-gray-500">Filtered Expense Total</p>
-        <h3 class="mt-1 text-2xl font-bold text-red-700">Rs. {{ number_format((float) $totalAmount, 2) }}</h3>
+        <h3 class="mt-1 text-2xl font-bold text-red-700">₹ {{ number_format((float) $totalAmount, 2) }}</h3>
     </div>
 
     <div class="overflow-hidden rounded bg-white shadow">
@@ -35,7 +35,7 @@
                     <tr class="hover:bg-gray-50">
                         <td class="px-4 py-3 font-medium text-gray-900">{{ $row->name }}</td>
                         <td class="px-4 py-3 text-right text-gray-900">{{ $row->expense_count }}</td>
-                        <td class="px-4 py-3 text-right font-semibold text-gray-900">Rs. {{ number_format((float) $row->total_amount, 2) }}</td>
+                        <td class="px-4 py-3 text-right font-semibold text-gray-900">₹ {{ number_format((float) $row->total_amount, 2) }}</td>
                     </tr>
                 @empty
                     <tr>

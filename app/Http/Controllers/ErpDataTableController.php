@@ -618,7 +618,7 @@ class ErpDataTableController extends Controller
 
     private function money(mixed $value): string
     {
-        return 'Rs. '.number_format((float) $value, 2);
+        return '₹ '.number_format((float) $value, 2);
     }
 
     private function quantity(mixed $value): string

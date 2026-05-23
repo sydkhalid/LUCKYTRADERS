@@ -7,7 +7,7 @@
         'reference_type' => $sale->bill_type === 'gst' ? 'gst_invoice' : 'normal_bill',
         'sale_date' => $sale->sale_date?->format('d M Y'),
         'balance_amount' => (float) $sale->balance_amount,
-        'label' => $sale->sale_no.' - '.($sale->bill_type === 'gst' ? 'GST Invoice' : 'Normal Bill').' - Balance Rs. '.number_format((float) $sale->balance_amount, 2),
+        'label' => $sale->sale_no.' - '.($sale->bill_type === 'gst' ? 'GST Invoice' : 'Normal Bill').' - Balance ₹ '.number_format((float) $sale->balance_amount, 2),
     ])->values();
 @endphp
 
@@ -49,7 +49,7 @@
                         <option value="">Select customer</option>
                         @foreach ($customers as $customer)
                             <option value="{{ $customer->id }}" @selected(old('customer_id') == $customer->id)>
-                                {{ $customer->name }} - Balance Rs. {{ number_format((float) $customer->current_balance, 2) }}
+                                {{ $customer->name }} - Balance ₹ {{ number_format((float) $customer->current_balance, 2) }}
                             </option>
                         @endforeach
                     </select>

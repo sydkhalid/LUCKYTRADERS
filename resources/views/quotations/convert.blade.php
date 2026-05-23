@@ -41,11 +41,11 @@
             <div class="rounded bg-slate-50 p-4">
                 <div class="flex justify-between text-sm">
                     <span class="text-gray-600">Sale Total</span>
-                    <span class="font-bold text-gray-900" id="saleTotal">Rs. 0.00</span>
+                    <span class="font-bold text-gray-900" id="saleTotal">₹ 0.00</span>
                 </div>
                 <div class="mt-2 flex justify-between text-sm">
                     <span class="text-gray-600">GST</span>
-                    <span class="font-semibold text-gray-900" id="saleGst">Rs. 0.00</span>
+                    <span class="font-semibold text-gray-900" id="saleGst">₹ 0.00</span>
                 </div>
             </div>
         </div>
@@ -67,8 +67,8 @@
                             <td class="px-4 py-3 font-medium text-gray-900">{{ $item->product?->name }}</td>
                             <td class="px-4 py-3 text-right text-gray-700">{{ number_format((float) $item->quantity, 3) }}</td>
                             <td class="px-4 py-3 text-gray-700">{{ $item->unit }}</td>
-                            <td class="px-4 py-3 text-right text-gray-700">Rs. {{ number_format((float) $item->rate, 2) }}</td>
-                            <td class="px-4 py-3 text-right font-semibold text-gray-900">Rs. {{ number_format((float) $item->total, 2) }}</td>
+                            <td class="px-4 py-3 text-right text-gray-700">₹ {{ number_format((float) $item->rate, 2) }}</td>
+                            <td class="px-4 py-3 text-right font-semibold text-gray-900">₹ {{ number_format((float) $item->total, 2) }}</td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -89,7 +89,7 @@
         const billType = document.getElementById('billType');
 
         function money(value) {
-            return 'Rs. ' + Number(value || 0).toFixed(2);
+            return '₹ ' + Number(value || 0).toFixed(2);
         }
 
         function refreshPreview() {

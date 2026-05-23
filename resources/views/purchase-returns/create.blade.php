@@ -32,7 +32,7 @@
                         <option value="">Select purchase</option>
                         @foreach ($purchases as $purchase)
                             <option value="{{ $purchase->id }}" @selected((int) old('purchase_id', request('purchase_id')) === $purchase->id)>
-                                {{ $purchase->purchase_no }} - {{ $purchase->supplier?->name }} - Balance Rs. {{ number_format((float) $purchase->balance_amount, 2) }}
+                                {{ $purchase->purchase_no }} - {{ $purchase->supplier?->name }} - Balance ₹ {{ number_format((float) $purchase->balance_amount, 2) }}
                             </option>
                         @endforeach
                     </select>
@@ -54,7 +54,7 @@
                 </div>
                 <div>
                     <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Purchase Balance</p>
-                    <p class="mt-1 font-semibold text-gray-900" id="selectedBalanceText">Rs. 0.00</p>
+                    <p class="mt-1 font-semibold text-gray-900" id="selectedBalanceText">₹ 0.00</p>
                 </div>
                 <div>
                     <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Returnable Products</p>
@@ -71,9 +71,9 @@
                 </div>
                 <div class="rounded bg-slate-50 p-5">
                     <div class="space-y-3 text-sm">
-                        <div class="flex justify-between"><span class="text-gray-600">Subtotal</span><span class="font-semibold text-gray-900" id="subtotalText">Rs. 0.00</span></div>
-                        <div class="flex justify-between"><span class="text-gray-600">GST</span><span class="font-semibold text-gray-900" id="gstText">Rs. 0.00</span></div>
-                        <div class="flex justify-between border-t border-slate-200 pt-3"><span class="text-gray-800">Return Total</span><span class="font-bold text-gray-900" id="totalText">Rs. 0.00</span></div>
+                        <div class="flex justify-between"><span class="text-gray-600">Subtotal</span><span class="font-semibold text-gray-900" id="subtotalText">₹ 0.00</span></div>
+                        <div class="flex justify-between"><span class="text-gray-600">GST</span><span class="font-semibold text-gray-900" id="gstText">₹ 0.00</span></div>
+                        <div class="flex justify-between border-t border-slate-200 pt-3"><span class="text-gray-800">Return Total</span><span class="font-bold text-gray-900" id="totalText">₹ 0.00</span></div>
                         <div class="text-xs text-gray-500">Allocate full return total between adjustment and refund received.</div>
                         <div><label class="mb-1 block text-sm font-medium text-gray-700">Adjustment Amount</label><input type="number" name="adjustment_amount" value="{{ old('adjustment_amount', '0') }}" min="0" step="0.01" class="w-full rounded border-gray-300 text-right shadow-sm focus:border-slate-500 focus:ring-slate-500" required></div>
                         <div><label class="mb-1 block text-sm font-medium text-gray-700">Refund Amount</label><input type="number" name="refund_amount" value="{{ old('refund_amount', '0') }}" min="0" step="0.01" class="w-full rounded border-gray-300 text-right shadow-sm focus:border-slate-500 focus:ring-slate-500" required></div>

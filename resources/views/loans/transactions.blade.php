@@ -6,7 +6,7 @@
     <div class="mb-5 flex items-center justify-between">
         <div>
             <h2 class="text-lg font-semibold text-gray-900">{{ $loan->loan_no }} Transaction History</h2>
-            <p class="text-sm text-gray-500">{{ $loan->party_name }} - Balance Rs. {{ number_format((float) $loan->balance_amount, 2) }}</p>
+            <p class="text-sm text-gray-500">{{ $loan->party_name }} - Balance ₹ {{ number_format((float) $loan->balance_amount, 2) }}</p>
         </div>
         <a href="{{ route('loans.show', $loan) }}" class="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Back</a>
     </div>
@@ -29,7 +29,7 @@
                         <td class="px-4 py-3 text-gray-700">{{ $transaction->transaction_date?->format('d M Y') }}</td>
                         <td class="px-4 py-3 font-medium text-gray-900">{{ $transaction->typeLabel() }}</td>
                         <td class="px-4 py-3 text-gray-700">{{ strtoupper($transaction->payment_mode) }}</td>
-                        <td class="px-4 py-3 text-right font-semibold text-gray-900">Rs. {{ number_format((float) $transaction->amount, 2) }}</td>
+                        <td class="px-4 py-3 text-right font-semibold text-gray-900">₹ {{ number_format((float) $transaction->amount, 2) }}</td>
                         <td class="px-4 py-3 text-gray-600">{{ $transaction->notes ?: '-' }}</td>
                         <td class="px-4 py-3 text-right">
                             <div class="flex justify-end gap-3">

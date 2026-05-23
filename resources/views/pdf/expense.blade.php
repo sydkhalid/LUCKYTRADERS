@@ -24,7 +24,7 @@
                 <div class="section-title">Amount</div>
                 <div class="box">
                     <table class="meta">
-                        <tr><td class="label">Expense Amount</td><td class="right bold">Rs. {{ number_format((float) $expense->amount, 2) }}</td></tr>
+                        <tr><td class="label">Expense Amount</td><td class="right bold">₹ {{ number_format((float) $expense->amount, 2) }}</td></tr>
                     </table>
                 </div>
             </td>
@@ -38,11 +38,11 @@
         <tbody>
             <tr>
                 <td>{{ $expense->notes ?: ($expense->category?->name ?: 'Business Expense') }}</td>
-                <td class="right bold">Rs. {{ number_format((float) $expense->amount, 2) }}</td>
+                <td class="right bold">₹ {{ number_format((float) $expense->amount, 2) }}</td>
             </tr>
         </tbody>
         <tfoot>
-            <tr class="total-row"><td class="right">Total</td><td class="right">Rs. {{ number_format((float) $expense->amount, 2) }}</td></tr>
+            <tr class="total-row"><td class="right">Total</td><td class="right">₹ {{ number_format((float) $expense->amount, 2) }}</td></tr>
         </tfoot>
     </table>
 

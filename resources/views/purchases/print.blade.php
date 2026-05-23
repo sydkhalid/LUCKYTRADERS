@@ -111,13 +111,13 @@
                             @endif
                             <td class="px-3 py-3 text-right text-gray-700">{{ number_format((float) $item->quantity, 3) }}</td>
                             <td class="px-3 py-3 text-gray-700">{{ $item->unit }}</td>
-                            <td class="px-3 py-3 text-right text-gray-700">Rs. {{ number_format((float) $item->rate, 2) }}</td>
-                            <td class="px-3 py-3 text-right text-gray-700">Rs. {{ number_format((float) $item->subtotal, 2) }}</td>
+                            <td class="px-3 py-3 text-right text-gray-700">₹ {{ number_format((float) $item->rate, 2) }}</td>
+                            <td class="px-3 py-3 text-right text-gray-700">₹ {{ number_format((float) $item->subtotal, 2) }}</td>
                             @if ($isGst)
                                 <td class="px-3 py-3 text-right text-gray-700">{{ number_format((float) $item->gst_percentage, 2) }}</td>
-                                <td class="px-3 py-3 text-right text-gray-700">Rs. {{ number_format((float) $item->gst_amount, 2) }}</td>
+                                <td class="px-3 py-3 text-right text-gray-700">₹ {{ number_format((float) $item->gst_amount, 2) }}</td>
                             @endif
-                            <td class="px-3 py-3 text-right font-semibold text-gray-950">Rs. {{ number_format((float) $item->total, 2) }}</td>
+                            <td class="px-3 py-3 text-right font-semibold text-gray-950">₹ {{ number_format((float) $item->total, 2) }}</td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -128,25 +128,25 @@
             <dl class="w-full max-w-sm space-y-2 text-sm">
                 <div class="flex justify-between border-b border-gray-100 pb-2">
                     <dt class="text-gray-600">Subtotal</dt>
-                    <dd class="font-semibold text-gray-950">Rs. {{ number_format((float) $purchase->subtotal, 2) }}</dd>
+                    <dd class="font-semibold text-gray-950">₹ {{ number_format((float) $purchase->subtotal, 2) }}</dd>
                 </div>
                 @if ($isGst)
                     <div class="flex justify-between border-b border-gray-100 pb-2">
                         <dt class="text-gray-600">Input GST</dt>
-                        <dd class="font-semibold text-gray-950">Rs. {{ number_format((float) $purchase->gst_amount, 2) }}</dd>
+                        <dd class="font-semibold text-gray-950">₹ {{ number_format((float) $purchase->gst_amount, 2) }}</dd>
                     </div>
                 @endif
                 <div class="flex justify-between border-b border-gray-100 pb-2 text-base">
                     <dt class="font-semibold text-gray-800">Total</dt>
-                    <dd class="font-bold text-gray-950">Rs. {{ number_format((float) $purchase->total_amount, 2) }}</dd>
+                    <dd class="font-bold text-gray-950">₹ {{ number_format((float) $purchase->total_amount, 2) }}</dd>
                 </div>
                 <div class="flex justify-between border-b border-gray-100 pb-2">
                     <dt class="text-gray-600">Paid</dt>
-                    <dd class="font-semibold text-gray-950">Rs. {{ number_format((float) $purchase->paid_amount, 2) }}</dd>
+                    <dd class="font-semibold text-gray-950">₹ {{ number_format((float) $purchase->paid_amount, 2) }}</dd>
                 </div>
                 <div class="flex justify-between">
                     <dt class="text-gray-600">Balance</dt>
-                    <dd class="font-bold text-gray-950">Rs. {{ number_format((float) $purchase->balance_amount, 2) }}</dd>
+                    <dd class="font-bold text-gray-950">₹ {{ number_format((float) $purchase->balance_amount, 2) }}</dd>
                 </div>
             </dl>
         </section>

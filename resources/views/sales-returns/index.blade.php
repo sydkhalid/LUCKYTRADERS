@@ -17,15 +17,15 @@
     <div class="mb-5 grid grid-cols-1 gap-4 md:grid-cols-3">
         <div class="erp-summary-card">
             <p class="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Return Total</p>
-            <h3 class="mt-2 text-2xl font-black text-slate-950">Rs. {{ number_format((float) $totalAmount, 2) }}</h3>
+            <h3 class="mt-2 text-2xl font-black text-slate-950">₹ {{ number_format((float) $totalAmount, 2) }}</h3>
         </div>
         <div class="erp-summary-card">
             <p class="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Refunded</p>
-            <h3 class="mt-2 text-2xl font-black text-red-700">Rs. {{ number_format((float) $refundAmount, 2) }}</h3>
+            <h3 class="mt-2 text-2xl font-black text-red-700">₹ {{ number_format((float) $refundAmount, 2) }}</h3>
         </div>
         <div class="erp-summary-card">
             <p class="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Adjusted</p>
-            <h3 class="mt-2 text-2xl font-black text-emerald-700">Rs. {{ number_format((float) $adjustmentAmount, 2) }}</h3>
+            <h3 class="mt-2 text-2xl font-black text-emerald-700">₹ {{ number_format((float) $adjustmentAmount, 2) }}</h3>
         </div>
     </div>
 

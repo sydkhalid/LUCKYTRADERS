@@ -1,5 +1,5 @@
 @php
-    $money = fn ($value) => ($erpCurrency['symbol'] ?? 'Rs.').' '.number_format((float) $value, 2);
+    $money = fn ($value) => ($erpCurrency['symbol'] ?? '₹').' '.number_format((float) $value, 2);
     $collectionRate = $cards['period_sales'] > 0 ? min(100, round(((float) $cards['period_collection'] / (float) $cards['period_sales']) * 100, 1)) : 0;
     $expenseRate = $cards['period_sales'] > 0 ? min(100, round(((float) $cards['total_expense'] / (float) $cards['period_sales']) * 100, 1)) : 0;
     $stockRisk = $cards['product_count'] > 0 ? min(100, round(((int) $cards['low_stock_count'] / (int) $cards['product_count']) * 100, 1)) : 0;

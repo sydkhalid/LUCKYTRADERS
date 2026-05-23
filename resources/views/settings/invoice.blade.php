@@ -109,7 +109,7 @@
                             </div>
                             <div class="settings-invoice-preview-total">
                                 <span>Total</span>
-                                <strong>{{ $erpCurrency['symbol'] ?? 'Rs.' }} 0.00</strong>
+                                <strong>{{ $erpCurrency['symbol'] ?? '₹' }} 0.00</strong>
                             </div>
                         </div>
                     </div>

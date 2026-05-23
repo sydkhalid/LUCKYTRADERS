@@ -25,8 +25,8 @@
                     <table class="meta">
                         <tr><td class="label">Transaction Type</td><td class="right">{{ $transaction->typeLabel() }}</td></tr>
                         <tr><td class="label">Payment Mode</td><td class="right">{{ strtoupper($transaction->payment_mode) }}</td></tr>
-                        <tr><td class="label">Amount</td><td class="right bold">Rs. {{ number_format((float) $transaction->amount, 2) }}</td></tr>
-                        <tr><td class="label">Loan Balance</td><td class="right">Rs. {{ number_format((float) $loan->balance_amount, 2) }}</td></tr>
+                        <tr><td class="label">Amount</td><td class="right bold">₹ {{ number_format((float) $transaction->amount, 2) }}</td></tr>
+                        <tr><td class="label">Loan Balance</td><td class="right">₹ {{ number_format((float) $loan->balance_amount, 2) }}</td></tr>
                     </table>
                 </div>
             </td>

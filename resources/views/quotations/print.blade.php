@@ -92,11 +92,11 @@
                             <td class="border border-gray-300 px-3 py-2">{{ $item->product?->name }}</td>
                             <td class="border border-gray-300 px-3 py-2 text-right">{{ number_format((float) $item->quantity, 3) }}</td>
                             <td class="border border-gray-300 px-3 py-2">{{ $item->unit }}</td>
-                            <td class="border border-gray-300 px-3 py-2 text-right">Rs. {{ number_format((float) $item->rate, 2) }}</td>
-                            <td class="border border-gray-300 px-3 py-2 text-right">Rs. {{ number_format((float) $item->subtotal, 2) }}</td>
+                            <td class="border border-gray-300 px-3 py-2 text-right">₹ {{ number_format((float) $item->rate, 2) }}</td>
+                            <td class="border border-gray-300 px-3 py-2 text-right">₹ {{ number_format((float) $item->subtotal, 2) }}</td>
                             <td class="border border-gray-300 px-3 py-2 text-right">{{ number_format((float) $item->gst_percentage, 2) }}%</td>
-                            <td class="border border-gray-300 px-3 py-2 text-right">Rs. {{ number_format((float) $item->gst_amount, 2) }}</td>
-                            <td class="border border-gray-300 px-3 py-2 text-right font-semibold">Rs. {{ number_format((float) $item->total, 2) }}</td>
+                            <td class="border border-gray-300 px-3 py-2 text-right">₹ {{ number_format((float) $item->gst_amount, 2) }}</td>
+                            <td class="border border-gray-300 px-3 py-2 text-right font-semibold">₹ {{ number_format((float) $item->total, 2) }}</td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -107,15 +107,15 @@
             <div class="w-full max-w-sm space-y-2 text-sm">
                 <div class="flex justify-between">
                     <span>Subtotal</span>
-                    <span>Rs. {{ number_format((float) $quotation->subtotal, 2) }}</span>
+                    <span>₹ {{ number_format((float) $quotation->subtotal, 2) }}</span>
                 </div>
                 <div class="flex justify-between">
                     <span>GST</span>
-                    <span>Rs. {{ number_format((float) $quotation->gst_amount, 2) }}</span>
+                    <span>₹ {{ number_format((float) $quotation->gst_amount, 2) }}</span>
                 </div>
                 <div class="flex justify-between border-t border-gray-300 pt-2 text-lg font-bold">
                     <span>Grand Total</span>
-                    <span>Rs. {{ number_format((float) $quotation->total_amount, 2) }}</span>
+                    <span>₹ {{ number_format((float) $quotation->total_amount, 2) }}</span>
                 </div>
             </div>
         </section>

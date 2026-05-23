@@ -1,5 +1,5 @@
 @php
-    $money = fn ($value) => ($erpCurrency['symbol'] ?? 'Rs.').' '.number_format((float) $value, 2);
+    $money = fn ($value) => ($erpCurrency['symbol'] ?? '₹').' '.number_format((float) $value, 2);
     $number = fn ($value) => number_format((float) $value, 0);
     $cardItems = [
         ['label' => 'Today Sales', 'value' => $money($cards['today_sales']), 'hint' => 'Current day billing', 'icon' => 'sales', 'tone' => 'success'],

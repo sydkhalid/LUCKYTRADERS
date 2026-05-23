@@ -52,13 +52,13 @@
         <tbody>
             <tr>
                 <td>{{ $payment->notes ?: $title.' '.$payment->payment_no }}</td>
-                <td class="right bold">Rs. {{ number_format((float) $payment->amount, 2) }}</td>
+                <td class="right bold">₹ {{ number_format((float) $payment->amount, 2) }}</td>
             </tr>
         </tbody>
         <tfoot>
             <tr class="total-row">
                 <td class="right">Total</td>
-                <td class="right">Rs. {{ number_format((float) $payment->amount, 2) }}</td>
+                <td class="right">₹ {{ number_format((float) $payment->amount, 2) }}</td>
             </tr>
         </tfoot>
     </table>

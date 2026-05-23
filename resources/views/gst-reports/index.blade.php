@@ -36,35 +36,35 @@
     <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">Total Taxable Sales</p>
-            <h3 class="mt-1 text-2xl font-bold text-gray-900">Rs. {{ number_format((float) $summary['taxable_sales'], 2) }}</h3>
+            <h3 class="mt-1 text-2xl font-bold text-gray-900">₹ {{ number_format((float) $summary['taxable_sales'], 2) }}</h3>
         </div>
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">Output GST</p>
-            <h3 class="mt-1 text-2xl font-bold text-emerald-700">Rs. {{ number_format((float) $summary['output_gst'], 2) }}</h3>
+            <h3 class="mt-1 text-2xl font-bold text-emerald-700">₹ {{ number_format((float) $summary['output_gst'], 2) }}</h3>
         </div>
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">GST Sales Total</p>
-            <h3 class="mt-1 text-2xl font-bold text-gray-900">Rs. {{ number_format((float) $summary['total_sales'], 2) }}</h3>
+            <h3 class="mt-1 text-2xl font-bold text-gray-900">₹ {{ number_format((float) $summary['total_sales'], 2) }}</h3>
         </div>
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">Total Taxable Purchases</p>
-            <h3 class="mt-1 text-2xl font-bold text-gray-900">Rs. {{ number_format((float) $summary['taxable_purchases'], 2) }}</h3>
+            <h3 class="mt-1 text-2xl font-bold text-gray-900">₹ {{ number_format((float) $summary['taxable_purchases'], 2) }}</h3>
         </div>
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">Input GST</p>
-            <h3 class="mt-1 text-2xl font-bold text-red-700">Rs. {{ number_format((float) $summary['input_gst'], 2) }}</h3>
+            <h3 class="mt-1 text-2xl font-bold text-red-700">₹ {{ number_format((float) $summary['input_gst'], 2) }}</h3>
         </div>
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">GST Purchase Total</p>
-            <h3 class="mt-1 text-2xl font-bold text-gray-900">Rs. {{ number_format((float) $summary['total_purchases'], 2) }}</h3>
+            <h3 class="mt-1 text-2xl font-bold text-gray-900">₹ {{ number_format((float) $summary['total_purchases'], 2) }}</h3>
         </div>
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">Net GST Payable</p>
-            <h3 class="mt-1 text-2xl font-bold {{ $summary['net_gst_payable'] >= 0 ? 'text-red-700' : 'text-emerald-700' }}">Rs. {{ number_format((float) $summary['net_gst_payable'], 2) }}</h3>
+            <h3 class="mt-1 text-2xl font-bold {{ $summary['net_gst_payable'] >= 0 ? 'text-red-700' : 'text-emerald-700' }}">₹ {{ number_format((float) $summary['net_gst_payable'], 2) }}</h3>
         </div>
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">Non-GST Sales</p>
-            <h3 class="mt-1 text-2xl font-bold text-gray-900">Rs. {{ number_format((float) $summary['non_gst_sales'], 2) }}</h3>
+            <h3 class="mt-1 text-2xl font-bold text-gray-900">₹ {{ number_format((float) $summary['non_gst_sales'], 2) }}</h3>
         </div>
         <a href="{{ route('gst-reports.non-gst-sales', $filters) }}" class="rounded bg-white p-5 shadow hover:shadow-md">
             <p class="text-sm text-gray-500">Normal Bill Report</p>
@@ -72,19 +72,19 @@
         </a>
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">GST Sales Returns</p>
-            <h3 class="mt-1 text-2xl font-bold text-red-700">Rs. {{ number_format((float) $summary['sales_returns'], 2) }}</h3>
+            <h3 class="mt-1 text-2xl font-bold text-red-700">₹ {{ number_format((float) $summary['sales_returns'], 2) }}</h3>
         </div>
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">GST Purchase Returns</p>
-            <h3 class="mt-1 text-2xl font-bold text-emerald-700">Rs. {{ number_format((float) $summary['purchase_returns'], 2) }}</h3>
+            <h3 class="mt-1 text-2xl font-bold text-emerald-700">₹ {{ number_format((float) $summary['purchase_returns'], 2) }}</h3>
         </div>
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">Sales Return GST Adjustment</p>
-            <h3 class="mt-1 text-2xl font-bold text-red-700">Rs. {{ number_format((float) $summary['sales_returns_gst'], 2) }}</h3>
+            <h3 class="mt-1 text-2xl font-bold text-red-700">₹ {{ number_format((float) $summary['sales_returns_gst'], 2) }}</h3>
         </div>
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">Purchase Return GST Adjustment</p>
-            <h3 class="mt-1 text-2xl font-bold text-emerald-700">Rs. {{ number_format((float) $summary['purchase_returns_gst'], 2) }}</h3>
+            <h3 class="mt-1 text-2xl font-bold text-emerald-700">₹ {{ number_format((float) $summary['purchase_returns_gst'], 2) }}</h3>
         </div>
     </div>
 @endsection

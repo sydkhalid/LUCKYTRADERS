@@ -19,15 +19,15 @@
     <div class="mb-5 grid grid-cols-1 gap-4 md:grid-cols-3">
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">Principal</p>
-            <h3 class="mt-1 text-2xl font-bold text-gray-900">Rs. {{ number_format((float) $totalPrincipal, 2) }}</h3>
+            <h3 class="mt-1 text-2xl font-bold text-gray-900">₹ {{ number_format((float) $totalPrincipal, 2) }}</h3>
         </div>
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">Interest</p>
-            <h3 class="mt-1 text-2xl font-bold text-gray-900">Rs. {{ number_format((float) $totalInterest, 2) }}</h3>
+            <h3 class="mt-1 text-2xl font-bold text-gray-900">₹ {{ number_format((float) $totalInterest, 2) }}</h3>
         </div>
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">Balance</p>
-            <h3 class="mt-1 text-2xl font-bold text-red-700">Rs. {{ number_format((float) $totalBalance, 2) }}</h3>
+            <h3 class="mt-1 text-2xl font-bold text-red-700">₹ {{ number_format((float) $totalBalance, 2) }}</h3>
         </div>
     </div>
 
@@ -53,10 +53,10 @@
                         <td class="px-4 py-3 text-gray-700">{{ $loan->loan_date?->format('d M Y') }}</td>
                         <td class="px-4 py-3 text-gray-700">{{ $loan->typeLabel() }}</td>
                         <td class="px-4 py-3 text-gray-700">{{ $loan->party_name }}</td>
-                        <td class="px-4 py-3 text-right text-gray-900">Rs. {{ number_format((float) $loan->principal_amount, 2) }}</td>
-                        <td class="px-4 py-3 text-right text-gray-900">Rs. {{ number_format((float) $loan->total_interest, 2) }}</td>
-                        <td class="px-4 py-3 text-right text-gray-900">Rs. {{ number_format((float) $loan->paid_amount, 2) }}</td>
-                        <td class="px-4 py-3 text-right font-semibold text-gray-900">Rs. {{ number_format((float) $loan->balance_amount, 2) }}</td>
+                        <td class="px-4 py-3 text-right text-gray-900">₹ {{ number_format((float) $loan->principal_amount, 2) }}</td>
+                        <td class="px-4 py-3 text-right text-gray-900">₹ {{ number_format((float) $loan->total_interest, 2) }}</td>
+                        <td class="px-4 py-3 text-right text-gray-900">₹ {{ number_format((float) $loan->paid_amount, 2) }}</td>
+                        <td class="px-4 py-3 text-right font-semibold text-gray-900">₹ {{ number_format((float) $loan->balance_amount, 2) }}</td>
                         <td class="px-4 py-3 text-right">
                             <a href="{{ route('loans.show', $loan) }}" class="font-semibold text-slate-700 hover:text-slate-900">View</a>
                         </td>

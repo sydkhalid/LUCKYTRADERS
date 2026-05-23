@@ -75,11 +75,11 @@
             @endforeach
         </tbody>
         <tfoot>
-            <tr><td colspan="{{ $hasGst ? 9 : 5 }}" class="right">Subtotal</td><td class="right">Rs. {{ number_format((float) $quotation->subtotal, 2) }}</td></tr>
+            <tr><td colspan="{{ $hasGst ? 9 : 5 }}" class="right">Subtotal</td><td class="right">₹ {{ number_format((float) $quotation->subtotal, 2) }}</td></tr>
             @if ($hasGst)
-                <tr><td colspan="9" class="right">GST Amount</td><td class="right">Rs. {{ number_format((float) $quotation->gst_amount, 2) }}</td></tr>
+                <tr><td colspan="9" class="right">GST Amount</td><td class="right">₹ {{ number_format((float) $quotation->gst_amount, 2) }}</td></tr>
             @endif
-            <tr class="total-row"><td colspan="{{ $hasGst ? 9 : 5 }}" class="right">Quotation Total</td><td class="right">Rs. {{ number_format((float) $quotation->total_amount, 2) }}</td></tr>
+            <tr class="total-row"><td colspan="{{ $hasGst ? 9 : 5 }}" class="right">Quotation Total</td><td class="right">₹ {{ number_format((float) $quotation->total_amount, 2) }}</td></tr>
         </tfoot>
     </table>
 

@@ -6,7 +6,7 @@
         'purchase_date' => $purchase->purchase_date?->format('d M Y'),
         'supplier_invoice_no' => $purchase->supplier_invoice_no,
         'balance_amount' => (float) $purchase->balance_amount,
-        'label' => $purchase->purchase_no.' - Supplier Inv '.($purchase->supplier_invoice_no ?: '-').' - Balance Rs. '.number_format((float) $purchase->balance_amount, 2),
+        'label' => $purchase->purchase_no.' - Supplier Inv '.($purchase->supplier_invoice_no ?: '-').' - Balance ₹ '.number_format((float) $purchase->balance_amount, 2),
     ])->values();
 @endphp
 
@@ -48,7 +48,7 @@
                         <option value="">Select supplier</option>
                         @foreach ($suppliers as $supplier)
                             <option value="{{ $supplier->id }}" @selected(old('supplier_id') == $supplier->id)>
-                                {{ $supplier->name }} - Balance Rs. {{ number_format((float) $supplier->current_balance, 2) }}
+                                {{ $supplier->name }} - Balance ₹ {{ number_format((float) $supplier->current_balance, 2) }}
                             </option>
                         @endforeach
                     </select>

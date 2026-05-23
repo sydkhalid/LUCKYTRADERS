@@ -6,7 +6,7 @@
     <div class="mb-5 flex items-center justify-between">
         <div>
             <h2 class="text-lg font-semibold text-gray-900">{{ $partner->name }} Transactions</h2>
-            <p class="text-sm text-gray-500">Current returnable capital: Rs. {{ number_format((float) $partner->current_investment, 2) }}</p>
+            <p class="text-sm text-gray-500">Current returnable capital: ₹ {{ number_format((float) $partner->current_investment, 2) }}</p>
         </div>
         <div class="flex gap-2">
             <a href="{{ route('partners.transactions.create', ['partner' => $partner, 'transaction_type' => 'investment']) }}" class="rounded bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">Investment</a>
@@ -33,7 +33,7 @@
                         <td class="px-4 py-3 text-gray-700">{{ $transaction->transaction_date?->format('d M Y') }}</td>
                         <td class="px-4 py-3 font-medium text-gray-900">{{ $transaction->typeLabel() }}</td>
                         <td class="px-4 py-3 text-gray-700">{{ $transaction->transaction_type === 'profit_share' ? '-' : strtoupper($transaction->payment_mode) }}</td>
-                        <td class="px-4 py-3 text-right font-semibold text-gray-900">Rs. {{ number_format((float) $transaction->amount, 2) }}</td>
+                        <td class="px-4 py-3 text-right font-semibold text-gray-900">₹ {{ number_format((float) $transaction->amount, 2) }}</td>
                         <td class="px-4 py-3 text-gray-600">{{ $transaction->notes ?: '-' }}</td>
                         <td class="px-4 py-3 text-right">
                             <div class="flex justify-end gap-3">

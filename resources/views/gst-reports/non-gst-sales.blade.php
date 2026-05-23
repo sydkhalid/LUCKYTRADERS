@@ -21,10 +21,10 @@
     ])
 
     <div class="mb-5 grid grid-cols-1 gap-4 md:grid-cols-4">
-        <div class="erp-summary-card"><p class="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Taxable</p><h3 class="mt-2 text-xl font-black text-slate-950">Rs. {{ number_format((float) $totals['taxable'], 2) }}</h3></div>
-        <div class="erp-summary-card"><p class="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Total</p><h3 class="mt-2 text-xl font-black text-slate-950">Rs. {{ number_format((float) $totals['total'], 2) }}</h3></div>
-        <div class="erp-summary-card"><p class="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Paid</p><h3 class="mt-2 text-xl font-black text-slate-950">Rs. {{ number_format((float) $totals['paid'], 2) }}</h3></div>
-        <div class="erp-summary-card"><p class="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Balance</p><h3 class="mt-2 text-xl font-black text-red-700">Rs. {{ number_format((float) $totals['balance'], 2) }}</h3></div>
+        <div class="erp-summary-card"><p class="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Taxable</p><h3 class="mt-2 text-xl font-black text-slate-950">₹ {{ number_format((float) $totals['taxable'], 2) }}</h3></div>
+        <div class="erp-summary-card"><p class="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Total</p><h3 class="mt-2 text-xl font-black text-slate-950">₹ {{ number_format((float) $totals['total'], 2) }}</h3></div>
+        <div class="erp-summary-card"><p class="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Paid</p><h3 class="mt-2 text-xl font-black text-slate-950">₹ {{ number_format((float) $totals['paid'], 2) }}</h3></div>
+        <div class="erp-summary-card"><p class="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Balance</p><h3 class="mt-2 text-xl font-black text-red-700">₹ {{ number_format((float) $totals['balance'], 2) }}</h3></div>
     </div>
 
     <x-erp.datatable

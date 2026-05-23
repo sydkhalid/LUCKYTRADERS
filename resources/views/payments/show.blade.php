@@ -33,7 +33,7 @@
     <div class="grid grid-cols-1 gap-5 lg:grid-cols-3">
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">Amount</p>
-            <h3 class="mt-1 text-2xl font-bold {{ $isReceipt ? 'text-emerald-700' : 'text-red-700' }}">Rs. {{ number_format((float) $payment->amount, 2) }}</h3>
+            <h3 class="mt-1 text-2xl font-bold {{ $isReceipt ? 'text-emerald-700' : 'text-red-700' }}">₹ {{ number_format((float) $payment->amount, 2) }}</h3>
             <p class="mt-2 text-sm text-gray-500">{{ strtoupper($payment->payment_mode) }} on {{ $payment->payment_date?->format('d M Y') }}</p>
         </div>
 

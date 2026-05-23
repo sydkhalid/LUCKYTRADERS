@@ -92,7 +92,7 @@ class GlobalSearchController extends Controller
             ->get()
             ->map(fn (Sale $sale) => [
                 'title' => $sale->sale_no,
-                'subtitle' => trim(($sale->customer?->name ?? 'Customer').' | '.strtoupper($sale->bill_type).' | Rs. '.number_format((float) $sale->total_amount, 2)),
+                'subtitle' => trim(($sale->customer?->name ?? 'Customer').' | '.strtoupper($sale->bill_type).' | ₹ '.number_format((float) $sale->total_amount, 2)),
                 'url' => route('sales.show', $sale),
             ]);
 
@@ -131,7 +131,7 @@ class GlobalSearchController extends Controller
             ->get()
             ->map(fn (Customer $customer) => [
                 'title' => $customer->name,
-                'subtitle' => trim(($customer->phone ?: 'No phone').' | Balance Rs. '.number_format((float) $customer->current_balance, 2)),
+                'subtitle' => trim(($customer->phone ?: 'No phone').' | Balance ₹ '.number_format((float) $customer->current_balance, 2)),
                 'url' => route('customers.show', $customer),
             ]);
 
@@ -151,7 +151,7 @@ class GlobalSearchController extends Controller
             ->get()
             ->map(fn (Supplier $supplier) => [
                 'title' => $supplier->name,
-                'subtitle' => trim(($supplier->phone ?: 'No phone').' | Balance Rs. '.number_format((float) $supplier->current_balance, 2)),
+                'subtitle' => trim(($supplier->phone ?: 'No phone').' | Balance ₹ '.number_format((float) $supplier->current_balance, 2)),
                 'url' => route('suppliers.show', $supplier),
             ]);
 
@@ -186,7 +186,7 @@ class GlobalSearchController extends Controller
             ->get()
             ->map(fn (Quotation $quotation) => [
                 'title' => $quotation->quotation_no,
-                'subtitle' => trim(($quotation->customer?->name ?? 'Customer').' | '.ucfirst($quotation->status).' | Rs. '.number_format((float) $quotation->total_amount, 2)),
+                'subtitle' => trim(($quotation->customer?->name ?? 'Customer').' | '.ucfirst($quotation->status).' | ₹ '.number_format((float) $quotation->total_amount, 2)),
                 'url' => route('quotations.show', $quotation),
             ]);
 
@@ -205,7 +205,7 @@ class GlobalSearchController extends Controller
             ->get()
             ->map(fn (Loan $loan) => [
                 'title' => $loan->loan_no,
-                'subtitle' => trim($loan->party_name.' | '.$loan->typeLabel().' | Balance Rs. '.number_format((float) $loan->balance_amount, 2)),
+                'subtitle' => trim($loan->party_name.' | '.$loan->typeLabel().' | Balance ₹ '.number_format((float) $loan->balance_amount, 2)),
                 'url' => route('loans.show', $loan),
             ]);
 
@@ -224,7 +224,7 @@ class GlobalSearchController extends Controller
             ->get()
             ->map(fn (Partner $partner) => [
                 'title' => $partner->name,
-                'subtitle' => 'Share '.number_format((float) $partner->share_percentage, 2).'% | Investment Rs. '.number_format((float) $partner->current_investment, 2),
+                'subtitle' => 'Share '.number_format((float) $partner->share_percentage, 2).'% | Investment ₹ '.number_format((float) $partner->current_investment, 2),
                 'url' => route('partners.show', $partner),
             ]);
 
@@ -243,7 +243,7 @@ class GlobalSearchController extends Controller
 
         $items = $receipts->map(fn (Payment $payment) => [
             'title' => $payment->payment_no,
-            'subtitle' => trim(($customerNames[$payment->party_id] ?? ucfirst($payment->party_type)).' | Rs. '.number_format((float) $payment->amount, 2).' | '.ucfirst($payment->payment_mode)),
+            'subtitle' => trim(($customerNames[$payment->party_id] ?? ucfirst($payment->party_type)).' | ₹ '.number_format((float) $payment->amount, 2).' | '.ucfirst($payment->payment_mode)),
             'url' => route('receipts.show', $payment),
         ]);
 
@@ -262,7 +262,7 @@ class GlobalSearchController extends Controller
 
         $items = $payments->map(fn (Payment $payment) => [
             'title' => $payment->payment_no,
-            'subtitle' => trim(($supplierNames[$payment->party_id] ?? ucfirst($payment->party_type)).' | Rs. '.number_format((float) $payment->amount, 2).' | '.ucfirst($payment->payment_mode)),
+            'subtitle' => trim(($supplierNames[$payment->party_id] ?? ucfirst($payment->party_type)).' | ₹ '.number_format((float) $payment->amount, 2).' | '.ucfirst($payment->payment_mode)),
             'url' => route('payments.show', $payment),
         ]);
 

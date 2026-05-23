@@ -30,11 +30,11 @@
             </div>
             <div>
                 <p class="text-xs font-semibold uppercase text-gray-500">Opening Balance</p>
-                <p class="mt-1 text-gray-900">Rs. {{ number_format((float) $supplier->opening_balance, 2) }} {{ ucfirst($supplier->balance_type) }}</p>
+                <p class="mt-1 text-gray-900">₹ {{ number_format((float) $supplier->opening_balance, 2) }} {{ ucfirst($supplier->balance_type) }}</p>
             </div>
             <div>
                 <p class="text-xs font-semibold uppercase text-gray-500">Current Balance</p>
-                <p class="mt-1 text-gray-900">Rs. {{ number_format((float) $supplier->current_balance, 2) }}</p>
+                <p class="mt-1 text-gray-900">₹ {{ number_format((float) $supplier->current_balance, 2) }}</p>
             </div>
             <div>
                 <p class="text-xs font-semibold uppercase text-gray-500">Status</p>

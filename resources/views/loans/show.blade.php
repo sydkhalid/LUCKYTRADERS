@@ -22,19 +22,19 @@
     <div class="mb-5 grid grid-cols-1 gap-4 md:grid-cols-4">
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">Principal</p>
-            <h3 class="mt-1 text-xl font-bold text-gray-900">Rs. {{ number_format((float) $loan->principal_amount, 2) }}</h3>
+            <h3 class="mt-1 text-xl font-bold text-gray-900">₹ {{ number_format((float) $loan->principal_amount, 2) }}</h3>
         </div>
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">Interest</p>
-            <h3 class="mt-1 text-xl font-bold text-gray-900">Rs. {{ number_format((float) $loan->total_interest, 2) }}</h3>
+            <h3 class="mt-1 text-xl font-bold text-gray-900">₹ {{ number_format((float) $loan->total_interest, 2) }}</h3>
         </div>
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">Paid / Returned</p>
-            <h3 class="mt-1 text-xl font-bold text-emerald-700">Rs. {{ number_format((float) $loan->paid_amount, 2) }}</h3>
+            <h3 class="mt-1 text-xl font-bold text-emerald-700">₹ {{ number_format((float) $loan->paid_amount, 2) }}</h3>
         </div>
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">Balance</p>
-            <h3 class="mt-1 text-xl font-bold text-red-700">Rs. {{ number_format((float) $loan->balance_amount, 2) }}</h3>
+            <h3 class="mt-1 text-xl font-bold text-red-700">₹ {{ number_format((float) $loan->balance_amount, 2) }}</h3>
         </div>
     </div>
 
@@ -80,7 +80,7 @@
                         <td class="px-4 py-3 text-gray-700">{{ $transaction->transaction_date?->format('d M Y') }}</td>
                         <td class="px-4 py-3 font-medium text-gray-900">{{ $transaction->typeLabel() }}</td>
                         <td class="px-4 py-3 text-gray-700">{{ strtoupper($transaction->payment_mode) }}</td>
-                        <td class="px-4 py-3 text-right font-semibold text-gray-900">Rs. {{ number_format((float) $transaction->amount, 2) }}</td>
+                        <td class="px-4 py-3 text-right font-semibold text-gray-900">₹ {{ number_format((float) $transaction->amount, 2) }}</td>
                         <td class="px-4 py-3 text-gray-600">{{ $transaction->notes ?: '-' }}</td>
                         <td class="px-4 py-3 text-right">
                             <div class="flex justify-end gap-3">

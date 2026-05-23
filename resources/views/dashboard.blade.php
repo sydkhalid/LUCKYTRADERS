@@ -4,7 +4,7 @@
 
 @section('content')
     @php
-        $money = fn ($value) => ($erpCurrency['symbol'] ?? 'Rs.').' '.number_format((float) $value, 2);
+        $money = fn ($value) => ($erpCurrency['symbol'] ?? '₹').' '.number_format((float) $value, 2);
         $chartValues = function ($value) use (&$chartValues): array {
             if (is_array($value)) {
                 return collect($value)

@@ -19,15 +19,15 @@
     <div class="mb-5 grid grid-cols-1 gap-4 md:grid-cols-3">
         <div class="erp-summary-card">
             <p class="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Today Expenses</p>
-            <h3 class="mt-2 text-2xl font-black text-red-700">Rs. {{ number_format((float) $todayTotal, 2) }}</h3>
+            <h3 class="mt-2 text-2xl font-black text-red-700">₹ {{ number_format((float) $todayTotal, 2) }}</h3>
         </div>
         <div class="erp-summary-card">
             <p class="text-xs font-black uppercase tracking-[0.16em] text-slate-500">This Month</p>
-            <h3 class="mt-2 text-2xl font-black text-red-700">Rs. {{ number_format((float) $monthTotal, 2) }}</h3>
+            <h3 class="mt-2 text-2xl font-black text-red-700">₹ {{ number_format((float) $monthTotal, 2) }}</h3>
         </div>
         <div class="erp-summary-card">
             <p class="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Total Expenses</p>
-            <h3 class="mt-2 text-2xl font-black text-slate-950">Rs. {{ number_format((float) $overallTotal, 2) }}</h3>
+            <h3 class="mt-2 text-2xl font-black text-slate-950">₹ {{ number_format((float) $overallTotal, 2) }}</h3>
         </div>
     </div>
 

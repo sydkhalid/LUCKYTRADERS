@@ -1,19 +1,50 @@
 @php
     $isGst = $sale->bill_type === 'gst';
-    $documentTitle = $title ?? ($isGst ? 'GST Invoice' : 'Normal Bill');
-    $documentNoLabel = $isGst ? 'GST Invoice No' : 'Normal Bill No';
     $companyName = $company['name'] ?? 'LUCKY TRADERS';
     $companyAddress = $company['address'] ?? '2/164/14 Line Kollai, Venkatapuram, Krishnagiri, Tamil Nadu, India - 635002';
     $companyPhone = $company['phone'] ?? '+91 7418287561';
     $companyGst = $company['gst_number'] ?? null;
     $taxableValue = (float) $sale->subtotal;
     $gstAmount = $isGst ? (float) $sale->gst_amount : 0;
-    $cgstAmount = round($gstAmount / 2, 2);
-    $sgstAmount = round($gstAmount - $cgstAmount, 2);
     $roundOff = round((float) $sale->total_amount - ($taxableValue + $gstAmount), 2);
-    $money = static fn ($value) => 'Rs. '.number_format((float) $value, 2);
-    $qty = static fn ($value) => number_format((float) $value, 3);
-    $gstRate = $sale->items->max(fn ($item) => (float) $item->gst_percentage);
+    $currency = "\u{20B9}";
+    $money = static fn ($value) => $currency.' '.number_format((float) $value, 2);
+    $qty = static fn ($value) => number_format((float) $value, 2);
+    $rate = static fn ($value) => rtrim(rtrim(number_format((float) $value, 2), '0'), '.');
+    $taxSummary = [];
+    $addTax = static function (string $label, float $amount) use (&$taxSummary): void {
+        $taxSummary[$label] = round(($taxSummary[$label] ?? 0) + $amount, 2);
+    };
+
+    if ($isGst) {
+        foreach ($sale->items as $item) {
+            $itemGstAmount = round((float) $item->gst_amount, 2);
+            $itemGstRate = (float) $item->gst_percentage;
+
+            if ($itemGstAmount <= 0 || $itemGstRate <= 0) {
+                continue;
+            }
+
+            if (($item->gst_type ?? 'cgst_sgst') === 'igst') {
+                $addTax('IGST ('.$rate($itemGstRate).'%)', $itemGstAmount);
+                continue;
+            }
+
+            $cgstAmount = round($itemGstAmount / 2, 2);
+            $sgstAmount = round($itemGstAmount - $cgstAmount, 2);
+            $halfRate = $rate($itemGstRate / 2);
+            $addTax('CGST ('.$halfRate.'%)', $cgstAmount);
+            $addTax('SGST ('.$halfRate.'%)', $sgstAmount);
+        }
+    }
+
+    $hasEway = filled($sale->eway_bill_no)
+        || filled($sale->eway_date)
+        || filled($sale->eway_driver_name)
+        || filled($sale->eway_mobile_no)
+        || filled($sale->eway_vehicle_no)
+        || filled($sale->eway_valid_upto);
+
     $bankText = trim((string) ($bankDetails ?? '')) ?: implode("\n", [
         'Bank Name: UNION BANK',
         'Account No: 558701010230709',
@@ -50,10 +81,8 @@
                 <div class="invoice-company-name">{{ $companyName }}</div>
             </td>
             <td class="invoice-meta">
-                <h2>{{ $documentTitle }}</h2>
-                <p><strong>{{ $documentNoLabel }}:</strong> {{ $sale->sale_no }}</p>
+                <p><strong>Invoice No:</strong> #{{ $sale->sale_no }}</p>
                 <p><strong>Invoice Date:</strong> {{ $sale->sale_date?->format('d-m-Y') }}</p>
-                <p><strong>Payment:</strong> {{ strtoupper($sale->payment_mode) }} / {{ ucfirst($sale->payment_status) }}</p>
             </td>
         </tr>
     </table>
@@ -79,7 +108,7 @@
                     <strong>{{ $sale->customer?->name ?: '-' }}</strong><br>
                     {{ $sale->customer?->address ?: '-' }}<br>
                     @if ($isGst)
-                        <strong>Customer GSTIN:</strong> {{ $sale->customer?->gst_number ?: '-' }}<br>
+                        <strong>GSTIN:</strong> {{ $sale->customer?->gst_number ?: '-' }}<br>
                     @endif
                     <strong>Phone:</strong> {{ $sale->customer?->phone ?: '-' }}
                 </div>
@@ -98,7 +127,7 @@
                 <th class="text-right">Qty (Kg)</th>
                 <th class="text-right">Rate</th>
                 @if ($isGst)
-                    <th class="text-right">GST %</th>
+                    <th>Tax %</th>
                 @endif
                 <th class="text-right">Amount</th>
             </tr>
@@ -111,12 +140,12 @@
                     @if ($isGst)
                         <td>{{ $item->product?->hsn_code ?: $item->product?->code ?: '-' }}</td>
                     @endif
-                    <td class="text-right">{{ $qty($item->quantity) }} {{ $item->unit }}</td>
-                    <td class="text-right">{{ $money($item->rate) }}</td>
+                    <td class="text-right">{{ $qty($item->quantity) }}</td>
+                    <td class="text-right">{{ $rate($item->rate) }}</td>
                     @if ($isGst)
-                        <td class="text-right">{{ number_format((float) $item->gst_percentage, 2) }}%</td>
+                        <td>{{ $rate($item->gst_percentage) }}%{{ ($item->gst_calculation ?? 'exclusive') === 'inclusive' ? ' (Included)' : '' }}</td>
                     @endif
-                    <td class="amount-cell">{{ $money($isGst ? $item->subtotal : $item->total) }}</td>
+                    <td class="amount-cell">{{ $money($item->total) }}</td>
                 </tr>
             @endforeach
         </tbody>
@@ -128,16 +157,14 @@
             <td>{{ $money($taxableValue) }}</td>
         </tr>
         @if ($isGst)
+            @foreach ($taxSummary as $label => $amount)
+                <tr>
+                    <td>{{ $label }}:</td>
+                    <td>{{ $money($amount) }}</td>
+                </tr>
+            @endforeach
             <tr>
-                <td>CGST ({{ number_format($gstRate / 2, 2) }}%):</td>
-                <td>{{ $money($cgstAmount) }}</td>
-            </tr>
-            <tr>
-                <td>SGST ({{ number_format($gstRate / 2, 2) }}%):</td>
-                <td>{{ $money($sgstAmount) }}</td>
-            </tr>
-            <tr>
-                <td>GST Amount:</td>
+                <td>Total GST:</td>
                 <td>{{ $money($gstAmount) }}</td>
             </tr>
         @endif
@@ -149,17 +176,32 @@
             <td>Grand Total:</td>
             <td>{{ $money($sale->total_amount) }}</td>
         </tr>
-        <tr>
-            <td>Paid Amount:</td>
-            <td>{{ $money($sale->paid_amount) }}</td>
-        </tr>
-        <tr>
-            <td>Balance Amount:</td>
-            <td>{{ $money($sale->balance_amount) }}</td>
-        </tr>
     </table>
 
     <div class="amount-words">Amount in Words: {{ $amountWords }}</div>
+
+    @if ($hasEway)
+        <table class="invoice-eway">
+            <tr>
+                <td><strong>E-Way Bill No:</strong></td>
+                <td>{{ $sale->eway_bill_no ?: '-' }}</td>
+                <td><strong>Date:</strong></td>
+                <td>{{ $sale->eway_date?->format('d-m-Y') ?: '-' }}</td>
+            </tr>
+            <tr>
+                <td><strong>Driver Name:</strong></td>
+                <td>{{ $sale->eway_driver_name ?: '-' }}</td>
+                <td><strong>Vehicle No:</strong></td>
+                <td>{{ $sale->eway_vehicle_no ?: '-' }}</td>
+            </tr>
+            <tr>
+                <td><strong>Mobile No:</strong></td>
+                <td>{{ $sale->eway_mobile_no ?: '-' }}</td>
+                <td><strong>Valid Upto:</strong></td>
+                <td>{{ $sale->eway_valid_upto?->format('d-m-Y') ?: '-' }}</td>
+            </tr>
+        </table>
+    @endif
 
     @if ($sale->notes)
         <div class="invoice-note"><strong>Notes:</strong> {{ $sale->notes }}</div>
@@ -168,17 +210,11 @@
     <table class="invoice-summary-section">
         <tr>
             <td class="invoice-bank">
-                <strong>BANK DETAILS</strong><br><br>
+                <span class="invoice-bank-title">BANK DETAILS</span>
                 {!! nl2br(e($bankText)) !!}
-                @if (! empty($termsAndConditions))
-                    <div class="invoice-footer-note">
-                        <strong>Terms:</strong><br>
-                        {!! nl2br(e($termsAndConditions)) !!}
-                    </div>
-                @endif
             </td>
             <td class="invoice-signature">
-                <p><strong>For {{ $companyName }}</strong></p>
+                <span class="invoice-signature-title">For {{ $companyName }}</span>
                 @if ($signatureSrc)
                     <img src="{{ $signatureSrc }}" alt="{{ $companyName }} Signature">
                 @else

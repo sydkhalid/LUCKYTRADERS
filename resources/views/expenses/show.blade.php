@@ -18,7 +18,7 @@
     <div class="mb-5 grid grid-cols-1 gap-4 md:grid-cols-3">
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">Amount</p>
-            <h3 class="mt-1 text-2xl font-bold text-red-700">Rs. {{ number_format((float) $expense->amount, 2) }}</h3>
+            <h3 class="mt-1 text-2xl font-bold text-red-700">₹ {{ number_format((float) $expense->amount, 2) }}</h3>
         </div>
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">Payment Mode</p>
@@ -47,7 +47,7 @@
             </div>
             <div>
                 <dt class="text-sm font-medium text-gray-500">Ledger Balance</dt>
-                <dd class="mt-1 text-sm font-semibold text-gray-900">Rs. {{ number_format((float) ($ledger->balance ?? 0), 2) }}</dd>
+                <dd class="mt-1 text-sm font-semibold text-gray-900">₹ {{ number_format((float) ($ledger->balance ?? 0), 2) }}</dd>
             </div>
             <div class="md:col-span-2">
                 <dt class="text-sm font-medium text-gray-500">Notes</dt>

@@ -28,7 +28,7 @@
                         <td class="px-4 py-3 font-medium text-gray-900">{{ $customer->name }}</td>
                         <td class="px-4 py-3 text-gray-700">{{ $customer->phone ?: '-' }}</td>
                         <td class="px-4 py-3 text-gray-700">{{ $customer->gst_number ?: '-' }}</td>
-                        <td class="px-4 py-3 text-right font-semibold text-gray-900">Rs. {{ number_format((float) $customer->current_balance, 2) }}</td>
+                        <td class="px-4 py-3 text-right font-semibold text-gray-900">₹ {{ number_format((float) $customer->current_balance, 2) }}</td>
                         <td class="px-4 py-3 text-right">
                             <a href="{{ route('ledgers.customers.show', $customer) }}" class="font-semibold text-slate-700 hover:text-slate-900">View Ledger</a>
                         </td>

@@ -25,7 +25,7 @@
         </div>
         <div class="erp-summary-card">
             <p class="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Active Balance</p>
-            <h3 class="mt-2 text-2xl font-black text-red-700">Rs. {{ number_format((float) $activeBalance, 2) }}</h3>
+            <h3 class="mt-2 text-2xl font-black text-red-700">₹ {{ number_format((float) $activeBalance, 2) }}</h3>
         </div>
     </div>
 

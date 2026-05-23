@@ -57,10 +57,10 @@ class AppServiceProvider extends ServiceProvider
                 $invoice = $service->invoiceSettings();
                 $currency = strtoupper((string) ($settings->currency ?: 'INR'));
                 $symbols = [
-                    'INR' => 'Rs.',
+                    'INR' => '₹',
                     'USD' => '$',
-                    'EUR' => '€',
-                    'GBP' => '£',
+                    'EUR' => 'â‚¬',
+                    'GBP' => 'Â£',
                     'AED' => 'AED',
                     'SGD' => 'S$',
                 ];

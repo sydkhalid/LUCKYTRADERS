@@ -96,11 +96,11 @@
                 <div class="rounded bg-slate-50 p-4">
                     <div class="flex justify-between text-sm">
                         <span class="text-gray-600">Interest</span>
-                        <span class="font-semibold text-gray-900" id="interestText">Rs. 0.00</span>
+                        <span class="font-semibold text-gray-900" id="interestText">₹ 0.00</span>
                     </div>
                     <div class="mt-3 flex justify-between border-t border-slate-200 pt-3 text-sm">
                         <span class="text-gray-800">Total Amount</span>
-                        <span class="font-bold text-gray-900" id="totalText">Rs. 0.00</span>
+                        <span class="font-bold text-gray-900" id="totalText">₹ 0.00</span>
                     </div>
                 </div>
             </div>
@@ -127,7 +127,7 @@
         const partyPhone = document.getElementById('partyPhone');
 
         function money(value) {
-            return 'Rs. ' + Number(value || 0).toFixed(2);
+            return '₹ ' + Number(value || 0).toFixed(2);
         }
 
         function refreshLoanTotal() {

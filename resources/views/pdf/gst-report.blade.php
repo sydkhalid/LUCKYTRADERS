@@ -21,17 +21,17 @@
             <tr><th>Summary</th><th class="right">Amount</th></tr>
         </thead>
         <tbody>
-            <tr><td>Total Taxable Sales</td><td class="right">Rs. {{ number_format((float) $summary['taxable_sales'], 2) }}</td></tr>
-            <tr><td>Output GST</td><td class="right">Rs. {{ number_format((float) $summary['output_gst'], 2) }}</td></tr>
-            <tr><td>GST Sales Total</td><td class="right">Rs. {{ number_format((float) $summary['total_sales'], 2) }}</td></tr>
-            <tr><td>Total Taxable Purchases</td><td class="right">Rs. {{ number_format((float) $summary['taxable_purchases'], 2) }}</td></tr>
-            <tr><td>Input GST</td><td class="right">Rs. {{ number_format((float) $summary['input_gst'], 2) }}</td></tr>
-            <tr><td>GST Purchase Total</td><td class="right">Rs. {{ number_format((float) $summary['total_purchases'], 2) }}</td></tr>
-            <tr><td>GST Sales Returns</td><td class="right">Rs. {{ number_format((float) $summary['sales_returns'], 2) }}</td></tr>
-            <tr><td>GST Purchase Returns</td><td class="right">Rs. {{ number_format((float) $summary['purchase_returns'], 2) }}</td></tr>
+            <tr><td>Total Taxable Sales</td><td class="right">₹ {{ number_format((float) $summary['taxable_sales'], 2) }}</td></tr>
+            <tr><td>Output GST</td><td class="right">₹ {{ number_format((float) $summary['output_gst'], 2) }}</td></tr>
+            <tr><td>GST Sales Total</td><td class="right">₹ {{ number_format((float) $summary['total_sales'], 2) }}</td></tr>
+            <tr><td>Total Taxable Purchases</td><td class="right">₹ {{ number_format((float) $summary['taxable_purchases'], 2) }}</td></tr>
+            <tr><td>Input GST</td><td class="right">₹ {{ number_format((float) $summary['input_gst'], 2) }}</td></tr>
+            <tr><td>GST Purchase Total</td><td class="right">₹ {{ number_format((float) $summary['total_purchases'], 2) }}</td></tr>
+            <tr><td>GST Sales Returns</td><td class="right">₹ {{ number_format((float) $summary['sales_returns'], 2) }}</td></tr>
+            <tr><td>GST Purchase Returns</td><td class="right">₹ {{ number_format((float) $summary['purchase_returns'], 2) }}</td></tr>
         </tbody>
         <tfoot>
-            <tr class="total-row"><td class="right">Net GST Payable</td><td class="right">Rs. {{ number_format((float) $summary['net_gst_payable'], 2) }}</td></tr>
+            <tr class="total-row"><td class="right">Net GST Payable</td><td class="right">₹ {{ number_format((float) $summary['net_gst_payable'], 2) }}</td></tr>
         </tfoot>
     </table>
 

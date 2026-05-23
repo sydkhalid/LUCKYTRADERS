@@ -57,6 +57,12 @@ class SaleController extends Controller
                 'balance_amount' => $totals['balance_amount'],
                 'payment_status' => $this->paymentStatus($totals['paid_amount'], $totals['total_amount']),
                 'payment_mode' => $data['payment_mode'],
+                'eway_bill_no' => $data['eway_bill_no'] ?? null,
+                'eway_date' => $data['eway_date'] ?? null,
+                'eway_driver_name' => $data['eway_driver_name'] ?? null,
+                'eway_mobile_no' => $data['eway_mobile_no'] ?? null,
+                'eway_vehicle_no' => $data['eway_vehicle_no'] ?? null,
+                'eway_valid_upto' => $data['eway_valid_upto'] ?? null,
                 'notes' => $data['notes'] ?? null,
             ]);
 
@@ -108,6 +114,12 @@ class SaleController extends Controller
                 'balance_amount' => $totals['balance_amount'],
                 'payment_status' => $this->paymentStatus($totals['paid_amount'], $totals['total_amount']),
                 'payment_mode' => $data['payment_mode'],
+                'eway_bill_no' => $data['eway_bill_no'] ?? null,
+                'eway_date' => $data['eway_date'] ?? null,
+                'eway_driver_name' => $data['eway_driver_name'] ?? null,
+                'eway_mobile_no' => $data['eway_mobile_no'] ?? null,
+                'eway_vehicle_no' => $data['eway_vehicle_no'] ?? null,
+                'eway_valid_upto' => $data['eway_valid_upto'] ?? null,
                 'notes' => $data['notes'] ?? null,
             ]);
 
@@ -176,7 +188,6 @@ class SaleController extends Controller
         $products = Product::where('status', 'active')->orderBy('name')->get();
         $productData = $products->mapWithKeys(fn (Product $product) => [
             $product->id => [
-                'unit' => $product->unit,
                 'rate' => (float) $product->selling_price,
                 'gst_percentage' => (float) $product->gst_percentage,
                 'purchase_price' => (float) $product->purchase_price,
@@ -195,13 +206,20 @@ class SaleController extends Controller
             'bill_type' => ['required', Rule::in(['gst', 'non_gst'])],
             'paid_amount' => ['required', 'numeric', 'min:0'],
             'payment_mode' => ['required', Rule::in(['cash', 'bank', 'upi', 'credit'])],
+            'eway_bill_no' => ['nullable', 'string', 'max:255'],
+            'eway_date' => ['nullable', 'date'],
+            'eway_driver_name' => ['nullable', 'string', 'max:255'],
+            'eway_mobile_no' => ['nullable', 'string', 'max:30'],
+            'eway_vehicle_no' => ['nullable', 'string', 'max:50'],
+            'eway_valid_upto' => ['nullable', 'date'],
             'notes' => ['nullable', 'string'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.product_id' => ['required', 'exists:products,id'],
             'items.*.quantity' => ['required', 'numeric', 'min:0.001'],
-            'items.*.unit' => ['required', 'string', 'max:50'],
             'items.*.rate' => ['required', 'numeric', 'min:0'],
             'items.*.gst_percentage' => ['required', 'numeric', 'min:0', 'max:100'],
+            'items.*.gst_calculation' => ['nullable', Rule::in(['exclusive', 'inclusive'])],
+            'items.*.gst_type' => ['nullable', Rule::in(['cgst_sgst', 'igst'])],
         ]);
     }
 
@@ -217,20 +235,40 @@ class SaleController extends Controller
             $product = $products[(int) $item['product_id']];
             $quantity = round((float) $item['quantity'], 3);
             $rate = round((float) $item['rate'], 2);
-            $itemSubtotal = round($quantity * $rate, 2);
-            $gstPercentage = $data['bill_type'] === 'gst' ? round((float) $product->gst_percentage, 2) : 0;
-            $itemGst = round($itemSubtotal * $gstPercentage / 100, 2);
-            $itemTotal = round($itemSubtotal + $itemGst, 2);
+            $lineAmount = round($quantity * $rate, 2);
+            $isGstBill = $data['bill_type'] === 'gst';
+            $gstPercentage = $isGstBill ? round((float) $item['gst_percentage'], 2) : 0;
+            $gstCalculation = $isGstBill && ($item['gst_calculation'] ?? 'exclusive') === 'inclusive'
+                ? 'inclusive'
+                : 'exclusive';
+            $gstType = $isGstBill && ($item['gst_type'] ?? 'cgst_sgst') === 'igst'
+                ? 'igst'
+                : 'cgst_sgst';
+
+            if ($isGstBill && $gstCalculation === 'inclusive') {
+                $itemTotal = $lineAmount;
+                $itemSubtotal = $gstPercentage > 0
+                    ? round($itemTotal / (1 + ($gstPercentage / 100)), 2)
+                    : $itemTotal;
+                $itemGst = round($itemTotal - $itemSubtotal, 2);
+            } else {
+                $itemSubtotal = $lineAmount;
+                $itemGst = $isGstBill ? round($itemSubtotal * $gstPercentage / 100, 2) : 0;
+                $itemTotal = round($itemSubtotal + $itemGst, 2);
+            }
+
             $purchaseCost = round($quantity * (float) $product->purchase_price, 2);
 
             $items[] = [
                 'product_id' => $product->id,
                 'quantity' => $quantity,
-                'unit' => $product->unit,
+                'unit' => 'Kg',
                 'rate' => $rate,
                 'subtotal' => $itemSubtotal,
                 'gst_percentage' => $gstPercentage,
                 'gst_amount' => $itemGst,
+                'gst_calculation' => $gstCalculation,
+                'gst_type' => $gstType,
                 'total' => $itemTotal,
                 'purchase_cost' => $purchaseCost,
                 'profit_amount' => round($itemSubtotal - $purchaseCost, 2),
@@ -278,7 +316,7 @@ class SaleController extends Controller
 
             if ((float) $product->current_stock < (float) $quantity) {
                 throw ValidationException::withMessages([
-                    'items' => 'Insufficient stock for '.$product->name.'. Available: '.$product->current_stock.' '.$product->unit,
+                    'items' => 'Insufficient stock for '.$product->name.'. Available: '.$product->current_stock.' Kg',
                 ]);
             }
         }

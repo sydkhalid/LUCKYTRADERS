@@ -7,7 +7,7 @@
         <div class="mb-5 flex items-center justify-between">
             <div>
                 <h2 class="text-lg font-semibold text-gray-900">{{ $loan->loan_no }} - {{ $loan->party_name }}</h2>
-                <p class="text-sm text-gray-500">Current balance: Rs. {{ number_format((float) $loan->balance_amount, 2) }}</p>
+                <p class="text-sm text-gray-500">Current balance: ₹ {{ number_format((float) $loan->balance_amount, 2) }}</p>
             </div>
             <a href="{{ route('loans.show', $loan) }}" class="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Back</a>
         </div>

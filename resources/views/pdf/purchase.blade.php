@@ -76,13 +76,13 @@
             @endforeach
         </tbody>
         <tfoot>
-            <tr><td colspan="{{ $isGst ? 9 : 5 }}" class="right">Subtotal</td><td class="right">Rs. {{ number_format((float) $purchase->subtotal, 2) }}</td></tr>
+            <tr><td colspan="{{ $isGst ? 9 : 5 }}" class="right">Subtotal</td><td class="right">₹ {{ number_format((float) $purchase->subtotal, 2) }}</td></tr>
             @if ($isGst)
-                <tr><td colspan="9" class="right">Input GST</td><td class="right">Rs. {{ number_format((float) $purchase->gst_amount, 2) }}</td></tr>
+                <tr><td colspan="9" class="right">Input GST</td><td class="right">₹ {{ number_format((float) $purchase->gst_amount, 2) }}</td></tr>
             @endif
-            <tr class="total-row"><td colspan="{{ $isGst ? 9 : 5 }}" class="right">Total Amount</td><td class="right">Rs. {{ number_format((float) $purchase->total_amount, 2) }}</td></tr>
-            <tr><td colspan="{{ $isGst ? 9 : 5 }}" class="right">Paid Amount</td><td class="right">Rs. {{ number_format((float) $purchase->paid_amount, 2) }}</td></tr>
-            <tr><td colspan="{{ $isGst ? 9 : 5 }}" class="right">Balance Amount</td><td class="right">Rs. {{ number_format((float) $purchase->balance_amount, 2) }}</td></tr>
+            <tr class="total-row"><td colspan="{{ $isGst ? 9 : 5 }}" class="right">Total Amount</td><td class="right">₹ {{ number_format((float) $purchase->total_amount, 2) }}</td></tr>
+            <tr><td colspan="{{ $isGst ? 9 : 5 }}" class="right">Paid Amount</td><td class="right">₹ {{ number_format((float) $purchase->paid_amount, 2) }}</td></tr>
+            <tr><td colspan="{{ $isGst ? 9 : 5 }}" class="right">Balance Amount</td><td class="right">₹ {{ number_format((float) $purchase->balance_amount, 2) }}</td></tr>
         </tfoot>
     </table>
 

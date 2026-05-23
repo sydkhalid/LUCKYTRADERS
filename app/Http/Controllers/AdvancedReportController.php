@@ -807,7 +807,7 @@ class AdvancedReportController extends Controller
         }
 
         return match ($type) {
-            'currency' => 'Rs. '.number_format((float) $value, 2),
+            'currency' => '₹ '.number_format((float) $value, 2),
             'quantity' => number_format((float) $value, 3),
             'percent' => number_format((float) $value, 2).'%',
             'number' => number_format((float) $value),
@@ -824,7 +824,7 @@ class AdvancedReportController extends Controller
         }
 
         return match ($type) {
-            'currency' => 'Rs. '.number_format((float) $value, 2),
+            'currency' => '₹ '.number_format((float) $value, 2),
             'quantity' => number_format((float) $value, 3),
             'percent' => number_format((float) $value, 2).'%',
             'number' => number_format((float) $value),

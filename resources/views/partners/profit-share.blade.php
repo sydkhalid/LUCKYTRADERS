@@ -26,7 +26,7 @@
     <div class="mb-5 grid grid-cols-1 gap-4 md:grid-cols-3">
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">Profit Amount</p>
-            <h3 class="mt-1 text-2xl font-bold text-gray-900">Rs. {{ number_format((float) $profitAmount, 2) }}</h3>
+            <h3 class="mt-1 text-2xl font-bold text-gray-900">₹ {{ number_format((float) $profitAmount, 2) }}</h3>
         </div>
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">Active Share</p>
@@ -34,7 +34,7 @@
         </div>
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">Calculated Share</p>
-            <h3 class="mt-1 text-2xl font-bold text-emerald-700">Rs. {{ number_format((float) $totalShareAmount, 2) }}</h3>
+            <h3 class="mt-1 text-2xl font-bold text-emerald-700">₹ {{ number_format((float) $totalShareAmount, 2) }}</h3>
         </div>
     </div>
 
@@ -58,8 +58,8 @@
                     <tr class="hover:bg-gray-50">
                         <td class="px-4 py-3 font-medium text-gray-900">{{ $partner->name }}</td>
                         <td class="px-4 py-3 text-right text-gray-900">{{ number_format((float) $partner->share_percentage, 2) }}%</td>
-                        <td class="px-4 py-3 text-right text-gray-900">Rs. {{ number_format((float) $partner->current_investment, 2) }}</td>
-                        <td class="px-4 py-3 text-right font-semibold text-gray-900">Rs. {{ number_format((float) $shareAmount, 2) }}</td>
+                        <td class="px-4 py-3 text-right text-gray-900">₹ {{ number_format((float) $partner->current_investment, 2) }}</td>
+                        <td class="px-4 py-3 text-right font-semibold text-gray-900">₹ {{ number_format((float) $shareAmount, 2) }}</td>
                         <td class="px-4 py-3 text-right">
                             @if ($shareAmount > 0)
                                 <a href="{{ route('partners.transactions.create', ['partner' => $partner, 'transaction_type' => 'profit_share', 'amount' => $shareAmount, 'notes' => 'Profit share']) }}" class="font-semibold text-slate-700 hover:text-slate-900">Record</a>

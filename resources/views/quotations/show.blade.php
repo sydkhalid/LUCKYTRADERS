@@ -25,15 +25,15 @@
     <div class="mb-5 grid grid-cols-1 gap-4 md:grid-cols-5">
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">Subtotal</p>
-            <h3 class="mt-1 text-xl font-bold text-gray-900">Rs. {{ number_format((float) $quotation->subtotal, 2) }}</h3>
+            <h3 class="mt-1 text-xl font-bold text-gray-900">₹ {{ number_format((float) $quotation->subtotal, 2) }}</h3>
         </div>
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">GST</p>
-            <h3 class="mt-1 text-xl font-bold text-gray-900">Rs. {{ number_format((float) $quotation->gst_amount, 2) }}</h3>
+            <h3 class="mt-1 text-xl font-bold text-gray-900">₹ {{ number_format((float) $quotation->gst_amount, 2) }}</h3>
         </div>
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">Total</p>
-            <h3 class="mt-1 text-xl font-bold text-gray-900">Rs. {{ number_format((float) $quotation->total_amount, 2) }}</h3>
+            <h3 class="mt-1 text-xl font-bold text-gray-900">₹ {{ number_format((float) $quotation->total_amount, 2) }}</h3>
         </div>
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">Valid Until</p>
@@ -81,11 +81,11 @@
                         <td class="px-4 py-3 font-medium text-gray-900">{{ $item->product?->name }}</td>
                         <td class="px-4 py-3 text-right text-gray-700">{{ number_format((float) $item->quantity, 3) }}</td>
                         <td class="px-4 py-3 text-gray-700">{{ $item->unit }}</td>
-                        <td class="px-4 py-3 text-right text-gray-700">Rs. {{ number_format((float) $item->rate, 2) }}</td>
-                        <td class="px-4 py-3 text-right text-gray-700">Rs. {{ number_format((float) $item->subtotal, 2) }}</td>
+                        <td class="px-4 py-3 text-right text-gray-700">₹ {{ number_format((float) $item->rate, 2) }}</td>
+                        <td class="px-4 py-3 text-right text-gray-700">₹ {{ number_format((float) $item->subtotal, 2) }}</td>
                         <td class="px-4 py-3 text-right text-gray-700">{{ number_format((float) $item->gst_percentage, 2) }}%</td>
-                        <td class="px-4 py-3 text-right text-gray-700">Rs. {{ number_format((float) $item->gst_amount, 2) }}</td>
-                        <td class="px-4 py-3 text-right font-semibold text-gray-900">Rs. {{ number_format((float) $item->total, 2) }}</td>
+                        <td class="px-4 py-3 text-right text-gray-700">₹ {{ number_format((float) $item->gst_amount, 2) }}</td>
+                        <td class="px-4 py-3 text-right font-semibold text-gray-900">₹ {{ number_format((float) $item->total, 2) }}</td>
                     </tr>
                 @endforeach
             </tbody>

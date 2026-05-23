@@ -73,8 +73,8 @@
                 <p class="text-xs font-semibold uppercase text-gray-500">Return Details</p>
                 <p class="mt-2 text-sm text-gray-700">Bill Type: <span class="font-semibold">{{ $isGst ? 'GST Invoice' : 'Normal Bill' }}</span></p>
                 <p class="text-sm text-gray-700">Refund Mode: <span class="font-semibold">{{ $return->payment_mode ? strtoupper($return->payment_mode) : '-' }}</span></p>
-                <p class="text-sm text-gray-700">Refund Amount: <span class="font-semibold">Rs. {{ number_format((float) $return->refund_amount, 2) }}</span></p>
-                <p class="text-sm text-gray-700">Adjustment Amount: <span class="font-semibold">Rs. {{ number_format((float) $return->adjustment_amount, 2) }}</span></p>
+                <p class="text-sm text-gray-700">Refund Amount: <span class="font-semibold">₹ {{ number_format((float) $return->refund_amount, 2) }}</span></p>
+                <p class="text-sm text-gray-700">Adjustment Amount: <span class="font-semibold">₹ {{ number_format((float) $return->adjustment_amount, 2) }}</span></p>
             </div>
         </section>
 
@@ -106,13 +106,13 @@
                             @endif
                             <td class="border border-gray-300 px-3 py-2 text-right">{{ number_format((float) $item->quantity, 3) }}</td>
                             <td class="border border-gray-300 px-3 py-2">{{ $item->product?->unit }}</td>
-                            <td class="border border-gray-300 px-3 py-2 text-right">Rs. {{ number_format((float) $item->rate, 2) }}</td>
-                            <td class="border border-gray-300 px-3 py-2 text-right">Rs. {{ number_format((float) $item->subtotal, 2) }}</td>
+                            <td class="border border-gray-300 px-3 py-2 text-right">₹ {{ number_format((float) $item->rate, 2) }}</td>
+                            <td class="border border-gray-300 px-3 py-2 text-right">₹ {{ number_format((float) $item->subtotal, 2) }}</td>
                             @if ($isGst)
                                 <td class="border border-gray-300 px-3 py-2 text-right">{{ number_format((float) $item->gst_percentage, 2) }}%</td>
-                                <td class="border border-gray-300 px-3 py-2 text-right">Rs. {{ number_format((float) $item->gst_amount, 2) }}</td>
+                                <td class="border border-gray-300 px-3 py-2 text-right">₹ {{ number_format((float) $item->gst_amount, 2) }}</td>
                             @endif
-                            <td class="border border-gray-300 px-3 py-2 text-right font-semibold">Rs. {{ number_format((float) $item->total, 2) }}</td>
+                            <td class="border border-gray-300 px-3 py-2 text-right font-semibold">₹ {{ number_format((float) $item->total, 2) }}</td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -123,25 +123,25 @@
             <div class="w-full max-w-sm space-y-2 text-sm">
                 <div class="flex justify-between">
                     <span>Subtotal</span>
-                    <span>Rs. {{ number_format((float) $return->subtotal, 2) }}</span>
+                    <span>₹ {{ number_format((float) $return->subtotal, 2) }}</span>
                 </div>
                 @if ($isGst)
                     <div class="flex justify-between">
                         <span>GST</span>
-                        <span>Rs. {{ number_format((float) $return->gst_amount, 2) }}</span>
+                        <span>₹ {{ number_format((float) $return->gst_amount, 2) }}</span>
                     </div>
                 @endif
                 <div class="flex justify-between border-t border-gray-300 pt-2 text-lg font-bold">
                     <span>Credit Note Total</span>
-                    <span>Rs. {{ number_format((float) $return->total_amount, 2) }}</span>
+                    <span>₹ {{ number_format((float) $return->total_amount, 2) }}</span>
                 </div>
                 <div class="flex justify-between">
                     <span>Adjusted</span>
-                    <span>Rs. {{ number_format((float) $return->adjustment_amount, 2) }}</span>
+                    <span>₹ {{ number_format((float) $return->adjustment_amount, 2) }}</span>
                 </div>
                 <div class="flex justify-between font-semibold">
                     <span>Refunded</span>
-                    <span>Rs. {{ number_format((float) $return->refund_amount, 2) }}</span>
+                    <span>₹ {{ number_format((float) $return->refund_amount, 2) }}</span>
                 </div>
             </div>
         </section>

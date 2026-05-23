@@ -18,7 +18,7 @@
         window.erpFlash = {{ \Illuminate\Support\Js::from($erpFlash) }};
         window.erpSettings = {{ \Illuminate\Support\Js::from([
             'company' => $erpCompany ?? [],
-            'currency' => $erpCurrency ?? ['code' => 'INR', 'symbol' => 'Rs.'],
+            'currency' => $erpCurrency ?? ['code' => 'INR', 'symbol' => '₹'],
             'defaultTax' => (float) ($erpSystemSettings->default_tax ?? 18),
             'dateFormat' => $erpSystemSettings->date_format ?? 'd M Y',
             'invoiceFooter' => $erpInvoiceSettings->terms_and_conditions ?? null,

@@ -83,7 +83,7 @@ function withAlpha(color, alpha = 0.18) {
 }
 
 function moneyFormatter(value) {
-    const symbol = window.erpSettings?.currency?.symbol || 'Rs.';
+    const symbol = window.erpSettings?.currency?.symbol || '₹';
 
     return `${symbol} ${Number(value || 0).toLocaleString('en-IN', {
         maximumFractionDigits: 2,

@@ -23,11 +23,11 @@
                 <div class="section-title">Loan Amounts</div>
                 <div class="box">
                     <table class="meta">
-                        <tr><td class="label">Principal</td><td class="right">Rs. {{ number_format((float) $loan->principal_amount, 2) }}</td></tr>
-                        <tr><td class="label">Interest</td><td class="right">Rs. {{ number_format((float) $loan->total_interest, 2) }}</td></tr>
-                        <tr><td class="label">Total</td><td class="right">Rs. {{ number_format((float) $loan->total_amount, 2) }}</td></tr>
-                        <tr><td class="label">Paid / Returned</td><td class="right">Rs. {{ number_format((float) $loan->paid_amount, 2) }}</td></tr>
-                        <tr><td class="label">Balance</td><td class="right bold">Rs. {{ number_format((float) $loan->balance_amount, 2) }}</td></tr>
+                        <tr><td class="label">Principal</td><td class="right">₹ {{ number_format((float) $loan->principal_amount, 2) }}</td></tr>
+                        <tr><td class="label">Interest</td><td class="right">₹ {{ number_format((float) $loan->total_interest, 2) }}</td></tr>
+                        <tr><td class="label">Total</td><td class="right">₹ {{ number_format((float) $loan->total_amount, 2) }}</td></tr>
+                        <tr><td class="label">Paid / Returned</td><td class="right">₹ {{ number_format((float) $loan->paid_amount, 2) }}</td></tr>
+                        <tr><td class="label">Balance</td><td class="right bold">₹ {{ number_format((float) $loan->balance_amount, 2) }}</td></tr>
                     </table>
                 </div>
             </td>
@@ -44,7 +44,7 @@
                     <td>{{ $transaction->transaction_date?->format('d M Y') }}</td>
                     <td>{{ $transaction->typeLabel() }}</td>
                     <td>{{ strtoupper($transaction->payment_mode) }}</td>
-                    <td class="right bold">Rs. {{ number_format((float) $transaction->amount, 2) }}</td>
+                    <td class="right bold">₹ {{ number_format((float) $transaction->amount, 2) }}</td>
                     <td>{{ $transaction->notes ?: '-' }}</td>
                 </tr>
             @endforeach

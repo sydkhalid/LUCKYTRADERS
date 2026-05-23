@@ -58,7 +58,7 @@
         </div>
         <div class="rounded bg-white p-5 shadow">
             <p class="text-sm text-gray-500">Filtered Value</p>
-            <h3 class="mt-1 text-2xl font-bold text-gray-900">Rs. {{ number_format((float) $totalValue, 2) }}</h3>
+            <h3 class="mt-1 text-2xl font-bold text-gray-900">₹ {{ number_format((float) $totalValue, 2) }}</h3>
         </div>
     </div>
 

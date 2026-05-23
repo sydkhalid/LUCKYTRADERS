@@ -25,11 +25,19 @@ class Sale extends Model
         'balance_amount',
         'payment_status',
         'payment_mode',
+        'eway_bill_no',
+        'eway_date',
+        'eway_driver_name',
+        'eway_mobile_no',
+        'eway_vehicle_no',
+        'eway_valid_upto',
         'notes',
     ];
 
     protected $casts = [
         'sale_date' => 'date',
+        'eway_date' => 'date',
+        'eway_valid_upto' => 'date',
         'subtotal' => 'decimal:2',
         'gst_amount' => 'decimal:2',
         'total_amount' => 'decimal:2',

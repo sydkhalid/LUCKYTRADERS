@@ -5,7 +5,7 @@
     let rowIndex = 0;
 
     function money(value) {
-        return 'Rs. ' + Number(value || 0).toFixed(2);
+        return '₹ ' + Number(value || 0).toFixed(2);
     }
 
     function escapeHtml(value) {
@@ -52,9 +52,9 @@
             <td class="px-3 py-3"><input type="number" name="items[${index}][quantity]" value="${data.quantity ?? 1}" step="0.001" min="0.001" class="quantity-input w-24 rounded border-gray-300 text-right shadow-sm focus:border-slate-500 focus:ring-slate-500" required></td>
             <td class="px-3 py-3"><input type="number" name="items[${index}][rate]" value="${data.rate ?? 0}" step="0.01" min="0" class="rate-input w-28 rounded border-gray-300 text-right shadow-sm focus:border-slate-500 focus:ring-slate-500" required></td>
             <td class="px-3 py-3"><input type="number" name="items[${index}][gst_percentage]" value="${data.gst_percentage ?? 0}" step="0.01" min="0" max="100" class="gst-input w-24 rounded border-gray-300 text-right shadow-sm focus:border-slate-500 focus:ring-slate-500" required></td>
-            <td class="row-subtotal px-3 py-3 text-right text-gray-700">Rs. 0.00</td>
-            <td class="row-gst px-3 py-3 text-right text-gray-700">Rs. 0.00</td>
-            <td class="row-total px-3 py-3 text-right font-semibold text-gray-900">Rs. 0.00</td>
+            <td class="row-subtotal px-3 py-3 text-right text-gray-700">₹ 0.00</td>
+            <td class="row-gst px-3 py-3 text-right text-gray-700">₹ 0.00</td>
+            <td class="row-total px-3 py-3 text-right font-semibold text-gray-900">₹ 0.00</td>
             <td class="px-3 py-3 text-right"><button type="button" class="remove-row font-semibold text-red-600 hover:text-red-800">Remove</button></td>
         `;
         rowsContainer.appendChild(tr);
